@@ -1,0 +1,140 @@
+﻿  OCR.cpp
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(19): warning C4005: 'RT_MANIFEST': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(253): note: see previous definition of 'RT_MANIFEST'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(20): warning C4005: 'CREATEPROCESS_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(254): note: see previous definition of 'CREATEPROCESS_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(21): warning C4005: 'ISOLATIONAWARE_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(255): note: see previous definition of 'ISOLATIONAWARE_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(22): warning C4005: 'ISOLATIONAWARE_NOSTATICIMPORT_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(256): note: see previous definition of 'ISOLATIONAWARE_NOSTATICIMPORT_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(23): warning C4005: 'MINIMUM_RESERVED_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(257): note: see previous definition of 'MINIMUM_RESERVED_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(24): warning C4005: 'MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(258): note: see previous definition of 'MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winres.h(35): warning C4005: 'LB_ADDSTRING': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(11119): note: see previous definition of 'LB_ADDSTRING'
+c:\program files (x86)\windows kits\8.1\include\um\winres.h(36): warning C4005: 'CB_ADDSTRING': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(11267): note: see previous definition of 'CB_ADDSTRING'
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(4): warning C4244: '=': conversion from 'float' to 'LONG', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(5): warning C4244: '=': conversion from 'float' to 'LONG', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(24): warning C4838: conversion from 'double' to 'float' requires a narrowing conversion
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(24): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(25): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(31): warning C4018: '>=': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(48): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(52): warning C4838: conversion from 'double' to 'float' requires a narrowing conversion
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(52): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(53): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(59): warning C4018: '>=': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(70): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(115): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(116): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(121): warning C4018: '<=': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(136): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(137): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(151): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(161): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(194): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(195): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(199): warning C4018: '<=': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(214): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(215): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(229): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(257): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(287): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(289): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(293): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(294): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(434): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(445): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(511): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(528): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(536): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(549): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(563): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(576): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(589): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(602): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(616): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(629): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(641): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(643): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(678): warning C4838: conversion from 'double' to 'float' requires a narrowing conversion
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(678): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(695): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(734): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(739): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(740): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(741): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(742): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(744): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(746): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(748): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(750): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(803): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(815): warning C4838: conversion from 'double' to 'float' requires a narrowing conversion
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(815): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(825): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(887): warning C4244: '=': conversion from 'double' to 'channel', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(891): warning C4244: '=': conversion from 'double' to 'channel', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(895): warning C4244: '=': conversion from 'double' to 'channel', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(907): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(907): warning C4244: 'initializing': conversion from 'float' to 'const int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(908): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(913): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(916): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(920): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(925): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(995): warning C4018: '<': signed/unsigned mismatch
+c:\program files (x86)\microsoft visual studio 14.0\vc\include\utility(200): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+  c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(640): note: see reference to function template instantiation 'std::pair<int,int>::pair<int,double,void,0>(std::pair<int,double> &&) noexcept' being compiled
+  c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\ocr.cpp(640): note: see reference to function template instantiation 'std::pair<int,int>::pair<int,double,void,0>(std::pair<int,double> &&) noexcept' being compiled
+  Main.cpp
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\layout.h(5): warning C4005: 'max': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h(193): note: see previous definition of 'max'
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guimain.h(286): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guimain.h(305): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guimain.h(312): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guimain.h(322): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guimain.h(330): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guimain.h(336): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guimain.h(341): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guimain.h(346): warning C4018: '<': signed/unsigned mismatch
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(19): warning C4005: 'RT_MANIFEST': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(253): note: see previous definition of 'RT_MANIFEST'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(20): warning C4005: 'CREATEPROCESS_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(254): note: see previous definition of 'CREATEPROCESS_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(21): warning C4005: 'ISOLATIONAWARE_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(255): note: see previous definition of 'ISOLATIONAWARE_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(22): warning C4005: 'ISOLATIONAWARE_NOSTATICIMPORT_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(256): note: see previous definition of 'ISOLATIONAWARE_NOSTATICIMPORT_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(23): warning C4005: 'MINIMUM_RESERVED_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(257): note: see previous definition of 'MINIMUM_RESERVED_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winuser.rh(24): warning C4005: 'MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(258): note: see previous definition of 'MAXIMUM_RESERVED_MANIFEST_RESOURCE_ID'
+c:\program files (x86)\windows kits\8.1\include\um\winres.h(35): warning C4005: 'LB_ADDSTRING': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(11119): note: see previous definition of 'LB_ADDSTRING'
+c:\program files (x86)\windows kits\8.1\include\um\winres.h(36): warning C4005: 'CB_ADDSTRING': macro redefinition
+  c:\program files (x86)\windows kits\8.1\include\um\winuser.h(11267): note: see previous definition of 'CB_ADDSTRING'
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\grid.h(50): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(72): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(79): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(115): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(120): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(129): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(172): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(177): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(183): warning C4838: conversion from 'double' to 'float' requires a narrowing conversion
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(183): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(184): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(196): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(200): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(205): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(301): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(302): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(553): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\puzzle solver + gdi api\main.cpp(257): warning C4715: 'ldDialogProc': not all control paths return a value
+  Puzzle Solver + GDI API.vcxproj -> c:\users\stephen\documents\visual studio 2015\Projects\PuzzleSolver\Debug\Puzzle Solver.exe
+  Puzzle Solver + GDI API.vcxproj -> c:\users\stephen\documents\visual studio 2015\Projects\PuzzleSolver\Debug\Puzzle Solver.pdb (Partial PDB)
