@@ -301,8 +301,12 @@ std::vector<Square> getCharacterLocations(Image * img)
 				if (horzSpaces[y].start == -1) continue;
 				if (horzSpaces[y].start + horzSpaces[y].size >= horzEqualSpacing.start && horzSpaces[y].start <= horzEqualSpacing.start + horzEqualSpacing.size) {
 					Square sq;
-					int nextX = x + 1;
-					int nextY = y + 1;
+					int i = 1;
+					while (x + i < spaces.size() && spaces[x + i].start == -1) ++i;
+					int nextX = x + i;
+					i = 1;
+					while (y + i < horzSpaces.size() && horzSpaces[y + i].start == -1) ++i;
+					int nextY = y + i;
 					sq.x = spaces[x].start + spaces[x].size;
 					sq.y = horzSpaces[y].start + horzSpaces[y].size;
 					sq.width = spaces[nextX].start - (spaces[x].start + spaces[x].size);
