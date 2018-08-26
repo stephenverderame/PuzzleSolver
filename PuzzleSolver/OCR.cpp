@@ -109,9 +109,9 @@ std::vector<Square> getCharacterLocations(Image * img)
 	memset(accumulator, 0, img->getWidth() * sizeof(int));
 	std::vector<Space> spaces;
 	std::vector<int> spaceSizes;
-	int totalAvg = img->integralImageValue(img->getWidth() - 1, img->getHeight() - 1) - img->integralImageValue(0, img->getHeight() - 1) - img->integralImageValue(img->getWidth() - 1, 0) + img->integralImageValue(0, 0);
-	totalAvg /= (img->getWidth() * img->getHeight());
-	printf("Total Avg: %d \n", totalAvg);
+	int totalIntensity = img->integralImageValue(img->getWidth() - 1, img->getHeight() - 1) - img->integralImageValue(0, img->getHeight() - 1) - img->integralImageValue(img->getWidth() - 1, 0) + img->integralImageValue(0, 0);
+	int totalColumnAvg = totalIntensity / img->getWidth();
+	int totalRowAvg = totalIntensity / img->getHeight();
 	for (int i = 0; i < img->getWidth(); i++) {
 		for (int y = 0; y < img->getHeight(); y++) {
 			accumulator[i] += img->getPixel(i, y).avg();
@@ -124,7 +124,7 @@ std::vector<Square> getCharacterLocations(Image * img)
 			spaceSizes.push_back(i - lastDark);
 			break;
 		}
-		if (accumulator[i] / (float)img->getHeight() < 235) {
+		if (accumulator[i] < totalColumnAvg) {
 			if (i - lastDark > 1) {
 				spaces.push_back({ lastDark + 1, i - lastDark });
 				spaceSizes.push_back(i - lastDark);
@@ -149,8 +149,11 @@ std::vector<Square> getCharacterLocations(Image * img)
 	}
 	printf("Median space size: %d \n", avgSpaceSize);
 	for (int i = 0; i < spaces.size(); i++) { //combining small spaces close together
-		int lastSpace = max(i - 1, 0);
-		if (spaces[i].size <= round(.2 * avgSpaceSize) && abs(spaces[i].start - (spaces[lastSpace].start + spaces[lastSpace].size)) <= round(.3 * avgSpaceSize)) {
+		if (i == 0) continue;
+		int x = 1;
+		while (i - x >= 0 && spaces[i - x].start == -1) ++x;
+		int lastSpace = i - x;
+		if (spaces[i].size <= round(.2 * avgSpaceSize) || abs(spaces[i].start - (spaces[lastSpace].start + spaces[lastSpace].size)) <= round(.3 * avgSpaceSize)) {
 			spaces[lastSpace].size = spaces[i].start + spaces[i].size - spaces[lastSpace].start;
 			spaces[i] = { -1, -1 };
 		}
@@ -202,7 +205,7 @@ std::vector<Square> getCharacterLocations(Image * img)
 			horzSpaceSizes.push_back(i - lastDark);
 			break;
 		}
-		if (horzAccumulator[i] / (float)img->getWidth() < 235) {
+		if (horzAccumulator[i] < totalRowAvg) {
 			if (i - lastDark > 1) {
 				horzSpaces.push_back({ lastDark + 1, i - lastDark });
 				horzSpaceSizes.push_back(i - lastDark);
@@ -227,8 +230,11 @@ std::vector<Square> getCharacterLocations(Image * img)
 	}
 	printf("Median HorzSpace size: %d \n", avgSpaceSize);
 	for (int i = 0; i < horzSpaces.size(); i++) {
-		int lastSpace = max(i - 1, 0);
-		if (horzSpaces[i].size <= round(.2 * avgSpaceSize) && abs(horzSpaces[i].start - (horzSpaces[lastSpace].start + horzSpaces[lastSpace].size)) <= round(.3 * avgSpaceSize)) {
+		if (i == 0) continue;
+		int x = 1;
+		while (i - x >= 0 && spaces[i - x].start == -1) ++x;
+		int lastSpace = i - x;
+		if (horzSpaces[i].size <= round(.2 * avgSpaceSize) || abs(horzSpaces[i].start - (horzSpaces[lastSpace].start + horzSpaces[lastSpace].size)) <= round(.3 * avgSpaceSize)) {
 			horzSpaces[lastSpace].size = horzSpaces[i].start + horzSpaces[i].size - horzSpaces[lastSpace].start;
 			horzSpaces[i] = { -1, -1 };
 		}
@@ -242,7 +248,9 @@ std::vector<Square> getCharacterLocations(Image * img)
 			}
 		}
 	}
+	printf("\n");
 	for (Space s : spaces) {
+		printf("Vert Space Size: %d \n", s.size);
 		for (int i = 0; i < img->getHeight(); i++) {
 			for (int x = s.start; x < s.start + s.size; x++) {
 				img->setPixel(x, i, { 0, 0, 255 });
@@ -283,15 +291,18 @@ std::vector<Square> getCharacterLocations(Image * img)
 	}*/
 #pragma endregion
 #ifndef DEBUGGING_SPACE
+	spaces.push_back({ (int)img->getWidth(), 0 });
+	horzSpaces.push_back({ (int)img->getHeight(), 0 });
 	std::vector<Square> characters;
-	for (int x = 0; x < spaces.size(); x++) {
+	for (int x = 0; x < spaces.size() - 1; x++) {
+		if (spaces[x].size == -1) continue;
 		if (spaces[x].start + spaces[x].size >= equalSpacing.start && spaces[x].start <= equalSpacing.start + equalSpacing.size) {
-			for (int y = 0; y < horzSpaces.size(); y++) {
+			for (int y = 0; y < horzSpaces.size() - 1; y++) {
+				if (horzSpaces[y].start == -1) continue;
 				if (horzSpaces[y].start + horzSpaces[y].size >= horzEqualSpacing.start && horzSpaces[y].start <= horzEqualSpacing.start + horzEqualSpacing.size) {
 					Square sq;
-					int prevY = max(y - 1, 0);
-					int nextX = min(x + 1, spaces.size() - 1);
-					int nextY = min(y + 1, horzSpaces.size() - 1);
+					int nextX = x + 1;
+					int nextY = y + 1;
 					sq.x = spaces[x].start + spaces[x].size;
 					sq.y = horzSpaces[y].start + horzSpaces[y].size;
 					sq.width = spaces[nextX].start - (spaces[x].start + spaces[x].size);
@@ -342,7 +353,9 @@ std::vector<Square> getCharacterLocations(Image * img)
 		}
 	}
 #endif
-/*	for (Square s : characters) {
+#ifndef DEBUGGING_SPACE
+#ifdef SHOW_DEBUG_CHARS
+	for (Square s : characters) {
 		for (int i = s.y; i < s.y + s.height; i++) {
 			img->setPixel(s.x, i, { 0, 255, 0 });
 			img->setPixel(s.x + s.width, i, { 0, 255, 0 });
@@ -351,7 +364,9 @@ std::vector<Square> getCharacterLocations(Image * img)
 			img->setPixel(i, s.y, { 0, 255, 0 });
 			img->setPixel(i, s.y + s.height, { 0, 255, 0 });
 		}
-	}*/
+	}
+#endif
+#endif
 	RECT r;
 	GetClientRect(gui::GUI::useWindow(), &r);
 	InvalidateRect(gui::GUI::useWindow(), &r, TRUE);
@@ -381,56 +396,18 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 {
 	SearchGrid grid;
 	std::vector<KnownSample *> letters;
-/*	for (int i = 0; i < 26; i++) {
-//		gui::Resource res = gui::GUI::loadResource(i, LETTER);
-		std::stringstream ss;
-		ss << "letters2\\" << (char)(i + 65) << ".bmp";
-		Image * letterImage = new Image(ss.str().c_str());
-//		if(i + 65 == 'n' || i + 65 == 'N') letterImage->saveBmp("testKnown.bmp"); 
-		letters.push_back(letterImage);
-//		printf("I: %d \n", i);
-	}*/
 	WIN32_FIND_DATA fData;
-	HANDLE hand = FindFirstFile("C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\Puzzle Solver + GDI API\\Puzzle Solver + GDI API\\letters\\*", &fData);
+	HANDLE hand = FindFirstFile("C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\*", &fData);
 	char fileRead[MAX_PATH];
 	while (hand != INVALID_HANDLE_VALUE) {		
 		if (isBmp(fData.cFileName)) {
 			printf("%s \n", fData.cFileName);
-			sprintf_s(fileRead, MAX_PATH, "C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\Puzzle Solver + GDI API\\Puzzle Solver + GDI API\\letters\\%s", fData.cFileName);
+			sprintf_s(fileRead, MAX_PATH, "C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\%s", fData.cFileName);
 			if (!isalpha(fData.cFileName[0])) printf("img name is not a letter! \n");
 			letters.push_back(new KnownSample{ new Image(fileRead), (char)toupper(fData.cFileName[0]) });			
 		}
 		if (FindNextFile(hand, &fData) == FALSE) break;
 	}
-/*	struct stat fInfo;
-	if (stat("data.ml", &fInfo) == 0) {
-		std::ifstream file;
-		file.open("data.ml", std::ios::in | std::ios::binary);
-		if(file.is_open()){
-			int size = 0;
-			file.read((char*)&size, sizeof(int));
-			printf("Size: %d \n", size);
-			channel * data = new channel[26 * size];
-			file.read((char*)data, 26 * size);
-			for (int i = 0; i < size; i++) {
-				channel * dr = data + (26 * i);
-				Image * imgM = new Image(5, 5);
-				char character = dr[25];
-				int sum = 0;
-				for (int j = 0; j < 25; j++) {
-					int x = j % 5;
-					int y = j / 5;
-					imgM->setPixel(x, y, { dr[j], dr[j], dr[j] });
-					sum += dr[j];
-				}
-				letters.push_back(new KnownSample{ imgM, (char)toupper(character) });
-				printf("Read %c with %d \n", character, sum);
-			}
-			file.close();
-			delete data;
-		}
-	}*/
-	std::multimap<char, channel *> guaranteed;
 	for (int i = 0; i < locations.size(); i++) {
 		std::pair<char, double> minDifference = std::make_pair(0, DBL_MAX);
 		Image * letter = new Image(locations[i].width, locations[i].height);
@@ -453,61 +430,8 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 				minDifference = std::make_pair(letters[j]->letter, diffScore);
 		}
 		grid.addLetter(minDifference.first, locations[i].x, locations[i].y);
-/*		if (minDifference.second < 81000 && minDifference.second > 100) {
-			//almost gaurunteed match
-			channel * data = new channel[25];
-			int sum = 0;
-			for (int i = 0; i < 25; i++) {
-				int x = i % 5;
-				int y = i / 5;
-				data[i] = (channel)letter->getPixel(x, y).avg();
-				sum += data[i];
-			}
-			guaranteed.insert(std::make_pair(minDifference.first, data));
-			printf("Insert %c with %d \n", minDifference.first, sum);
-
-		}*/
 		delete letter;
 	}
-/*	if (guaranteed.size() > 0) {
-		channel * data = new channel[26 * guaranteed.size()];
-		int i = 0;
-		for (auto it = guaranteed.begin(); it != guaranteed.end(); it++) {
-			memcpy_s(data + i * 26, 26 * guaranteed.size(), (*it).second, 25);
-			data[i * 26 + 25] = (*it).first;
-			delete (*it).second;
-			i++;
-		}
-		struct stat fInfo;
-		if (stat("data.ml", &fInfo) == 0) {
-			//file exists
-			printf("Exists \n");
-			std::fstream file;
-			file.open("data.ml", std::ios::in | std::ios::out | std::ios::binary);
-			if (file.is_open()) {
-				int size;
-				file.read((char*)&size, sizeof(int));
-				size += guaranteed.size();
-				file.write((char*)&size, sizeof(int));
-				file.seekp(0, std::ios::end);
-				file.write((char*)data, 26 * guaranteed.size());
-				file.close();
-			}
-			else printf("Could not open for read/write \n");
-		}
-		else {
-			std::ofstream file;
-			file.open("data.ml", std::ios::binary | std::ios::out);
-			if (file.is_open()) {
-				int size = guaranteed.size();
-				printf("Writing size of: %d \n", size);
-				file.write((char*)&size, sizeof(int));
-				file.write((char*)data, 26 * guaranteed.size());
-				file.close();
-			}
-			else printf("Could not open for writing \n");
-		}
-	}*/
 	for (int i = 0; i < letters.size(); i++)
 		delete letters[i];
 	grid.iterateRowbyRow();
@@ -763,41 +687,6 @@ POINT getOrigin(Image * img)
 	}
 	return { startX, startY };
 }
-#ifdef OLD_ROTATE
- void rotateImage(Image * img, float theta, POINT origin)
-{
-	Color * buffer = new Color[img->getWidth() * img->getHeight()];
-	//Debugging
-	for (int i = 0; i < img->getWidth() * img->getHeight(); i++) {
-		buffer[i] = Color{ 0, 255, 0 };
-	}
-	//end debugging
-	float rotationMatrix[] = {
-		cos(radians(theta)),  -sin(radians(theta)),
-		sin(radians(theta)),  cos(radians(theta))
-	};
-	for (int i = 0; i < img->getWidth() * img->getHeight(); i++) {
-		int x = i % img->getWidth();
-		int y = i / img->getWidth();
-		Color c = img->getPixel(x, y);
-		POINT rtPt = { x - origin.x, y - origin.y };
-		POINT rotated = matrixMultiply(rotationMatrix, rtPt);
-		rotated.x += origin.x;
-		rotated.y += origin.y;
-		if (rotated.x > 0 && rotated.x < img->getWidth() && rotated.y > 0 && rotated.y < img->getHeight())
-			buffer[rotated.y * img->getWidth() + rotated.x] = c;
-	}
-	for (int i = 0; i < img->getWidth() * img->getHeight(); i++) {
-		int x = i % img->getWidth();
-		int y = i / img->getWidth();
-		img->setPixel(x, y, buffer[i]);
-	}
-	RECT r;
-	GetClientRect(gui::GUI::useWindow(), &r);
-	InvalidateRect(gui::GUI::useWindow(), &r, TRUE);
-	delete[] buffer;
-}
-#else
 void rotateImage(Image * img, float theta, POINT origin)
 {
 	int diagnol = ceil(sqrt(img->getWidth() * img->getWidth() + img->getHeight() * img->getHeight()));
@@ -826,34 +715,6 @@ void rotateImage(Image * img, float theta, POINT origin)
 			buffer[i] = img->getPixel(rotated.x, rotated.y);
 
 	}
-/*	for (int i = 0; i < img->getWidth() * img->getHeight(); i++) {
-		int x = i % img->getWidth();
-		int y = i / img->getWidth();
-		Color c = img->getPixel(x, y);
-		POINT rtPt = { x - origin.x, y - origin.y };
-		POINT rotated = matrixMultiply(rotationMatrix, rtPt);
-		rotated.x += origin.x;
-		rotated.y += origin.y;
-		rotated.x += (diagnol - img->getWidth()) / 2;
-		rotated.y += (diagnol - img->getHeight()) / 2;
-		if (rotated.x > 0 && rotated.x < diagnol && rotated.y > 0 && rotated.y < diagnol)
-			buffer[rotated.y * diagnol + rotated.x] = c;
-	}
-/*	for (int i = 0; i < diagnol * diagnol; i++) {
-		if (buffer[i].g > 250) {
-			int x = i % img->getWidth();
-			int y = i / img->getWidth();
-			int xm = max(0, x - 1);
-			int xp = min(img->getWidth(), x + 1);
-			int ym = max(0, y - 1);
-			int yp = min(img->getHeight() - 1, y + 1);
-			Pixel q1{ xm, ym, img->getPixel(xm, ym) };
-			Pixel q2{ xp, ym, img->getPixel(xp, ym) };
-			Pixel q3{ xm, yp, img->getPixel(xm, yp) };
-			Pixel q4{ xp, yp, img->getPixel(xm, yp) };
-//			buffer[i] = bilinearInterpolation(q1, q2, q3, q4, { x, y });
-		}
-	}*/
 	img->resize(diagnol, diagnol);
 	PAINTSTRUCT p;
 	HDC dc = BeginPaint(gui::GUI::useWindow(), &p);
@@ -862,74 +723,13 @@ void rotateImage(Image * img, float theta, POINT origin)
 		int y = i / diagnol;
 		channel * bits = img->getRawData();
 		if (bits == nullptr) printf("Bits is null \n");
-//		printf("Max num = %d \n", diagnol * diagnol * 4);
-//		printf("Current num = %d \n", y * diagnol * 4 + x * 3);
-//		bits[(diagnol - y - 1) * diagnol * 3 + x * 3] = buffer[i].b;
-//		bits[(diagnol - y - 1) * diagnol * 3 + x * 3 + 1] = buffer[i].g;
-//		bits[(diagnol - y - 1) * diagnol * 3 + x * 3 + 2] = buffer[i].r;
 		img->setPixel(x, y, buffer[i]);
-		//Color test = img->getPixel(x, y);
-		//SetPixel(dc, x, y, RGB(test.r, test.g, test.b));
 	}
 	EndPaint(gui::GUI::useWindow(), &p);
 	RECT r;
 	GetClientRect(gui::GUI::useWindow(), &r);
 	InvalidateRect(gui::GUI::useWindow(), &r, TRUE);
 	delete[] buffer;
-}
-#endif
-Color bilinearInterpolation(Pixel q1, Pixel q2, Pixel q3, Pixel q4, POINT x)
-{
-	Color c;
-	double x1 = q1.x, x2 = q2.x, y1 = q3.y, y2 = q1.y;
-	double r1 = ((x2 - x.x) / (x2 - x1)) * q3.c.r + ((x.x - x1) / (x2 - x1)) * q4.c.r;
-	double r2 = ((x2 - x.x) / (x2 - x1)) * q1.c.r + ((x.x - x1) / (x2 - x1)) * q2.c.r;
-	c.r = ((y2 - x.y) / (y2 - y1)) * r1 + ((x.y - y1) / (y2 - y1)) * r2;
-
-	r1 = ((x2 - x.x) / (x2 - x1)) * q3.c.g + ((x.x - x1) / (x2 - x1)) * q4.c.g;
-	r2 = ((x2 - x.x) / (x2 - x1)) * q1.c.g + ((x.x - x1) / (x2 - x1)) * q2.c.g;
-	c.g = ((y2 - x.y) / (y2 - y1)) * r1 + ((x.y - y1) / (y2 - y1)) * r2;
-
-	r1 = ((x2 - x.x) / (x2 - x1)) * q3.c.b + ((x.x - x1) / (x2 - x1)) * q4.c.b;
-	r2 = ((x2 - x.x) / (x2 - x1)) * q1.c.b + ((x.x - x1) / (x2 - x1)) * q2.c.b;
-	c.b = ((y2 - x.y) / (y2 - y1)) * r1 + ((x.y - y1) / (y2 - y1)) * r2;
-	return c;
-}
-//#define THRESHOLD 200
-CharacterFeatures getImageScore(Image * img)
-{
-	int score = 0;
-	char elbow1 = 0;
-	char elbow2 = 0;
-	char dash1 = 0;
-	char dash2 = 0;
-	char v = 0;
-	const int THRESHOLD = img->integralImageValue(img->getWidth() - 1, img->getHeight() - 1) / (float)(img->getHeight() * img->getWidth());
-	for (int i = 0; i < img->getHeight() * img->getWidth(); i++) {
-		int x = i % img->getWidth();
-		int y = i / img->getWidth();
-		for (int j = -1; j <= 1; j++) {
-			if (j == 0) continue;
-			if (y + j >= 0 && y + j < img->getHeight() && x - j < img->getWidth() && x - j >= 0)
-				if (img->getPixel(x, y).avg() < THRESHOLD && img->getPixel(x - j, y).avg() < THRESHOLD && img->getPixel(x, y + j).avg() < THRESHOLD && img->getPixel(x - j, y + j).avg() >= THRESHOLD) elbow1++;
-//				elbow1 += img->getPixel(x, y).avg() < THRESHOLD ? (img->getPixel(x - j, y).avg() < THRESHOLD ? (img->getPixel(x, y + j).avg() < THRESHOLD ? (img->getPixel(x - j, y +j).avg() > THRESHOLD ? 1 : 0) : 0) : 0) : 0;
-			if (y + j >= 0 && y + j < img->getHeight() && x + j >= 0 && x + j < img->getWidth())
-				if (img->getPixel(x, y).avg() < THRESHOLD && img->getPixel(x + j, y).avg() < THRESHOLD && img->getPixel(x, y + j).avg() < THRESHOLD && img->getPixel(x + j, y + j).avg() >= THRESHOLD) elbow2++;
-//				elbow2 += img->getPixel(x, y).avg() < THRESHOLD ? (img->getPixel(x + j, y).avg() < THRESHOLD ? (img->getPixel(x, y + j).avg() < THRESHOLD ? (img->getPixel(x + j, y + j).avg() > THRESHOLD ? 1 : 0) : 0) : 0) : 0;
-//				dash += img->getPixel(x, y).avg() < THRESHOLD ? (img->getPixel(x + j, y + j).avg() < THRESHOLD ? (img->getPixel(x - j, y - j).avg() < THRESHOLD ? 1 : 0) : 0) : 0;
-			if (y + j >= 0 && y + j < img->getHeight() && x + 1 < img->getWidth() && x - 1 >= 0)
-				if (img->getPixel(x, y).avg() < THRESHOLD && img->getPixel(x + 1, y + j).avg() < THRESHOLD && img->getPixel(x - 1, y + j).avg() < THRESHOLD && img->getPixel(x, y + j).avg() >= THRESHOLD) v++;
-//				v += img->getPixel(x, y).avg() < THRESHOLD ? (img->getPixel(x + 1, y + j).avg() < THRESHOLD ? (img->getPixel(x - 1, y + j).avg() < THRESHOLD ? 1 : 0) : 0) : 0;
-
-		}
-		if (y + 1 >= 0 && y + 1 < img->getHeight() && x + 1 >= 0 && x + 1 < img->getWidth() && x - 1 >= 0 && x - 1 < img->getWidth() && y - 1 >= 0 && y - 1 < img->getHeight()) {
-			if (img->getPixel(x, y).avg() < THRESHOLD && img->getPixel(x + 1, y + 1).avg() < THRESHOLD && img->getPixel(x - 1, y - 1).avg() < THRESHOLD) dash1++;
-			if (img->getPixel(x, y).avg() < THRESHOLD && img->getPixel(x + 1, y - 1).avg() < THRESHOLD && img->getPixel(x - 1, y + 1).avg() < THRESHOLD) dash2++;
-		}
-
-		
-	}
-	return CharacterFeatures{elbow1, elbow2, dash1, dash2, v, THRESHOLD};
 }
 Rect::operator Square()
 {

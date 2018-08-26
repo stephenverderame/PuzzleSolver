@@ -11,6 +11,7 @@
 #include <map>
 #include <algorithm>
 //#define DEBUGGING_SPACE
+#define SHOW_DEBUG_CHARS
 struct Square {
 	int x;
 	int y;
@@ -71,14 +72,7 @@ public:
 	char getLetter(int columns, int rows) { if (rows > maxRows || rows < 0 || columns > maxColumns || columns < 0) return '-'; return letters[columns * (maxRows + 1) + rows]->letter; }
 	void search(Image * img, std::vector<Square> locations, std::vector<std::string> words);
 	void copyFrom(SearchGrid g);
-};
-struct CharacterFeatures {
-	int elbow1;
-	int elbow2;
-	int dash1;
-	int dash2;
-	int v;
-	int threshold;
+	bool isEmpty() { return letters.size() == 0; }
 };
 POINT matrixMultiply(float * matrix, POINT vector);
 float findSkewAngle(Image * img, POINT * origin = nullptr, Bounds * skewBounds = NULL);
@@ -87,5 +81,3 @@ void rotateImage(Image * img, float theta, POINT origin);
 std::vector<Square> getCharacterLocations(Image * img);
 SearchGrid identifyLetters(Image * img, std::vector<Square> locations);
 void augmentDataSet(std::vector<Square> locations, std::vector<char> knowns, Image * img, int firstKnown = 0);
-Color bilinearInterpolation(Pixel q1, Pixel q2, Pixel q3, Pixel q4, POINT x);
-CharacterFeatures getImageScore(Image * img);

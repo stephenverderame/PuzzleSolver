@@ -293,6 +293,8 @@ LRESULT CALLBACK customProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l) {
 		else {
 			crop = false;
 			position_2 = { GET_X_LPARAM(l), GET_Y_LPARAM(l) };
+			position_1.x += img->getX(); position_1.y += img->getY();
+			position_2.x += img->getX(); position_2.y += img->getY();
 			showFinal = true;
 			currentCursor = CURSOR_NORMAL;
 			clicks = 0;
@@ -423,12 +425,12 @@ LRESULT CALLBACK customProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l) {
 		SelectObject(dc, oldBrush);
 		SelectObject(dc, oldPen);
 		DeleteObject(pen);
-		SwapBuffers(dc);
-		EndPaint(display, &paint);
 		Statusbar * status = (Statusbar*)mainPage->getCurrentPage()->getControl("letterBar");
 		std::string text = "";
 		text += read.getLetter(loc)->letter;
 		status->setText(text.c_str(), 0);
+		SwapBuffers(dc);
+		EndPaint(display, &paint);
 	}
 	if (msg == WM_MOUSEMOVE && crop) {
 		RECT r;
@@ -598,7 +600,7 @@ int main(){
 			}
 		}
 		else if (LOWORD(ep.getParam3()) == IDM_VIEW_READ) {
-			if (img != nullptr) {
+			if (img != nullptr && !read.isEmpty()) {
 				viewRead = !viewRead;
 				if (viewRead)
 					mainPage->getCurrentPage()->getControl("letterBar")->showComponent();
