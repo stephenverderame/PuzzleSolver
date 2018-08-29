@@ -401,17 +401,48 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 	SearchGrid grid;
 	std::vector<KnownSample *> letters;
 	WIN32_FIND_DATA fData;
-	HANDLE hand = FindFirstFile("C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\*", &fData);
+	HANDLE hand = FindFirstFile("C:\\Users\\sev\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\*", &fData);
 	char fileRead[MAX_PATH];
-	while (hand != INVALID_HANDLE_VALUE) {		
+	while (hand != INVALID_HANDLE_VALUE) {
 		if (isBmp(fData.cFileName)) {
 			printf("%s \n", fData.cFileName);
-			sprintf_s(fileRead, MAX_PATH, "C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\%s", fData.cFileName);
+			sprintf_s(fileRead, MAX_PATH, "C:\\Users\\sev\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\%s", fData.cFileName);
 			if (!isalpha(fData.cFileName[0])) printf("img name is not a letter! \n");
-			letters.push_back(new KnownSample{ new Image(fileRead), (char)toupper(fData.cFileName[0]) });			
+			letters.push_back(new KnownSample{ new Image(fileRead), (char)toupper(fData.cFileName[0]) });
 		}
 		if (FindNextFile(hand, &fData) == FALSE) break;
 	}
+	FILE * file = fopen("C:\\Users\\SEV\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\data.ml", "rb");
+	int testNumber = 0;
+	printf("Letter size: %d \n", letters.size());
+	if (file != NULL) {
+		fseek(file, 0, SEEK_END);
+		long size = ftell(file);
+		fseek(file, 0, SEEK_SET);
+		if (size % 101) printf("Not a multiple of 101 bytes... \n");
+		long iterations = size / 101;
+		printf("Data file size: %d, iterations: %d \n", size, iterations);
+		for (int i = 0; i < iterations; i++) {
+			Image * newImg = new Image(SAMPLE_WIDTH, SAMPLE_HEIGHT);
+			unsigned char * buffer = new unsigned char[SAMPLE_WIDTH * SAMPLE_HEIGHT];
+			fread(buffer, 1, 100, file);
+			for (int i = 0; i < 100; i++) {
+				int x = i % 10;
+				int y = i / 10;
+				newImg->setPixel(x, y, { buffer[i], buffer[i], buffer[i] });
+			}
+			char letter;
+			fread(&letter, 1, 1, file);
+			printf("Reading %c \n", letter);
+			letters.push_back(new KnownSample{ newImg, letter });
+			testNumber = letters.size() - 1;
+			newImg->saveBmp("testReadLetter.bmp");
+			delete buffer;
+		}
+
+	}
+	else printf("Data.ml not found!\n");
+	printf("testNumber: %d \n", testNumber);
 	for (int i = 0; i < locations.size(); i++) {
 		std::pair<char, double> minDifference = std::make_pair(0, DBL_MAX);
 		Image * letter = new Image(locations[i].width, locations[i].height);
@@ -420,9 +451,9 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 				letter->setPixel(x, y, img->getPixel(x + locations[i].x, y + locations[i].y));
 			}
 		}
-		if (i == 4) letter->saveBmp("testUnknownPreScale.bmp");
+//		if (i == 4) letter->saveBmp("testUnknownPreScale.bmp");
 		letter->scaleTo(SAMPLE_WIDTH, SAMPLE_HEIGHT);
-		if (i == 4) letter->saveBmp("testUnknown.bmp");
+//		if (i == 4) letter->saveBmp("testUnknown.bmp");
 		for (int j = 0; j < letters.size(); j++) {
 			double diffScore = 0;
 			for (int k = 0; k < SAMPLE_WIDTH * SAMPLE_HEIGHT; k++) {
@@ -430,11 +461,19 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 				int y = k / SAMPLE_WIDTH;
 				diffScore += pow(letter->getPixel(x, y).avg() - letters[j]->image->getPixel(x, y).avg(), 2);
 			}
+			if (j == testNumber && i == 19 * 3 + 4) {
+				printf("The new sample has a score of: %f \n", diffScore);
+			}
 			if (diffScore < minDifference.second)
 				minDifference = std::make_pair(letters[j]->letter, diffScore);
 		}
 		grid.addLetter(minDifference.first, locations[i].x, locations[i].y);
-		delete letter;
+		if (i == 19 * 3 + 4) {
+			printf("Chosen letter scored: %f \n", minDifference.second);
+			letter->saveBmp("testChosen.bmp");
+		}
+		grid.matchLetter(new KnownSample{ letter, minDifference.first });
+//		delete letter;
 	}
 	for (int i = 0; i < letters.size(); i++)
 		delete letters[i];
@@ -445,9 +484,11 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
  {
 	 std::map<std::string, int> foundWords;
 	 std::map<std::string, Line> foundWordsPos;
+	 std::map<std::string, std::vector<POINT>> possibleLetterLocations;
 	 printf("testGetLetters: %c %c %c \n", getLetter(maxColumns, maxRows), getLetter(maxColumns - 1, maxRows - 1), getLetter(maxColumns - 2, maxRows - 2));
 	 for (std::string word : words) {
 		 std::vector<std::string> possibilities;
+		 std::vector<std::vector<POINT>> possibleCharLocations;
 		 std::vector<Line> lines;
 		 for (int i = 0; i < (maxRows + 1) * (maxColumns + 1); i++) {
 			 int x = i / (maxColumns + 1);
@@ -461,10 +502,13 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 						 l.end = {  x + (int)word.size() - j - 1, y };
 						 if (!l.outOfBounds(maxRows + 1, maxColumns + 1)) {
 							 std::stringstream p;
+							 std::vector<POINT> pts;
 							 for (int k = -j; k < word.size() - j; k++) {
 								 p << getLetter(x + k, y);
+								 pts.push_back({ x + k, y });
 							 }
 							 possibilities.push_back(p.str());
+							 possibleCharLocations.push_back(pts);
 							 lines.push_back(l);
 						 }
 					 }
@@ -474,10 +518,13 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 						 l.start = { x, y - j };
 						 l.end = { x, y + (int)word.size() - j - 1 };
 						 if (!l.outOfBounds(maxRows + 1, maxColumns + 1)) {
+							 std::vector<POINT> pts;
 							 for (int k = -j; k < word.size() - j; k++) {
 								 s << getLetter(x, y + k);
+								 pts.push_back({ x, y + k });
 							 }
 							 possibilities.push_back(s.str());
+							 possibleCharLocations.push_back(pts);
 							 lines.push_back(l);
 						 }
 					 }
@@ -488,10 +535,13 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 						 l.start = { x - j, y + j };
 						 l.end = { x + (int)word.size() - j - 1, y - ((int)word.size() - j - 1)};
 						 if (!l.outOfBounds(maxRows + 1, maxColumns + 1)) {
+							 std::vector<POINT> pts;
 							 for (int k = -j; k < word.size() - j; k++) {
 								 s << getLetter(x + k, y - k);
+								 pts.push_back({ x + k, y - k });
 							 }
 							 possibilities.push_back(s.str());
+							 possibleCharLocations.push_back(pts);
 							 lines.push_back(l);
 						 }
 					 }
@@ -501,10 +551,13 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 						 l.start = { x - j, y - j };
 						 l.end = { x + (int)word.size() - j - 1, y + (int)word.size() - j - 1 };
 						 if (!l.outOfBounds(maxRows + 1, maxColumns + 1)) {
+							 std::vector<POINT> pts;
 							 for (int k = -j; k < word.size() - j; k++) {
 								 s << getLetter(x + k, y + k);
+								 pts.push_back({ x + k, y + k });
 							 }
 							 possibilities.push_back(s.str());
+							 possibleCharLocations.push_back(pts);
 							 lines.push_back(l);
 						 }
 					 }
@@ -514,10 +567,13 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 						 l.start = { x + j, y + j };
 						 l.end = { x - ((int)word.size() - j - 1), y - ((int)word.size() - j - 1) };
 						 if (!l.outOfBounds(maxRows + 1, maxColumns + 1)) {
+							 std::vector<POINT> pts;
 							 for (int k = -j; k < word.size() - j; k++) {
 								 s << getLetter(x - k, y - k);
+								 pts.push_back({ x - k, y - k });
 							 }
 							 possibilities.push_back(s.str());
+							 possibleCharLocations.push_back(pts);
 							 lines.push_back(l);
 						 }
 					 }
@@ -527,10 +583,13 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 						 l.start = { x + j, y - j };
 						 l.end = { x - ((int)word.size() - j - 1), y + (int)word.size() - j - 1 };
 						 if (!l.outOfBounds(maxRows + 1, maxColumns + 1)) {
+							 std::vector<POINT> pts;
 							 for (int k = -j; k < word.size() - j; k++) {
 								 s << getLetter(x - k, y + k);
+								 pts.push_back({ x - k, y + k });
 							 }
 							 possibilities.push_back(s.str());
+							 possibleCharLocations.push_back(pts);
 							 lines.push_back(l);
 						 }
 					 }
@@ -541,10 +600,13 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 						 l.start = { x + j, y };
 						 l.end = { x - ((int)word.size() - j - 1), y };
 						 if (!l.outOfBounds(maxRows + 1, maxColumns + 1)) {
+							 std::vector<POINT> pts;
 							 for (int k = -j; k < word.size() - j; k++) {
 								 s << getLetter(x - k, y);
+								 pts.push_back({ x - k, y });
 							 }
 							 possibilities.push_back(s.str());
+							 possibleCharLocations.push_back(pts);
 							 lines.push_back(l);
 						 }
 					 }
@@ -554,10 +616,13 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 						 l.start = { x, y + j };
 						 l.end = { x, y - ((int)word.size() - j - 1) };
 						 if (!l.outOfBounds(maxRows + 1, maxColumns + 1)) {
+							 std::vector<POINT> pts;
 							 for (int k = -j; k < word.size() - j; k++) {
 								 s << getLetter(x, y - k);
+								 pts.push_back({ x, y - k });
 							 }
 							 possibilities.push_back(s.str());
+							 possibleCharLocations.push_back(pts);
 							 lines.push_back(l);
 						 }
 					 }
@@ -580,11 +645,13 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 				if (foundWords.at(word) < maxSame.second) {
 					foundWords[word] = maxSame.second;
 					foundWordsPos[word] = lines[maxSame.first];
+					possibleLetterLocations[word] = possibleCharLocations[maxSame.first];
 				}
 			}
 			else {
 				foundWords.insert(std::make_pair(word, maxSame.second));
 				foundWordsPos.insert(std::make_pair(word, lines[maxSame.first]));
+				possibleLetterLocations.insert(std::make_pair(word, possibleCharLocations[maxSame.first]));
 			}
 		}
 	 }
@@ -613,6 +680,37 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 		 }
 		 
 	 }
+	 FILE * file = fopen("C:\\Users\\SEV\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\data.ml", "ab");
+	 for (auto it = foundWords.begin(); it != foundWords.end(); it++) {
+		 //implement 'machine learning'
+		 if (possibleLetterLocations[it->first].size() > 0 && it->second != it->first.size()) {
+			 for (int i = 0; i < it->first.size(); i++) {
+				 int x = possibleLetterLocations[it->first][i].x;
+				 int y = possibleLetterLocations[it->first][i].y;
+				 if (it->first[i] != getLetter(x, y)) {
+					 printf("Mismatch %c\n", getLetter(x, y));
+					 KnownSample * k = identifiedLetters[x * (maxRows + 1) + y];
+					 for (int i = 0; i < SAMPLE_WIDTH * SAMPLE_HEIGHT; i++) {
+						 int x = i % SAMPLE_WIDTH;
+						 int y = i / SAMPLE_WIDTH;
+						 Color c = k->image->getPixel(x, y);
+						 unsigned char wc = c.avg();
+						 fwrite(&wc, 1, 1, file);
+					 }
+					 char c = it->first[i];
+					 fwrite(&c, 1, 1, file);
+					 printf("Saving %c...\n", c);
+					 k->image->saveBmp("testWriteLetter.bmp");
+					 
+
+				 }
+			 }
+		 }
+		 else if (possibleLetterLocations[it->first].size() <= 0) {
+			 printf("%s has no possible letters??\n", it->first.c_str());
+		}
+	 }
+	 fclose(file);
 	 RECT r;
 	 GetClientRect(gui::GUI::useWindow(), &r);
 	 InvalidateRect(gui::GUI::useWindow(), &r, TRUE);
@@ -627,12 +725,41 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 	 for (auto l : g.letters) {
 		 letters.push_back(new Letter(*l));
 	 }
+	 if (identifiedLetters.size() > 0) {
+		 for (int i = 0; i < identifiedLetters.size(); i++)
+			 delete identifiedLetters[i];
+		 identifiedLetters.erase(identifiedLetters.begin(), identifiedLetters.end());
+	 }
+	 for (auto l : g.identifiedLetters)
+		 identifiedLetters.push_back(new KnownSample(*l));
 	 lastRow = g.lastRow;
 	 lastColumn = g.lastColumn;
 	 maxRows = g.maxRows;
 	 maxColumns = g.maxColumns;
 	 row0Y = g.row0Y;
 	 column0X = g.column0X;
+ }
+ SearchGrid & SearchGrid::operator=(const SearchGrid & other)
+ {
+	 this->row0Y = other.row0Y;
+	 this->column0X = other.column0X;
+	 this->lastColumn = other.lastColumn;
+	 this->lastRow = other.lastRow;
+	 identifiedLetters.erase(identifiedLetters.begin(), identifiedLetters.end());
+	 for (auto l : other.identifiedLetters)
+		 identifiedLetters.push_back(new KnownSample(*l));
+	 letters.erase(letters.begin(), letters.end());
+	 for (auto l : other.letters)
+		 letters.push_back(new Letter(*l));
+ }
+ SearchGrid::SearchGrid(const SearchGrid & other) : row0Y(other.row0Y), column0X(other.column0X), maxRows(other.maxRows), maxColumns(other.maxColumns),
+	 lastRow(other.lastRow), lastColumn(other.lastColumn)
+ {
+	 for (auto l : other.letters) {
+		 letters.push_back(new Letter(*l));
+	 }
+	 for (auto l : other.identifiedLetters)
+		 identifiedLetters.push_back(new KnownSample(*l));
  }
  void augmentDataSet(std::vector<Square> locations, std::vector<char> knowns, Image * img, int firstKnown)
  {
@@ -799,6 +926,9 @@ SearchGrid::~SearchGrid()
 	for (int i = 0; i < letters.size(); i++) {
 		delete letters[i];
 	}
+	for (int i = 0; i < identifiedLetters.size(); i++) {
+		delete identifiedLetters[i];
+	}
 }
 
 void SearchGrid::iterateRowbyRow()
@@ -827,4 +957,17 @@ bool Line::outOfBounds(int maxRows, int maxColumns)
 	if (start.x < 0 || start.x >= maxColumns || start.y < 0 || start.y >= maxRows ||
 		end.x < 0 || end.x >= maxColumns || end.y < 0 || end.y >= maxRows) return true;
 	return false;
+}
+
+KnownSample & KnownSample::operator=(const KnownSample & other)
+{
+	this->letter = other.letter;
+	if (image != nullptr)
+		delete image;
+	image = new Image(other.image->getWidth(), other.image->getHeight());
+	for (int i = 0; i < other.image->getWidth() * other.image->getHeight(); i++) {
+		int x = i % other.image->getWidth();
+		int y = i / other.image->getWidth();
+		image->setPixel(x, y, other.image->getPixel(x, y));
+	}
 }

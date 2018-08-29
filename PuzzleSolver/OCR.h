@@ -1,4 +1,5 @@
 #pragma once
+#define _CRT_SECURE_NO_WARNINGS
 #include <Canvas.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -11,7 +12,7 @@
 #include <map>
 #include <algorithm>
 //#define DEBUGGING_SPACE
-#define SHOW_DEBUG_CHARS
+//#define SHOW_DEBUG_CHARS
 struct Square {
 	int x;
 	int y;
@@ -53,10 +54,21 @@ struct KnownSample {
 	~KnownSample() { delete image; }
 	operator Image*() { return image; }
 	Image * operator->() { return image; }
+	KnownSample(const KnownSample& other) : letter(other.letter) {
+		image = new Image(other.image->getWidth(), other.image->getHeight());
+		for (int i = 0; i < image->getWidth() * image->getHeight(); i++) {
+			int x = i % image->getWidth();
+			int y = i / image->getWidth();
+			image->setPixel(x, y, other.image->getPixel(x, y));
+		}
+	}
+	KnownSample(Image * ptr, char let) : image(ptr), letter(let) {};
+	KnownSample& operator=(const KnownSample & other);
 };
 class SearchGrid {
 private:
 	std::vector <Letter *> letters;
+	std::vector <KnownSample *> identifiedLetters;
 	int row0Y;
 	int column0X;
 	std::pair<int, int> lastRow;
@@ -65,14 +77,18 @@ private:
 	int maxColumns = 0;
 public:
 	void addLetter(char c, int x, int y);
+	SearchGrid() {};
 	~SearchGrid();
 	void iterateRowbyRow();
 	std::pair<int, int> getDimensions() { return std::pair<int, int>(maxRows, maxColumns); }
+	void matchLetter(KnownSample * s) { identifiedLetters.push_back(s); }
 	Letter * getLetter(int i) { return letters[i]; }
 	char getLetter(int columns, int rows) { if (rows > maxRows || rows < 0 || columns > maxColumns || columns < 0) return '-'; return letters[columns * (maxRows + 1) + rows]->letter; }
 	void search(Image * img, std::vector<Square> locations, std::vector<std::string> words);
 	void copyFrom(SearchGrid g);
 	bool isEmpty() { return letters.size() == 0; }
+	SearchGrid& operator=(const SearchGrid & other);
+	SearchGrid(const SearchGrid& other);
 };
 POINT matrixMultiply(float * matrix, POINT vector);
 float findSkewAngle(Image * img, POINT * origin = nullptr, Bounds * skewBounds = NULL);

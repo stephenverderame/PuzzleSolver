@@ -7,7 +7,7 @@
 #include <Dialog.h>
 #include "res.h"
 #include <ObjIdl.h>
-#include <time.h>
+#include <ctime>
 #include "Grid.h"
 #include "OCR.h"
 #include <guiMainEx.h>
@@ -293,8 +293,8 @@ LRESULT CALLBACK customProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l) {
 		else {
 			crop = false;
 			position_2 = { GET_X_LPARAM(l), GET_Y_LPARAM(l) };
-			position_1.x += img->getX(); position_1.y += img->getY();
-			position_2.x += img->getX(); position_2.y += img->getY();
+			position_1.y -= 30; //acount for size of taskbar
+			position_2.y -= 30;
 			showFinal = true;
 			currentCursor = CURSOR_NORMAL;
 			clicks = 0;
