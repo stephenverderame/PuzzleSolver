@@ -293,8 +293,8 @@ LRESULT CALLBACK customProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l) {
 		else {
 			crop = false;
 			position_2 = { GET_X_LPARAM(l), GET_Y_LPARAM(l) };
-			position_1.y -= 30; //acount for size of taskbar
-			position_2.y -= 30;
+			position_1.y -= 20; //acount for size of taskbar
+			position_2.y -= 20;
 			showFinal = true;
 			currentCursor = CURSOR_NORMAL;
 			clicks = 0;
@@ -313,7 +313,7 @@ LRESULT CALLBACK customProc(HWND hwnd, UINT msg, WPARAM w, LPARAM l) {
 			position_2 = { 0, 0 };
 		}
 	}
-	else if (msg == WM_KEYDOWN && w == 0x55) {
+	else if (msg == WM_KEYDOWN && w == 'Z') {
 		if (GetAsyncKeyState(VK_CONTROL) < 0)
 			display.fireEvent(Event(WM_COMMAND, EventParams(0, IDT_UNDO)));
 	}

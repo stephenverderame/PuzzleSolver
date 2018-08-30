@@ -401,18 +401,18 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 	SearchGrid grid;
 	std::vector<KnownSample *> letters;
 	WIN32_FIND_DATA fData;
-	HANDLE hand = FindFirstFile("C:\\Users\\sev\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\*", &fData);
+	HANDLE hand = FindFirstFile("C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\*", &fData);
 	char fileRead[MAX_PATH];
 	while (hand != INVALID_HANDLE_VALUE) {
 		if (isBmp(fData.cFileName)) {
 			printf("%s \n", fData.cFileName);
-			sprintf_s(fileRead, MAX_PATH, "C:\\Users\\sev\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\%s", fData.cFileName);
+			sprintf_s(fileRead, MAX_PATH, "C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\letters\\%s", fData.cFileName);
 			if (!isalpha(fData.cFileName[0])) printf("img name is not a letter! \n");
 			letters.push_back(new KnownSample{ new Image(fileRead), (char)toupper(fData.cFileName[0]) });
 		}
 		if (FindNextFile(hand, &fData) == FALSE) break;
 	}
-	FILE * file = fopen("C:\\Users\\SEV\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\data.ml", "rb");
+	FILE * file = fopen("C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\data.ml", "rb");
 	int testNumber = 0;
 	printf("Letter size: %d \n", letters.size());
 	if (file != NULL) {
@@ -491,8 +491,8 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 		 std::vector<std::vector<POINT>> possibleCharLocations;
 		 std::vector<Line> lines;
 		 for (int i = 0; i < (maxRows + 1) * (maxColumns + 1); i++) {
-			 int x = i / (maxColumns + 1);
-			 int y = i % (maxColumns + 1);
+			 int x = i / (maxRows + 1);
+			 int y = i % (maxRows + 1);
 			 Letter letter = *letters[i];
 			 for (int j = 0; j < word.size(); j++) {
 				 if (letter == word[j]) {
@@ -680,7 +680,7 @@ SearchGrid identifyLetters(Image * img, std::vector<Square> locations)
 		 }
 		 
 	 }
-	 FILE * file = fopen("C:\\Users\\SEV\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\data.ml", "ab");
+	 FILE * file = fopen("C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\data.ml", "ab");
 	 for (auto it = foundWords.begin(); it != foundWords.end(); it++) {
 		 //implement 'machine learning'
 		 if (possibleLetterLocations[it->first].size() > 0 && it->second != it->first.size()) {
@@ -947,7 +947,7 @@ void SearchGrid::iterateRowbyRow()
 
 bool Letter::operator==(char c)
 {
-	std::vector<std::vector<char>> confusionSets;
+//	std::vector<std::vector<char>> confusionSets;
 	if (letter == c) return true;
 	return false;
 }
