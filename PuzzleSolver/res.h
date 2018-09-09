@@ -1,5 +1,5 @@
 #pragma once
-#include <winres.h>
+#include <Windows.h>
 #define ID_CURSOR_PEN 301
 #define ID_ICON 201
 #define ID_MENU 101
@@ -56,3 +56,5 @@
 #define IDD_FIND 1059
 #define IDC_WORD_LIST 1060
 #define IDC_FIND_WORDS 1070
+
+#define IDC_STATIC -1
