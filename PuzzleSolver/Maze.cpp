@@ -21,7 +21,7 @@ void CV::Maze::choosePoint()
 			buffer[i] = (255 * 255 * 3) - ((int)c.red * c.red + (int)c.green * c.green + (int)c.blue * c.blue);
 		}
 		Notification::notification n;
-		n.msg = Notification::mze_selecting;
+		n.msg = Notification::messages::mze_selecting;
 		notify(n);
 		Cursor::CustomCursor::getInstance()->setCursor(Cursor::CURSOR_DRAW);
 	}
@@ -57,7 +57,7 @@ void CV::Maze::calculatePathThread(Math::point start, Math::point end, Math::poi
 	invalidate = true;
 	iMu.unlock();
 	Notification::notification n;
-	n.msg = Notification::mze_finish;
+	n.msg = Notification::messages::mze_finish;
 	notify(n);
 }
 

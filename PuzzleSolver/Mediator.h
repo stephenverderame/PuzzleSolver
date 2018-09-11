@@ -15,7 +15,7 @@ namespace Control {
 		void attachGui(Gui * gui);
 		void attachWnd(Wnd * wnd);
 		void sendToGui(events e);
-		void update(const Notification::notification n);
+		void update(const Notification::notification n) override;
 
 	};
 }

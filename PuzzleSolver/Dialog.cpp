@@ -73,8 +73,7 @@ namespace DialogSpace {
 				data[0] = min;
 				data[1] = max;
 				CustomCursor::getInstance()->setCursor(CURSOR_NORMAL);
-				notification n = { nullptr, nullptr, dlg_set_limits };
-				n.msg = dlg_set_limits;
+				notification n = { nullptr, nullptr, messages::dlg_set_limits };
 				n.data1 = data;
 				notify(n);
 				DestroyWindow(hwnd);
@@ -105,8 +104,7 @@ namespace DialogSpace {
 				}
 
 				printf("Theta: %f \n", theta);
-				notification n = { nullptr, nullptr, dlg_draw_lines };
-				n.msg = dlg_draw_lines;
+				notification n = { nullptr, nullptr, messages::dlg_draw_lines };
 				n.data1 = new Math::point{ origin.x, origin.y };
 				n.data2 = new double[2];
 				((double*)n.data2)[0] = theta;
@@ -143,12 +141,12 @@ namespace DialogSpace {
 						pOrigin = true;
 						CustomCursor::getInstance()->setCursor(CURSOR_DRAW);
 						MessageBox(hwnd, "Click the point on the image where you want the center of rotation", "Pick Origin", MB_OK | MB_ICONINFORMATION);
-						notification n = { nullptr, nullptr, dlg_pick_origin };
+						notification n = { nullptr, nullptr, messages::dlg_pick_origin };
 						notify(n);
 					}
 					else {
 						CustomCursor::getInstance()->setCursor(CURSOR_NORMAL);
-						notification n = { nullptr, nullptr, dlg_geta_origin };
+						notification n = { nullptr, nullptr, messages::dlg_geta_origin };
 						notify(n);
 					}
 				}
@@ -200,7 +198,7 @@ namespace DialogSpace {
 				char * buffer = new char[txtSize + 1];
 				GetWindowText(handle, buffer, txtSize);
 				buffer[txtSize] = '\0';
-				notification n = { buffer, nullptr, dlg_find_words };
+				notification n = { buffer, nullptr, messages::dlg_find_words };
 				notify(n);
 				EndDialog(hwnd, IDC_FIND_WORDS);
 			}

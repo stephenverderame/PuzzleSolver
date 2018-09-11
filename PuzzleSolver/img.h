@@ -9,6 +9,7 @@ namespace IMG {
 		unsigned char green;
 		unsigned char blue;
 		int avg();
+		int total();
 		explicit operator Color();
 	};
 	struct pixel {
@@ -53,6 +54,6 @@ namespace IMG {
 		ImgMemento getMemento();
 		void loadFrom(ImgMemento memento);
 		bool isLoaded() { return loaded; }
-		operator Image*();
+		void drawLine(Math::point start, Math::point end, color c);
 	};
 } 

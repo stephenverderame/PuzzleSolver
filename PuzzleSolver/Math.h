@@ -20,6 +20,12 @@ namespace Math {
 	matrix rotationMatrix(const double degrees);
 
 	point& operator*(const matrix & mat, const point & vec);
+	point& operator+(const point& a, const point& b);
+	point& operator-(const point& a, const point& b);
+	point& operator+=(point& cur, const point& b);
+	point& operator-=(point& cur, const point& b);
+
+	int gcd(int a, int b);
 
 	template<typename T>
 	inline T min(T a, T b) {

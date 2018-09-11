@@ -21,8 +21,9 @@ class Stroke {
 private:
 	HPEN pen;
 	bool mustDelete;
-	Stroke(const Stroke & other) {};
-	Stroke& operator=(const Stroke & other) {};
+public:
+	Stroke(const Stroke & other) = delete;
+	Stroke& operator=(const Stroke & other) = delete;
 public:
 	Stroke(int size, color c);
 	Stroke() : mustDelete(false) { pen = GetStockPen(NULL_PEN); }
@@ -33,8 +34,9 @@ class Brush {
 private:
 	HBRUSH brush;
 	bool mustDelete;
-	Brush(const Brush & other) {};
-	Brush& operator=(const Brush & other) {};
+public:
+	Brush(const Brush & other) = delete;
+	Brush& operator=(const Brush & other) = delete;
 public:
 	Brush(color c);
 	Brush() : mustDelete(false) { brush = GetStockBrush(NULL_BRUSH); }
@@ -73,10 +75,11 @@ public:
 	void beginDBLPaint();
 	void endDBLPaint();
 	void clrScr();
-	void update(Notification::notification n);
-	void setStroke(Stroke & newStroke);
-	void setBrush(Brush & newBrush);
+	void update(Notification::notification n) override;
+	void setStroke(const Stroke & newStroke);
+	void setBrush(const Brush & newBrush);
 	void drawRect(Math::point topLeft, Math::point bottomRight);
+	void drawLine(Math::point start, Math::point end);
 	Math::point getMousePos();
 
 };
@@ -88,3 +91,6 @@ public:
 	static LRESULT __stdcall callback(HWND h, UINT u, WPARAM w, LPARAM l);
 
 };
+
+static const Brush  & null_brush = Brush();
+static const Stroke & null_stroke = Stroke();

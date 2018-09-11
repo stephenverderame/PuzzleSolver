@@ -30,19 +30,19 @@ namespace DialogSpace {
 		Wnd & window;
 		HWND modelessDialog;
 	public:
-		int __stdcall callback(HWND hwnd, UINT msg, WPARAM w, LPARAM l);
+		int __stdcall callback(HWND hwnd, UINT msg, WPARAM w, LPARAM l) override;
 	public:
 		RotateDialog(Math::point origin, Wnd & wnd);
-		void openDialog();
-		void recv(DialogNotification n);
+		void openDialog() override;
+		void recv(DialogNotification n) override;
 		void setOrigin(const Math::point p);
 	};
 	class SearchDialog : public Dialog {
 	public:
-		int __stdcall callback(HWND hwnd, UINT msg, WPARAM w, LPARAM l);
+		int __stdcall callback(HWND hwnd, UINT msg, WPARAM w, LPARAM l) override;
 	public:
-		void openDialog();
-		void recv(DialogNotification n) {};
+		void openDialog() override;
+		void recv(DialogNotification n) override {};
 	};
 
 

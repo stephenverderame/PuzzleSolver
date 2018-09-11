@@ -91,15 +91,32 @@ void IMG::Img::loadFrom(ImgMemento memento)
 }
 
 
-IMG::Img::operator Image*()
+void IMG::Img::drawLine(Math::point start, Math::point end, color c)
 {
-	assert(!"THIS CODE SHOULD NOT BE USED - JUST HERE TO STOP ERRORS");
-	return img.get();
+	Math::point a = end - start;
+	double denominator = a.x == 0 ? 1 : a.x;
+	double t = atan(a.y / denominator);
+	double distance = sqrt((end.x - start.x) * (end.x - start.x) + (end.y - start.y) * (end.y - start.y));
+	Math::matrix m = {
+		cos(t),	-sin(t),
+		sin(t),	 cos(t)
+	};
+	for (int i = 0; i < ceil(distance); ++i) {
+		Math::point p = { i, 0};
+		p = m * p;
+		p += start;
+		setPixel({ c, p });
+	}
 }
 
 int IMG::color::avg()
 {
 	return ((int)red + blue + green) / 3;
+}
+
+int IMG::color::total()
+{
+	return (int)red + green + blue;
 }
 
 IMG::color::operator Color()
@@ -108,7 +125,6 @@ IMG::color::operator Color()
 }
 IMG::imgState::imgState(const imgState & other) : width(other.width), height(other.height)
 {
-	printf("state copy constructor\n");
 	if (other.width * other.height > 0) {
 		imgData.reserve(other.width * other.height);
 		for (int i = 0; i < other.width * other.height; ++i)

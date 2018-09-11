@@ -89,6 +89,27 @@ namespace CV {
 		IMG::Img & getEditedImage() { return seekImage; }
 	};
 
+	using pointList = std::vector<std::pair<Math::point, Math::point>>;
+	class Hough {
+	private:
+		std::vector<std::vector<uint32_t>> accumulator;
+		size_t accumulatorHeight;
+		size_t accumulatorWidth;
+		struct {
+			double x;
+			double y;
+		} center;
+		IMG::Img & image;
+	public:
+		Hough(const Hough & other) = delete;
+		Hough& operator=(const Hough & other) = delete;
+	public:
+		Hough(IMG::Img & img) : image(img) {};
+		void transform(IMG::Img & img);
+		pointList getLines(uint32_t threshold);
+
+	};
+
 
 	float findSkewAngle(IMG::Img & img, Math::point * origin = nullptr, Bounds * skewBounds = nullptr);
 	Math::point getOrigin(IMG::Img & img);

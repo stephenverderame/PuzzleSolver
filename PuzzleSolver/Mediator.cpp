@@ -16,6 +16,5 @@ void Control::GuiWndMediator::sendToGui(events e)
 }
 void Control::GuiWndMediator::update(const Notification::notification n)
 {
-	if (n.msg == Notification::msg_click) return;
 	notify(n);
 }

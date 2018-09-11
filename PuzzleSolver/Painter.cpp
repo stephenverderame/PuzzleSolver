@@ -13,7 +13,7 @@ Painter::Painter(Wnd * w, IMG::Img * i)
 void Painter::draw(Notification::notification n)
 {
 	switch (n.msg) {
-	case msg_click:
+	case messages::msg_click:
 	if (pimpl->crop) {
 		int x = *((int*)n.data1);
 		int y = *((int*)n.data2);
@@ -42,8 +42,11 @@ void Painter::draw(Notification::notification n)
 					image.setPixel({ pimpl->image->getPixel({min(pimpl->position_1.x, pimpl->position_2.x) + x, min(pimpl->position_1.y, pimpl->position_2.y) + y}) , {x, y} });
 				}
 			}
-			pimpl->window->drawImage(image);
-			pimpl->window->redraw();
+			notification n;
+			n.msg = messages::pai_crop;
+			IMG::ImgMemento * mem = new IMG::ImgMemento(image.getMemento());
+			n.data1 = mem;
+			notify(n);
 			pimpl->position_1 = { 0, 0 };
 			pimpl->position_2 = { 0, 0 };
 		}
@@ -51,7 +54,7 @@ void Painter::draw(Notification::notification n)
 		delete (int*)n.data2;
 	}
 	break;
-	case msg_mmove:
+	case messages::msg_mmove:
 		if (pimpl->crop)
 			pimpl->window->redraw();
 		else if (pimpl->viewRead)
@@ -60,7 +63,7 @@ void Painter::draw(Notification::notification n)
 		delete (int*)n.data1;
 		delete (int*)n.data2;
 		break;
-	case msg_rclick:
+	case messages::msg_rclick:
 		pimpl->crop = false;
 		pimpl->clicks = 0;
 		pimpl->showFinal = false;
@@ -70,16 +73,15 @@ void Painter::draw(Notification::notification n)
 		pimpl->position_1 = { 0, 0 };
 		pimpl->position_2 = { 0, 0 };
 		break;
-	case msg_paint:
+	case messages::msg_paint:
 	{
 		if (pimpl->clicks > 0) {
 			pimpl->window->beginDBLPaint();
 			pimpl->window->clrScr();
 			pimpl->window->canvasDraw(); 
 			Stroke s(3, { 255, 0, 0 });
-			Brush b;
 			pimpl->window->setStroke(s);
-			pimpl->window->setBrush(b);
+			pimpl->window->setBrush(null_brush);
 			pimpl->window->drawRect({ min(pimpl->position_1.x, pimpl->mouse.x), min(pimpl->position_1.y, pimpl->mouse.y)}, { max(pimpl->position_1.x, pimpl->mouse.x), max(pimpl->position_1.y, pimpl->mouse.y) });
 			pimpl->window->endDBLPaint();
 		}

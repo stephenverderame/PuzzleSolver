@@ -7,19 +7,19 @@ int Wnd::callback(HWND hwnd, UINT msg, WPARAM w, LPARAM l)
 	switch (msg) {
 	case WM_LBUTTONDOWN:
 		printf("Mouse click!\n");
-		n.msg = msg_click;
+		n.msg = messages::msg_click;
 		n.data1 = new int(GET_X_LPARAM(l));
 		n.data2 = new int(GET_Y_LPARAM(l));
 		notify(n);
 		break;
 	case WM_KEYDOWN:
 		if (w == 'Z' && GetAsyncKeyState(VK_CONTROL) < 0) {
-			n.msg = msg_undo;
+			n.msg = messages::msg_undo;
 			notify(n);
 		}
 		break;
 	case WM_RBUTTONDOWN:
-		n.msg = msg_rclick;
+		n.msg = messages::msg_rclick;
 		notify(n);
 		break;
 	case WM_ERASEBKGND:
@@ -27,11 +27,11 @@ int Wnd::callback(HWND hwnd, UINT msg, WPARAM w, LPARAM l)
 			return TRUE;
 		break;
 	case WM_PAINT:
-		n.msg = msg_paint;
+		n.msg = messages::msg_paint;
 		notify(n);
 		break;
 	case WM_MOUSEMOVE:
-		n.msg = msg_mmove;
+		n.msg = messages::msg_mmove;
 		n.data1 = new int(GET_X_LPARAM(l));
 		n.data2 = new int(GET_Y_LPARAM(l));
 		notify(n);
@@ -67,7 +67,7 @@ Wnd::Wnd() : img(nullptr)
 		Size::WndDimensions::width = LOWORD(ep.getParaml());
 		Size::WndDimensions::height = HIWORD(ep.getParaml());
 		notification n;
-		n.msg = wnd_size;
+		n.msg = messages::wnd_size;
 		notify(n);
 	}, WM_SIZE));
 	display->addEventListener(new EventListener([this](EventParams ep) {
@@ -75,45 +75,45 @@ Wnd::Wnd() : img(nullptr)
 		ZeroMemory(&n, sizeof(n));
 		switch (LOWORD(ep.getParam3())) {
 		case IDM_LOAD:
-			n.msg = wnd_load;
+			n.msg = messages::wnd_load;
 			break;
 		case IDM_CROP:
-			n.msg = wnd_crop;
+			n.msg = messages::wnd_crop;
 			break;
 		case IDM_MONOCHROME:
-			n.msg = wnd_monochrome;
+			n.msg = messages::wnd_monochrome;
 			break;
 		case IDM_ROTATE:
-			n.msg = wnd_rotate;
+			n.msg = messages::wnd_rotate;
 			break;
 		case IDM_SAVE:
-			n.msg = wnd_save;
+			n.msg = messages::wnd_save;
 			break;
 		case IDM_SOLVE_MAZE:
-			n.msg = wnd_solve_maze;
+			n.msg = messages::wnd_solve_maze;
 			break;
 		case IDM_SOLVE_SEARCH:
-			n.msg = wnd_solve_srch;
+			n.msg = messages::wnd_solve_srch;
 			break;
 		case IDM_VIEW_READ:
-			n.msg = wnd_view_read;
+			n.msg = messages::wnd_view_read;
 			break;
 		case IDT_UNDO:
-			n.msg = wnd_undo;
+			n.msg = messages::wnd_undo;
 			break;
 		}
-		if (n.msg != msg_click) //if msg is set
+		if (n.msg != messages::msg_click) //if msg is set
 			notify(n);
 	}, WM_COMMAND));
 	display->addEventListener(new EventListener([this](EventParams ep) {
 		notification n;
-		n.msg = wnd_hscroll;
+		n.msg = messages::wnd_hscroll;
 		n.data1 = new Event(WM_HSCROLL, ep);
 		notify(n);
 	}, WM_HSCROLL));
 	display->addEventListener(new EventListener([this](EventParams ep) {
 		notification n;
-		n.msg = wnd_vscroll;
+		n.msg = messages::wnd_vscroll;
 		n.data1 = new Event(WM_VSCROLL, ep);
 		notify(n);
 	}, WM_VSCROLL));
@@ -152,6 +152,7 @@ void Wnd::redraw() const
 
 void Wnd::setPixelColor(const Math::point & p, const color & c)
 {
+	assert(dcIsValid && "Attempted operation on invalid DC!");
 	SetPixel(dc, p.x, p.y, RGB(c.red, c.green, c.blue));
 }
 
@@ -260,7 +261,7 @@ void Wnd::clrScr()
 void Wnd::update(Notification::notification n)
 {
 	switch (n.msg) {
-	case Notification::gui_hscroll:
+	case Notification::messages::gui_hscroll:
 	{
 		int changePos = *((int*)n.data1);
 		for (auto it = display->getCanvas()->getImages()->begin(); it != display->getCanvas()->getImages()->end(); it++) {
@@ -268,7 +269,7 @@ void Wnd::update(Notification::notification n)
 		}
 		break;
 	}
-	case Notification::gui_vscroll:
+	case Notification::messages::gui_vscroll:
 	{
 		int changePos = *((int*)n.data1);
 		for (auto it = display->getCanvas()->getImages()->begin(); it != display->getCanvas()->getImages()->end(); it++) {
@@ -279,7 +280,7 @@ void Wnd::update(Notification::notification n)
 	}
 }
 
-void Wnd::setStroke(Stroke & newStroke)
+void Wnd::setStroke(const Stroke & newStroke)
 {
 	HPEN p = (HPEN)SelectObject(dc, newStroke.pen);
 	if (firstPen) {
@@ -288,7 +289,7 @@ void Wnd::setStroke(Stroke & newStroke)
 	}
 }
 
-void Wnd::setBrush(Brush & newBrush)
+void Wnd::setBrush(const Brush & newBrush)
 {
 	HBRUSH b = (HBRUSH)SelectObject(dc, newBrush.brush);
 	if (firstBrush) {
@@ -301,6 +302,13 @@ void Wnd::drawRect(Math::point topLeft, Math::point bottomRight)
 {
 	assert(dcIsValid && "Attempted operation that requires a valid DC!");
 	Rectangle(dc, topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+}
+
+void Wnd::drawLine(Math::point start, Math::point end)
+{
+	assert(dcIsValid && "Attempted operation that requires a valid DC!");
+	MoveToEx(dc, start.x, start.y, NULL);
+	LineTo(dc, end.x, end.y);
 }
 
 Math::point Wnd::getMousePos()

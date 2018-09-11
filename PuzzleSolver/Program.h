@@ -15,7 +15,7 @@ namespace Program {
 	public:
 		Main(Wnd & wnd);
 		void attatchDialog(std::shared_ptr<DialogSpace::Dialog> d);
-		void update(const Notification::notification m);
+		void update(const Notification::notification m) override;
 		bool noMessages() const;
 		Notification::notification ppopMsg();
 	};

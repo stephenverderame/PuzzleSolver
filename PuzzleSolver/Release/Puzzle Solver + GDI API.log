@@ -1,28 +1,11 @@
-﻿  Main.cpp
+﻿  Maze.cpp
 c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(50): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\OCR.h(49): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(289): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(308): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(315): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(325): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(333): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(339): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(344): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(349): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\gui.h(22): warning C4373: 'Gui::update': virtual function overrides 'Notification::Observer::update', previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
-  c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Observer.h(40): note: see declaration of 'Notification::Observer::update'
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Wnd.h(76): warning C4373: 'Wnd::update': virtual function overrides 'Notification::Observer::update', previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
-  c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Observer.h(40): note: see declaration of 'Notification::Observer::update'
-Main.cpp(143): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-Main.cpp(149): warning C4018: '<': signed/unsigned mismatch
-Main.cpp(161): warning C4018: '<': signed/unsigned mismatch
-Main.cpp(165): warning C4018: '<': signed/unsigned mismatch
-Main.cpp(170): warning C4018: '<': signed/unsigned mismatch
-Main.cpp(72): warning C4101: 'msg': unreferenced local variable
+Maze.cpp(17): warning C4018: '<': signed/unsigned mismatch
   Generating code
-  1 of 3682 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\dialog.cpp(164): warning C4715: 'DialogSpace::RotateDialog::callback': not all control paths return a value
+  340 of 3930 functions ( 8.7%) were compiled, the rest were copied from previous compilation.
+    336 functions were new in current compilation
+    18 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\Documents\Visual Studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.exe
   Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\Documents\Visual Studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.pdb (Full PDB)

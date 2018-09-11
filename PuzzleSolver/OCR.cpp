@@ -156,11 +156,11 @@ void CV::SearchGrid::getCharacterLocations()
 			}
 		}
 	}
-/*	printf("Equal spacing from: %d to %d \n", equalSpacing.start, equalSpacing.start + equalSpacing.size);
-	for (int i = 0; i < img->getHeight(); i++) {
-		img->setPixel(equalSpacing.start, i, { 255, 0, 0 });
-		img->setPixel(equalSpacing.start + equalSpacing.size, i, { 255, 0, 0 });
-	}*/
+	printf("Equal spacing from: %d to %d \n", equalSpacing.start, equalSpacing.start + equalSpacing.size);
+	for (int i = 0; i < seekImage.height(); i++) {
+		seekImage.setPixel({ { 255, 0, 0 }, equalSpacing.start, i, });
+		seekImage.setPixel({ { 255, 0, 0 }, equalSpacing.start + equalSpacing.size, i, });
+	}
 #pragma endregion
 #pragma region horzSpacing
 	int * horzAccumulator = new int[seekImage.height()];
@@ -258,10 +258,10 @@ void CV::SearchGrid::getCharacterLocations()
 			}
 		}
 	}
-/*	for (int i = 0; i < seekImage.width(); i++) {
-		img->setPixel(i, horzEqualSpacing.start, { 255, 0, 0 });
-		img->setPixel(i, horzEqualSpacing.start + horzEqualSpacing.size, { 255, 0, 0 });
-	}*/
+	for (int i = 0; i < seekImage.width(); i++) {
+		seekImage.setPixel({ { 255, 0, 0 }, i, horzEqualSpacing.start});
+		seekImage.setPixel({ { 255, 0, 0 }, i, horzEqualSpacing.start + horzEqualSpacing.size });
+	}
 #pragma endregion
 #ifndef DEBUGGING_SPACE
 	spaces.push_back({ (int)seekImage.width(), 0 });
@@ -791,8 +791,7 @@ void CV::rotateImage(IMG::Img & img, float theta, point origin)
 		y -= (diagnol - img.width()) / 2;
 		point rtPt = { x - origin.x, y - origin.y };
 		point rotated = rotMat * rtPt;
-		rotated.x += origin.x;
-		rotated.y += origin.y;
+		rotated += origin;
 		if (rotated.x > 0 && rotated.x < img.width() && rotated.y > 0 && rotated.y < img.height())
 			buffer[i] = img.getPixel(rotated.x, rotated.y);
 
@@ -917,4 +916,68 @@ CV::KnownSample & CV::KnownSample::operator=(const KnownSample & other)
 		int y = i / other.image->getWidth();
 		image->setPixel(x, y, other.image->getPixel(x, y));
 	}
+}
+
+void CV::Hough::transform(IMG::Img & img)
+{
+	image = img;
+	accumulatorHeight = sqrt(2.0) * (double)max(img.height(), img.width());
+	accumulatorWidth = 180;
+	if (accumulator.size() > 0) accumulator.clear();
+	accumulator.resize(accumulatorWidth);
+	for (size_t i = 0; i < accumulatorWidth; ++i)
+		accumulator[i].resize(accumulatorHeight);
+	center.x = img.width() / 2;
+	center.y = img.height() / 2;
+	for (int y = 0; y < img.height(); ++y) {
+		for (int x = 0; x < img.width(); ++x) {
+			if (img.getPixel(x, y).avg() < 200) { //if dark pixel
+				for (int t = 0; t < 180; ++t) {
+					//r = x cos0 + y sin0
+					double r = ((double)x - center.x) * cos(radians(t)) + ((double)y - center.y) * sin(radians(t));
+					accumulator[t][(int)round(r + accumulatorHeight / 2.0)] += 1;
+				}
+			}
+		}
+	}
+}
+
+CV::pointList CV::Hough::getLines(uint32_t threshold)
+{
+	pointList lines;
+	for (int r = 0; r < accumulatorHeight; ++r) {
+		for (int t = 0; t < accumulatorWidth; ++t) {
+			if (accumulator[t][r] >= threshold) {
+				uint32_t max = accumulator[t][r];
+				//determine max in 9x9 square
+				for (int y = -3; y <= 3; ++y) {
+					for (int x = -3; x <= 3; ++x) {
+						if (y + r >= 0 && y + r < accumulatorHeight && x + t >= 0 && x + t < accumulatorWidth) {
+							if (accumulator[x + t][y + r] > max) {
+								max = accumulator[x + t][y + r];
+								y = x = 5; //break from both loops
+							}
+						}
+					}
+				}
+				if (max > accumulator[t][r]) continue; //if this point isn't a local max
+				point p1, p2;
+				if (t >= 45 && t <= 135) { //avoids divide by zero
+					//y = (r - x cos0) / sin0
+					p1.x = 0;
+					p1.y = (r - accumulatorHeight / 2.0) - ((p1.x - center.x) * cos(radians(t)) / sin(radians(t))) + center.y;
+					p2.x = image.width();
+					p2.y = (r - accumulatorHeight / 2.0) - ((p2.x - center.x) * cos(radians(t)) / sin(radians(t))) + center.y;
+				}
+				else {
+					p1.y = 0;
+					p1.x = (r - accumulatorWidth / 2.0) - ((p1.y - center.y) * sin(radians(t)) / cos(radians(t))) + center.x;
+					p2.y = image.height();
+					p2.x = (r - accumulatorWidth / 2.0) - ((p2.y - center.y) * sin(radians(t)) / cos(radians(t))) + center.x;
+				}
+				lines.push_back(std::make_pair(p1, p2));
+			}
+		}
+	}
+	return lines;
 }

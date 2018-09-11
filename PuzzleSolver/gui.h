@@ -19,7 +19,7 @@ public:
 	void setStatusText(const char * str);
 	void updateScrollBar(const int imgWidth, const int imgHeight);
 	void update(const ::Control::events e);
-	void update(Notification::notification n);
+	void update(Notification::notification n) override;
 	void showLetterBar(const bool b);
 	void showProgressBar(const bool s);
 	int handleGUIEvents();

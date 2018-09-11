@@ -25,14 +25,14 @@ Gui::Gui()
 	Scrollbar * scroll = (Scrollbar*)main->getCurrentPage()->getControl("testScroll");
 	scroll->setScrollMessages([this](int changePos) {
 		Notification::notification n;
-		n.msg = Notification::gui_hscroll;
+		n.msg = Notification::messages::gui_hscroll;
 		n.data1 = &changePos;
 		notify(n);
 	});
 	scroll = (Scrollbar*)main->getCurrentPage()->getControl("scrollVert");
 	scroll->setScrollMessages(nullptr, [this](int changePos) {
 		Notification::notification n;
-		n.msg = Notification::gui_vscroll;
+		n.msg = Notification::messages::gui_vscroll;
 		n.data1 = &changePos;
 		notify(n);
 	});
@@ -62,7 +62,7 @@ void Gui::update(events e)
 
 void Gui::update(Notification::notification n)
 {
-	if (n.msg == Notification::wnd_hscroll || n.msg == Notification::wnd_vscroll) {
+	if (n.msg == Notification::messages::wnd_hscroll || n.msg == Notification::messages::wnd_vscroll) {
 		Event * ev = reinterpret_cast<Event*>(n.data1);
 		MSG m = ev->toMsg();
 		main->handleMessage(&m);

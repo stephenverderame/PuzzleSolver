@@ -2,7 +2,7 @@
 #include <vector>
 #include <memory>
 namespace Notification {
-	enum messages {
+	enum class messages {
 		msg_click,
 		msg_undo,
 		msg_rclick,
@@ -28,7 +28,8 @@ namespace Notification {
 		gui_hscroll,
 		gui_vscroll,
 		mze_selecting,
-		mze_finish
+		mze_finish,
+		pai_crop
 	};
 	struct notification {
 		void * data1;

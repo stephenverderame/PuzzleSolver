@@ -1,8 +1,9 @@
 #pragma once
 #include "Wnd.h"
 #include "img.h"
+#include "Observer.h"
 #include <ctime>
-class Painter {
+class Painter : public Notification::Subject {
 private:
 	struct impl {
 		Wnd * window;

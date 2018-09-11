@@ -9,7 +9,6 @@ double Math::degrees(double radians)
 {
 	return radians * (180.0 / PI);
 }
-
 Math::point Math::matVecProd(const matrix & mat, const point & vec)
 {
 	Math::point p;
@@ -31,4 +30,37 @@ Math::matrix Math::rotationMatrix(const double degrees)
 Math::point & Math::operator*(const matrix & mat, const point & vec)
 {
 	return Math::matVecProd(mat, vec);
+}
+
+Math::point & Math::operator+(const point & a, const point & b)
+{
+	point resultant = { a.x + b.x, a.y + b.y };
+	return resultant;
+}
+
+Math::point & Math::operator-(const point & a, const point & b)
+{
+	point resultant = { a.x - b.x, a.y - b.y };
+	return resultant;
+}
+
+Math::point & Math::operator+=(point & cur, const point & b)
+{
+	cur.x += b.x;
+	cur.y += b.y;
+	return cur;
+
+}
+
+Math::point & Math::operator-=(point & cur, const point & b)
+{
+	cur.x -= b.x;
+	cur.y -= b.y;
+	return cur;
+}
+
+int Math::gcd(int a, int b)
+{
+	if (b == 0) return a;
+	return gcd(b, a % b);
 }

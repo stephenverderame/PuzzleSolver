@@ -27,48 +27,6 @@ using namespace Undo;
 
 int main() {
 	//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { 
-
-#pragma region eventHandling
-
-/*		else if (LOWORD(ep.getParam3()) == IDM_CROP) {
-			if (img != nullptr) {
-				crop = true;
-				showFinal = false;
-				currentCursor = CURSOR_SELECT;
-			}
-		}*/
-		/*		else if (LOWORD(ep.getParam3()) == IDM_SOLVE_MAZE) {
-					if (img != nullptr) {
-						sMu.lock();
-						bool s = solving;
-						sMu.unlock();
-						if (!s) {
-							if (buffer != nullptr) delete buffer;
-							buffer = new int[img->getHeight() * img->getWidth()];
-							for (int i = 0; i < img->getHeight() * img->getWidth(); i++) {
-								int x = i % img->getWidth();
-								int y = i / img->getWidth();
-								Color c = img->getPixel(x, y);
-								buffer[i] = (255 * 255 * 3) - ((int)c.r * c.r + (int)c.g * c.g + (int)c.b * c.b);
-							}
-							selecting = true;
-							currentCursor = CURSOR_DRAW;
-						}
-					}
-				}
-		/*		else if (LOWORD(ep.getParam3()) == IDT_UNDO) {
-					if (!undoStack.empty()) {
-						display.getCanvas()->removeImage(img);
-						delete img;
-						img = undoStack.top();
-						undoStack.pop();
-						display.getCanvas()->addImage(img);
-						RECT r;
-						GetClientRect(display, &r);
-						InvalidateRect(display, &r, TRUE);
-					}
-				}*/
-#pragma endregion
 	MSG msg;
 	Wnd window;
 	Gui gui;
@@ -85,6 +43,7 @@ int main() {
 	std::vector<point> minLine;
 	std::vector<point> maxLine;
 	Painter painter(&window, &image);
+	painter.attatch(&mainProgram);
 	Maze maze(image);
 	maze.attatch(&mainProgram);
 	bool mazePointSelection = false;
@@ -102,7 +61,7 @@ int main() {
 		if (gui.handleGUIEvents() == gui_msg_quit) break;
 		while (!mainProgram.noMessages()) {
 			notification note = mainProgram.ppopMsg();
-			if (note.msg == msg_click) {
+			if (note.msg == messages::msg_click) {
 				if (mazePointSelection) {
 					int x = *((int*)note.data1);
 					int y = *((int*)note.data2);
@@ -137,7 +96,7 @@ int main() {
 				}
 			}
 			switch (note.msg) {
-			case dlg_draw_lines:
+			case messages::dlg_draw_lines:
 			{
 				double theta = ((double*)note.data2)[0];
 				int control = ((double*)note.data2)[1];
@@ -147,9 +106,9 @@ int main() {
 				}
 				matrix rotMat = rotationMatrix(theta);
 				for (int i = 0; i < line.size(); i++) {
-					line[i] = { line[i].x - origin.x, line[i].y - origin.y };
+					line[i] = line[i] - origin;
 					line[i] = rotMat * line[i];
-					line[i] = { line[i].x + origin.x, line[i].y + origin.y };
+					line[i] = line[i] + origin;
 				}
 				if (control == IDC_EDIT1)
 					minLine = line;
@@ -179,7 +138,7 @@ int main() {
 				delete[](double*)note.data2;
 				break;
 			}
-			case dlg_set_limits:
+			case messages::dlg_set_limits:
 			{
 				float * bounds = (float*)note.data1;
 				Bounds b{ bounds[0], bounds[1] };
@@ -198,10 +157,10 @@ int main() {
 				delete[] bounds;
 				break;
 			}
-			case dlg_pick_origin:
+			case messages::dlg_pick_origin:
 				pickOrigin = true;
 				break;
-			case dlg_geta_origin:
+			case messages::dlg_geta_origin:
 			{
 				Math::point p = getOrigin(image);
 				rotationOrigin = p;
@@ -209,7 +168,7 @@ int main() {
 				DialogHelper<RotateDialog>::send(n);
 				break;
 			}
-			case wnd_hscroll:
+			case messages::wnd_hscroll:
 			{
 				events e;
 				e.c = wm_std;
@@ -217,7 +176,7 @@ int main() {
 				mediator.sendToGui(e);
 				break;
 			}
-			case wnd_vscroll:
+			case messages::wnd_vscroll:
 			{
 				events e;
 				e.c = wm_std;
@@ -225,14 +184,14 @@ int main() {
 				mediator.sendToGui(e);
 				break;
 			}
-			case wnd_view_read:
+			case messages::wnd_view_read:
 			{
 				if (!image.isLoaded()) break;
 				viewRead = !viewRead;
 				gui.showLetterBar(viewRead);
 				break;
 			}
-			case wnd_solve_srch:
+			case messages::wnd_solve_srch:
 			{
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
@@ -242,14 +201,14 @@ int main() {
 				dialog->openDialog();
 				break;
 			}
-			case msg_undo:
+			case messages::msg_undo:
 				if (!UndoStack::getInstance()->isEmpty()) {
 					image.loadFrom(UndoStack::getInstance()->undo());
 					window.drawImage(image);
 					window.redraw();
 				}
 				break;
-			case wnd_rotate:
+			case messages::wnd_rotate:
 			{
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
@@ -262,7 +221,7 @@ int main() {
 				rotationOrigin = origin;
 				break;
 			}
-			case wnd_save:
+			case messages::wnd_save:
 			{
 				if (!image.isLoaded()) break;
 				std::string path = gui::saveFileDialog();
@@ -271,21 +230,39 @@ int main() {
 				}
 				break;
 			}
-			case wnd_crop:
+			case messages::wnd_crop:
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
 				painter.crop(true);
 				window.customErase(true);
 				Cursor::CustomCursor::getInstance()->setCursor(Cursor::CURSOR_SELECT);
 				break;
-			case wnd_monochrome:
+			case messages::pai_crop:
+			{
+				IMG::ImgMemento * mem = (IMG::ImgMemento*)note.data1;
+				image.loadFrom(*mem);
+				window.drawImage(image);
+				window.redraw();
+				delete mem;
+				break;
+			}
+			case messages::wnd_monochrome:
+			{
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
-				image.greyscale();
+				image.greyscale();				
+				// HOUGH TEST
+				Hough hough(image);
+				hough.transform(image);
+				auto list = hough.getLines(200);
+				printf("%d lines found!\n", list.size());
+				for (decltype(auto) line : list)
+					image.drawLine(line.first, line.second, { 255, 0, 0 });
 				window.drawImage(image);
 				window.redraw();
 				break;
-			case wnd_load:
+			}
+			case messages::wnd_load:
 			{
 				gui::fileFilter f("Images", { ".bmp", ".png", ".jpg" });
 				std::string path = gui::openFileDialog(&f);
@@ -298,7 +275,7 @@ int main() {
 				}
 				break;
 			}
-			case dlg_find_words:
+			case messages::dlg_find_words:
 			{	
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
@@ -333,7 +310,7 @@ int main() {
 #endif
 				break;
 			}
-			case wnd_solve_maze:
+			case messages::wnd_solve_maze:
 			{
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
@@ -341,17 +318,17 @@ int main() {
 				maze.choosePoint();
 				break;
 			}
-			case mze_finish:
+			case messages::mze_finish:
 				Cursor::CustomCursor::getInstance()->setCursor(Cursor::CURSOR_NORMAL);
 				gui.showProgressBar(false);
 				window.drawImage(image);
 				window.redraw();
 				break;
-			case mze_selecting:
+			case messages::mze_selecting:
 				maze.loadMaze(image);
 				mazePointSelection = true;
 				break;
-			case msg_paint:
+			case messages::msg_paint:
 			{
 				if (viewRead) {
 					point mouse = window.getMousePos();
@@ -367,9 +344,8 @@ int main() {
 					window.startDrawing();
 					window.canvasDraw();
 					Stroke s(1, { 0, 255, 0 });
-					Brush b;
 					window.setStroke(s);
-					window.setBrush(b);
+					window.setBrush(null_brush);
 					window.drawRect({ wordSearch.getLocation(loc).x, wordSearch.getLocation(loc).y }, { wordSearch.getLocation(loc).x + wordSearch.getLocation(loc).width, wordSearch.getLocation(loc).y + wordSearch.getLocation(loc).height });
 					std::string str;
 					str += wordSearch.getLetter(loc)->letter;
@@ -379,7 +355,7 @@ int main() {
 					break;
 				}
 			}
-			case msg_mmove:
+			case messages::msg_mmove:
 				if (viewRead)
 					window.redraw();
 			default:

@@ -122,7 +122,7 @@ public:
 				}
 				if (cont) continue;
 				cont = false;
-				for (auto itt = closed.begin(); itt != closed.end(); itt++) {
+				for (auto itt = closed.begin(); itt != closed.end(); itt++) { 
 					if (p == *itt/* && f > get((*itt).x, (*itt).y) + diagnolHeuristic(*itt, goal)*/) {
 						cont = true;
 						break;
