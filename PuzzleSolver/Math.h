@@ -1,4 +1,5 @@
 #pragma once
+#include <initializer_list>
 #include <math.h>
 #undef radians
 #undef min
@@ -36,4 +37,41 @@ namespace Math {
 	inline T max(T a, T b) {
 		return a < b ? b : a;
 	}
+
+	template<unsigned short dimensions, typename T>
+	class Vector {
+	private:
+		T * data;
+	public:
+		Vector() { data = new T[dimensions]; }
+		Vector(std::initializer_list<T> list) : Vector() {
+			int i = 0;
+			for (auto item : list) {
+				if (i >= dimensions) break;
+				data[i++] = item;
+			}
+		}
+		Vector(const Vector<dimensions, T> & other) : Vector() {
+			for (int i = 0; i < dimensions; ++i)
+				data[i] = other.data[i];
+		}
+		Vector& operator=(const Vector<dimensions, T> & other) {
+			for (int i = 0; i < dimensions; ++i)
+				data[i] = other.data[i];
+			return *this;
+		}
+		T& operator[](const int index) {
+			return data[index];
+		}
+		~Vector() {
+			delete[] data;
+		}
+		Vector& operator+=(const T & scalar) {
+			for (int i = 0; i < dimensions; ++i)
+				data[i] += scalar;
+			return *this;
+		}
+	};
+
+	using vec3f = Vector<3, double>;
 }

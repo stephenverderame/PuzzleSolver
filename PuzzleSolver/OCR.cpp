@@ -666,7 +666,7 @@ void CV::SearchGrid::identifyLetters()
 		 }
 		 else if (possibleLetterLocations[it->first].size() <= 0) {
 			 printf("%s has no possible letters??\n", it->first.c_str());
-		}
+		 }
 	 }
 	 fclose(file);
 	 RECT r;
@@ -732,6 +732,194 @@ void CV::SearchGrid::identifyLetters()
 		 image->scaleTo(SAMPLE_WIDTH, SAMPLE_HEIGHT);
 		 image->saveBmp(path);
 	 }
+ }
+ std::shared_ptr<IMG::Img> CV::cannyEdgeDetection(IMG::Img & img, int upperThreshold, int lowerThreshold)
+ {
+	 Kernel guassian({
+		 0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067,
+		 0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
+		 0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
+		 0.00038771, 0.01330373, 0.11098164, 0.22508352, 0.11098164, 0.01330373, 0.00038771,
+		 0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
+		 0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
+		 0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067
+	 });
+//	 auto image = guassian.apply(img);
+	 std::vector<double> directions, magnitudes;
+	 auto resultant = sobelEdgeDetection(img, &magnitudes, &directions);
+	 for (int i = 0; i < directions.size(); ++i)
+		 while (directions[i] < 0) directions[i] += 180;
+	 resultant->clear();
+	 for (int i = 0; i < img.width() * img.height(); ++i) {
+		 int x = i % img.width();
+		 int y = i / img.width();
+		 if (magnitudes[i] < upperThreshold) continue;
+		 bool isEdge = true;
+		 if (directions[i] > 112.5 && directions[i] <= 157.5) {
+			 if (y > 0 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x + 1)]) isEdge = false;
+			 if (y < img.height() - 1 && x > 0 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x - 1)]) isEdge = false;
+		 }
+		 else if (directions[i] > 67.5 && directions[i] <= 112.5) {
+			 if (y > 0 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + x]) isEdge = false;
+			 if (y < img.height() - 1 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + x]) isEdge = false;
+		 }
+		 else if (directions[i] > 22.5 && directions[i] <= 67.5) {
+			 if (y > 0 && x > 0 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x - 1)]) isEdge = false;
+			 if (y < img.height() - 1 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x + 1)]) isEdge = false;
+		 }
+		 else {
+			 if (x > 0 && magnitudes[i] <= magnitudes[y * img.width() + (x - 1)]) isEdge = false;
+			 if (x < img.width() - 1 && magnitudes[i] <= magnitudes[y * img.width() + (x - 1)]) isEdge = false;
+		 }
+		 if (isEdge)
+			 resultant->setPixel(255, 255, 255, x, y);
+		 else
+			 resultant->setPixel(0, 0, 0, x, y);
+	 }
+	 //infinite loop
+	 bool imageChanged = false;
+	 do {
+		 imageChanged = false;
+		 for (int i = 0; i < img.width() * img.height(); ++i) {
+			 int x = i % img.width();
+			 int y = i / img.width();
+			 int intensity = resultant->getPixel(x, y).avg();
+			 if (intensity == 255) {
+				 resultant->setPixel(64, 64, 64, x, y);
+				 if (directions[i] > 112.5 && directions[i] <= 157.5) {
+					 if (y > 1 && x > 1) {
+						 if (lowerThreshold <= magnitudes[(y - 1) * img.width() + (x - 1)] && resultant->getPixel(x - 1, y - 1).avg() != 64 &&
+							 directions[(y - 1) * img.width() + (x - 1)] > 112.5 && directions[(y - 1) * img.width() + (x - 1)] <= 157.5 &&
+							 magnitudes[(y - 1) * img.width() + (x - 1)] > magnitudes[(y - 2) * img.width() + x] &&
+							 magnitudes[(y - 1) * img.width() + (x - 1)] > magnitudes[y * img.width() + (x - 2)]) 
+						 {
+							 resultant->setPixel(255, 255, 255, x - 1, y - 1);
+							 imageChanged = true;
+						 }
+					 }
+					 if (y < img.width() - 2 && x < img.width() - 2) {
+						 if (lowerThreshold <= magnitudes[(y + 1) * img.width() + (x + 1)] && resultant->getPixel(x + 1, y + 1).avg() != 64 &&
+							 directions[(y + 1) * img.width() + (x + 1)] > 112.5 && directions[(y + 1) * img.width() + (x + 1)] <= 157.5 &&
+							 magnitudes[(y + 1) * img.width() + (x + 1)] > magnitudes[(y + 2) * img.width() + x] &&
+							 magnitudes[(y + 1) * img.width() + (x + 1)] > magnitudes[y * img.width() + (x + 2)])
+						 {
+							 resultant->setPixel(255, 255, 255, x + 1, y + 1);
+							 imageChanged = true;
+						 }
+					 }
+				 }
+				 else if (directions[i] > 67.5 && directions[i] <= 112.5) {
+					 if (y > 0 && y < img.height() - 1 && x > 0) {
+						 if (lowerThreshold <= magnitudes[(y) * img.width() + (x - 1)] && resultant->getPixel(x - 1, y).avg() != 64 &&
+							 directions[(y) * img.width() + (x - 1)] > 67.5 && directions[(y) * img.width() + (x - 1)] <= 112.5 &&
+							 magnitudes[(y) * img.width() + (x - 1)] > magnitudes[(y - 1) * img.width() + (x - 1)] &&
+							 magnitudes[(y) * img.width() + (x - 1)] > magnitudes[(y + 1) * img.width() + (x - 1)])
+						 {
+							 resultant->setPixel(255, 255, 255, x - 1, y);
+							 imageChanged = true;
+						 }
+					 }
+					 if (x < img.width() - 1 && y > 0 && y < img.height() - 1) {
+						 if (lowerThreshold <= magnitudes[(y) * img.width() + (x + 1)] && resultant->getPixel(x + 1, y).avg() != 64 &&
+							 directions[(y) * img.width() + (x + 1)] > 67.5 && directions[(y) * img.width() + (x + 1)] <= 112.5 &&
+							 magnitudes[(y) * img.width() + (x + 1)] > magnitudes[(y - 1) * img.width() + (x + 1)] &&
+							 magnitudes[(y) * img.width() + (x + 1)] > magnitudes[(y + 1) * img.width() + (x + 1)])
+						 {
+							 resultant->setPixel(255, 255, 255, x + 1, y);
+							 imageChanged = true;
+						 }
+					 }
+				 }
+				 else if (directions[i] > 22.5 && directions[i] <= 67.5) {
+					 if (y > 1 && x > 1 && x < img.width() - 1) {
+						 if (lowerThreshold <= magnitudes[(y - 1) * img.width() + (x + 1)] && resultant->getPixel(x + 1, y - 1).avg() != 64 &&
+							 directions[(y - 1) * img.width() + (x + 1)] > 22.5 && directions[(y - 1) * img.width() + (x + 1)] <= 67.5 &&
+							 magnitudes[(y - 1) * img.width() + (x + 1)] > magnitudes[(y - 2) * img.width() + x] &&
+							 magnitudes[(y - 1) * img.width() + (x + 1)] > magnitudes[y * img.width() + (x - 2)])
+						 {
+							 resultant->setPixel(255, 255, 255, x + 1, y - 1);
+							 imageChanged = true;
+						 }
+					 }
+					 if (y < img.height() - 2 && x > 1) {
+						 if (lowerThreshold <= magnitudes[(y + 1) * img.width() + (x - 1)] && resultant->getPixel(x - 1, y + 1).avg() != 64 &&
+							 directions[(y + 1) * img.width() + (x - 1)] > 22.5 && directions[(y + 1) * img.width() + (x - 1)] <= 67.5 &&
+							 magnitudes[(y + 1) * img.width() + (x - 1)] > magnitudes[(y) * img.width() + (x - 2)] &&
+							 magnitudes[(y + 1) * img.width() + (x - 1)] > magnitudes[(y + 2) * img.width() + (x)])
+						 {
+							 resultant->setPixel(255, 255, 255, x - 1, y + 1);
+							 imageChanged = true;
+						 }
+					 }
+				 }
+				 else {
+					 if (y > 0 && x > 0 && x < img.width() - 2) {
+						 if (lowerThreshold <= magnitudes[(y - 1) * img.width() + (x)] && resultant->getPixel(x, y - 1).avg() != 64 &&
+							 directions[(y - 1) * img.width() + (x)] < 22.5 || directions[(y - 1) * img.width() + (x)] >= 157.5 &&
+							 magnitudes[(y - 1) * img.width() + (x)] > magnitudes[(y - 1) * img.width() + (x - 1)] &&
+							 magnitudes[(y - 1) * img.width() + (x)] > magnitudes[(y - 1) * img.width() + (x + 2)])
+						 {
+							 resultant->setPixel(255, 255, 255, x, y - 1);
+							 imageChanged = true;
+						 }
+						 if (y < img.height() - 1 && x > 0 && x < img.width() - 1) {
+							 if (lowerThreshold <= magnitudes[(y + 1) * img.width() + (x)] && resultant->getPixel(x, y + 1).avg() != 64 &&
+								 directions[(y + 1) * img.width() + (x)] < 22.5 || directions[(y + 1) * img.width() + (x)] >= 157.5 &&
+								 magnitudes[(y + 1) * img.width() + (x)] > magnitudes[(y + 1) * img.width() + (x - 1)] &&
+								 magnitudes[(y + 1) * img.width() + (x)] > magnitudes[(y + 1) * img.width() + (x + 1)])
+							 {
+								 resultant->setPixel(255, 255, 255, x, y + 1);
+								 imageChanged = true;
+							 }
+						 }
+					 }
+				 }
+			 }
+		 }
+	 } while (imageChanged);
+	 for (int i = 0; i < img.width() * img.height(); ++i) {
+		 int x = i % img.width();
+		 int y = i / img.width();
+		 if (resultant->getPixel(x, y).avg() == 64)
+			 resultant->setPixel(255, 255, 255, x, y);
+	 }
+
+	 return resultant;
+
+ }
+ std::shared_ptr<IMG::Img> CV::sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes, std::vector<double> * directions)
+ {
+	 Kernel sobelY({
+		 -1, -2, -1,
+		  0,  0,  0,
+		  1,  2,  1 });
+	 Kernel sobelX({
+		 -1, 0, 1,
+		 -2, 0, 2,
+		 -1, 0, 1 });
+	 auto gx = sobelX.apply_matrix(img);
+	 auto gy = sobelY.apply_matrix(img);
+	 std::vector<double> magnitude(img.width() * img.height());
+	 double maxMag = std::numeric_limits<double>::min();
+	 for (int i = 0; i < img.width() * img.height(); ++i) {
+		 int x = i % img.width();
+		 int y = i / img.width();
+		 magnitude[i] = sqrt(gx[i][0] * gx[i][0] + gy[i][0] * gy[i][0]);
+		 if (directions != nullptr) directions->push_back(Math::degrees(atan(gy[i][0] / gx[i][0])));
+		 maxMag = max(maxMag, magnitude[i]);
+	 }
+	 std::shared_ptr<IMG::Img> newImage(new IMG::Img());
+	 newImage->createNew(img.width(), img.height());
+	 newImage->clear();
+	 for (int i = 0; i < img.width() * img.height(); ++i) {
+		 int x = i % img.width();
+		 int y = i / img.width();
+		 double val = magnitude[i] * 255.0 / maxMag;
+		 channel c = static_cast<channel>(val);
+		 newImage->setPixel(c, c, c, x, y);
+	 }
+	 if (magnitudes != nullptr) *magnitudes = magnitude;
+	 return newImage;
  }
 point CV::getOrigin(IMG::Img & img)
 {
@@ -931,7 +1119,7 @@ void CV::Hough::transform(IMG::Img & img)
 	center.y = img.height() / 2;
 	for (int y = 0; y < img.height(); ++y) {
 		for (int x = 0; x < img.width(); ++x) {
-			if (img.getPixel(x, y).avg() < 200) { //if dark pixel
+			if (img.getPixel(x, y).avg() > 200) { //if light (dark in actual image) pixel
 				for (int t = 0; t < 180; ++t) {
 					//r = x cos0 + y sin0
 					double r = ((double)x - center.x) * cos(radians(t)) + ((double)y - center.y) * sin(radians(t));
@@ -962,22 +1150,167 @@ CV::pointList CV::Hough::getLines(uint32_t threshold)
 				}
 				if (max > accumulator[t][r]) continue; //if this point isn't a local max
 				point p1, p2;
-				if (t >= 45 && t <= 135) { //avoids divide by zero
+				if (t >= 45 && t <= 135) { 
 					//y = (r - x cos0) / sin0
 					p1.x = 0;
-					p1.y = (r - accumulatorHeight / 2.0) - ((p1.x - center.x) * cos(radians(t)) / sin(radians(t))) + center.y;
+					p1.y = ((r - accumulatorHeight / 2.0) - (p1.x - center.x) * cos(radians(t))) / sin(radians(t)) + center.y;
 					p2.x = image.width();
-					p2.y = (r - accumulatorHeight / 2.0) - ((p2.x - center.x) * cos(radians(t)) / sin(radians(t))) + center.y;
+					p2.y = ((r - accumulatorHeight / 2.0) - (p2.x - center.x) * cos(radians(t))) / sin(radians(t)) + center.y;
 				}
 				else {
 					p1.y = 0;
-					p1.x = (r - accumulatorWidth / 2.0) - ((p1.y - center.y) * sin(radians(t)) / cos(radians(t))) + center.x;
+					p1.x = ((r - accumulatorHeight / 2.0) - (p1.y - center.y) * sin(radians(t))) / cos(radians(t)) + center.x;
 					p2.y = image.height();
-					p2.x = (r - accumulatorWidth / 2.0) - ((p2.y - center.y) * sin(radians(t)) / cos(radians(t))) + center.x;
+					p2.x = ((r - accumulatorHeight / 2.0) - (p2.y - center.y) * sin(radians(t))) / cos(radians(t)) + center.x;
 				}
 				lines.push_back(std::make_pair(p1, p2));
 			}
 		}
 	}
 	return lines;
+}
+
+void CV::Hough::display(const char * filename) const
+{
+	IMG::Img img;
+	img.createNew(accumulatorWidth, accumulatorHeight);
+	img.clear();
+	uint32_t maxVal = 0;
+	for (size_t x = 0; x < accumulatorWidth; ++x) {
+		for (size_t y = 0; y < accumulatorHeight; ++y) {
+			maxVal = max(maxVal, accumulator[x][y]);
+		}
+	}
+
+	for (size_t x = 0; x < accumulatorWidth; ++x) {
+		for (size_t y = 0; y < accumulatorHeight; ++y) {
+			uint32_t intensity = accumulator[x][y];
+			double colorVal = intensity * 255.0 / (double)maxVal;
+			img.setPixel({ IMG::color{(unsigned char)colorVal, (unsigned char)colorVal, (unsigned char)colorVal}, Math::point{(int)x, (int)y} });
+		}
+	}
+
+	img.saveAsBmp(filename);
+}
+
+CV::Kernel::Kernel(int width, int height) : width(width), height(height)
+{
+	k.resize(width);
+	for (int i = 0; i < width; ++i)
+		k[i].resize(height);
+}
+
+CV::Kernel::Kernel(std::initializer_list<double> list)
+{
+	assert(list.size() & 1 && list.size() > 2 && "Only odd sized lists are currently implemented");
+	height = width = sqrt(list.size());
+	assert(height * width == list.size() && "Only square matrices are currently implemented");
+	k.resize(width);
+	for (int i = 0; i < width; ++i)
+		k[i].resize(height);
+	int i = 0;
+	for (auto element : list) {
+		int x = i % width;
+		int y = i / width;
+		k[x][y] = element;
+		++i;
+	}
+}
+
+
+std::shared_ptr<IMG::Img> CV::Kernel::apply(IMG::Img & img)
+{
+	//need to handle overflow of byte
+	int j = width / 2;
+	printf("J: %d\n", j);
+	std::shared_ptr<IMG::Img> newImage(new IMG::Img());
+	newImage->createNew(img.width(), img.height());
+//	newImage->clear();
+	double minSum = std::numeric_limits<double>::max();
+	double maxSum = std::numeric_limits<double>::min();
+	std::vector<vec3f> mat(img.width() * img.height());
+	for (int i = 0; i < img.width() * img.height(); ++i) {
+		int x = i % img.width();
+		int y = i / img.width();
+		double sumRed = 0, sumGreen = 0, sumBlue = 0;
+//		printf("(%d, %d) --- ", x, y);
+		for (int y1 = -j; y1 <= j; ++y1) {
+			for (int x1 = -j; x1 <= j; ++x1) {
+				if (x + x1 >= 0 && x + x1 < img.width() && y + y1 >= 0 && y + y1 < img.height()) {
+					IMG::color c = img.getPixel({ x + x1, y + y1 });
+					double r = c.red * k[x1 + j][y1 + j];
+					sumGreen += c.green * k[x1 + j][y1 + j];
+					sumBlue += c.blue * k[x1 + j][y1 + j];
+//					printf("(%d, %d)[%d] * (%d, %d)[%.1f] = %.3f ", x + x1, y + y1, c.red, y1 + j, x1 + j, k[y1 + j][x1 + j], r);
+					sumRed += r;
+				}
+			}
+		}
+//		printf(" = %f\n", sumRed);
+		minSum = min(minSum, min(min(sumRed, sumGreen), sumBlue));
+		maxSum = max(maxSum, max(sumRed, max(sumGreen, sumBlue)));
+		mat[i] = { sumRed, sumGreen, sumBlue };
+	}
+	printf("Max: %f  Min: %f \n", maxSum, minSum);
+	if (minSum < 0) maxSum -= minSum;
+	else printf("Min sum >= 0 \n");
+	for (int i = 0; i < mat.size(); ++i) {
+		int x = i % img.width();
+		int y = i / img.width();
+//		printf("Sum: %f ", mat[i][0]);
+		if(minSum < 0) mat[i] += -minSum;
+//		printf("Sum: %f ", mat[i][0]);
+		double red = mat[i][0] * 255.0 / maxSum;
+		double green = mat[i][1] * 255.0 / maxSum;
+		double blue = mat[i][2] * 255.0 / maxSum;
+		//		printf("%f \n", red);
+		newImage->setPixel(static_cast<channel>(red), static_cast<channel>(green), static_cast<channel>(blue), x, y);
+	}
+//	printf("\n\n");
+	return newImage;
+}
+
+std::vector<Math::vec3f> CV::Kernel::apply_matrix(IMG::Img & img)
+{
+	int j = width / 2;
+	std::vector<vec3f> mat(img.width() * img.height());
+	for (int i = 0; i < img.width() * img.height(); ++i) {
+		int x = i % img.width();
+		int y = i / img.width();
+		double sumRed = 0, sumGreen = 0, sumBlue = 0;
+		for (int y1 = -j; y1 <= j; ++y1) {
+			for (int x1 = -j; x1 <= j; ++x1) {
+				if (x + x1 >= 0 && x + x1 < img.width() && y + y1 >= 0 && y + y1 < img.height()) {
+					IMG::color c = img.getPixel({ x + x1, y + y1 });
+					double r = c.red * k[x1 + j][y1 + j];
+					sumGreen += c.green * k[x1 + j][y1 + j];
+					sumBlue += c.blue * k[x1 + j][y1 + j];
+//					printf("I(%d, %d) * K(%d, %d) = %.2f ", x + x1, y + y1, x1 + j, y1 + j, r);
+					sumRed += r;
+				}
+			}
+		}
+//		printf("-> %.2f\n", sumRed);
+		mat[i] = { sumRed, sumGreen, sumBlue };
+	}
+	return mat;
+}
+
+void CV::Kernel::testShowMatrix(FILE * out)
+{
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < width; ++j) {
+			fprintf(out, "%f ", k[j][i]);
+		}
+		fprintf(out, "\n");
+	}
+}
+
+void CV::Kernel::scale(double scaler)
+{
+	for (int y = 0; y < height; ++y) {
+		for (int x = 0; x < width; ++x) {
+			k[x][y] *= scaler;
+		}
+	}
 }

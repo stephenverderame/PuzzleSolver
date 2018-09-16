@@ -1,12 +1,8 @@
 #define WINVER 0x501 
 #define GUI_VISUAL_STYLES_6
 #include <thread>
-#include <mutex>
-#include <ObjIdl.h>
-#include <ctime>
 #include "Grid.h"
 #include "OCR.h"
-#include <stack>
 #include "Wnd.h"
 #include "Program.h"
 #include "Mediator.h"
@@ -250,15 +246,34 @@ int main() {
 			{
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
-				image.greyscale();				
+//				image.greyscale();
+/*				IMG::Img testImg;
+				testImg.createNew(3, 3);
+				for (int i = 0; i < 3; ++i) {
+					for (int j = 0; j < 3; ++j) {
+						testImg.setPixel(i * 100, i * 100, i * 100, j, i);
+						printf("%d ", i * 100);
+					}
+					printf("\n");
+				}*/
+				auto img = cannyEdgeDetection(image, 150, 200);
+/*				for (int i = 0; i < 3; ++i) {
+					for (int j = 0; j < 3; ++j) {
+						printf("%.2f ", mags[i * 3 + j][0]);
+					}
+					printf("\n");
+				}*/
 				// HOUGH TEST
-				Hough hough(image);
-				hough.transform(image);
-				auto list = hough.getLines(200);
+/*				Hough hough(*img);
+				hough.transform(*img);
+				auto list = hough.getLines(130);
+				//130 hough min for sobel
+//				hough.display("testHough.bmp");
 				printf("%d lines found!\n", list.size());
 				for (decltype(auto) line : list)
-					image.drawLine(line.first, line.second, { 255, 0, 0 });
-				window.drawImage(image);
+					img->drawLine(line.first, line.second, { 255, 0, 0 });*/
+				window.drawImage(*img);
+				image = *img;
 				window.redraw();
 				break;
 			}

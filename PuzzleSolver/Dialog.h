@@ -4,6 +4,10 @@
 #include "Observer.h"
 #include <vector>
 #include "Wnd.h"
+#define gui_assert(EXPRESSION, WMSG) if(!(EXPRESSION)) {\
+	MessageBox(NULL, (WMSG), "Assertation Failure", MB_ICONERROR | MB_OK);\
+	assert(!(WMSG)); \
+}
 namespace DialogSpace {
 	inline float getWndVal(HWND parent, int control);
 	enum DialogMessage {
@@ -56,13 +60,16 @@ namespace DialogSpace {
 	private:
 		static std::shared_ptr<T> instance;
 	public:
-		static void setInstance(std::shared_ptr<T> i) { instance = i; }
+		static void setInstance(std::shared_ptr<T> i) {
+			static_assert(is_dialog<T>::value, "Dialog helper must be passed a dialog type");
+			instance = i; 
+		}
 		static int __stdcall callback(HWND h, UINT m, WPARAM w, LPARAM l) {
-			assert(is_dialog<T>::value && "Dialog helper must be passed a dialog type!");
+			gui_assert(instance.get() != nullptr, "Dialog instance is being used before being set!");
 			return instance->callback(h, m, w, l);
 		}
 		static void send(DialogNotification n) {
-			assert(is_dialog<T>::value && "Dialog helper must be passed a dialog type!");
+			gui_assert(instance.get() != nullptr, "Dialog instance is being used before being set!");
 			instance->recv(n);
 		}
 		

@@ -44,6 +44,7 @@ namespace IMG {
 		unsigned int width() const;
 		unsigned int height() const;
 		void setPixel(const pixel c);
+		void setPixel(const channel r, const channel g, const channel b, const int x, const int y);
 		void rect(Math::point topLeft, Math::point btmRight, color c);
 		color getPixel(const Math::point p) const;
 		color getPixel(const int x, const int y) const;
@@ -55,5 +56,6 @@ namespace IMG {
 		void loadFrom(ImgMemento memento);
 		bool isLoaded() { return loaded; }
 		void drawLine(Math::point start, Math::point end, color c);
+		void clear();
 	};
 } 

@@ -107,12 +107,27 @@ namespace CV {
 		Hough(IMG::Img & img) : image(img) {};
 		void transform(IMG::Img & img);
 		pointList getLines(uint32_t threshold);
+		void display(const char * filename) const;
 
 	};
-
+	class Kernel {
+	private:
+		std::vector<std::vector<double>> k;
+		int width;
+		int height;
+	public:
+		Kernel(int width, int height);
+		Kernel(std::initializer_list<double> list);
+		std::shared_ptr<IMG::Img> apply(IMG::Img & img);
+		std::vector<Math::vec3f> apply_matrix(IMG::Img & img);
+		void testShowMatrix(FILE * out);
+		void scale(double scalar);
+	};
 
 	float findSkewAngle(IMG::Img & img, Math::point * origin = nullptr, Bounds * skewBounds = nullptr);
 	Math::point getOrigin(IMG::Img & img);
 	void rotateImage(IMG::Img & img, float theta, Math::point origin);
 	void augmentDataSet(std::vector<Square> locations, std::vector<char> knowns, IMG::Img & img, int firstKnown = 0);
+	std::shared_ptr<IMG::Img> cannyEdgeDetection(IMG::Img & img, int upperThreshold, int lowerThreshold);
+	std::shared_ptr<IMG::Img> sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes = nullptr, std::vector<double> * directions = nullptr);
 }

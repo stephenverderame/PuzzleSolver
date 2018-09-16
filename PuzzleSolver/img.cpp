@@ -27,6 +27,11 @@ void IMG::Img::setPixel(const pixel p)
 	img->setPixel(p.p.x, p.p.y, { p.c.red, p.c.green, p.c.blue });
 }
 
+void IMG::Img::setPixel(const channel r, const channel g, const channel b, const int x, const int y)
+{
+	img->setPixel(x, y, { r, g, b });
+}
+
 void IMG::Img::rect(Math::point topLeft, Math::point btmRight, color c)
 {
 	for (int x = topLeft.x; x <= btmRight.x; ++x) {
@@ -107,6 +112,11 @@ void IMG::Img::drawLine(Math::point start, Math::point end, color c)
 		p += start;
 		setPixel({ c, p });
 	}
+}
+
+void IMG::Img::clear()
+{
+	img->clearBmp(0);
 }
 
 int IMG::color::avg()

@@ -2,6 +2,7 @@
 #include "img.h"
 #include "Math.h"
 #include "Grid.h"
+#include <thread>
 #include <mutex>
 #include <vector>
 #include "Observer.h"
