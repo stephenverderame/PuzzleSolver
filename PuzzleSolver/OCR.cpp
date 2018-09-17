@@ -733,7 +733,7 @@ void CV::SearchGrid::identifyLetters()
 		 image->saveBmp(path);
 	 }
  }
- std::shared_ptr<IMG::Img> CV::cannyEdgeDetection(IMG::Img & img, int upperThreshold, int lowerThreshold)
+ std::shared_ptr<IMG::Img> CV::cannyEdgeDetection(IMG::Img & img, const double upperThreshold, const double lowerThreshold)
  {
 	 Kernel guassian({
 		 0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067,
@@ -749,11 +749,19 @@ void CV::SearchGrid::identifyLetters()
 	 auto resultant = sobelEdgeDetection(img, &magnitudes, &directions);
 	 for (int i = 0; i < directions.size(); ++i)
 		 while (directions[i] < 0) directions[i] += 180;
+	 double minMag = std::numeric_limits<double>::max();
+	 double maxMag = std::numeric_limits<double>::min();
+	 for (int i = 0; i < magnitudes.size(); ++i) {
+		 minMag = min(minMag, magnitudes[i]);
+		 maxMag = max(maxMag, magnitudes[i]);
+	 }
 	 resultant->clear();
 	 for (int i = 0; i < img.width() * img.height(); ++i) {
 		 int x = i % img.width();
 		 int y = i / img.width();
-		 if (magnitudes[i] < upperThreshold) continue;
+		 if (((magnitudes[i] - minMag) / (maxMag - minMag)) < lowerThreshold) {
+			 continue;
+		 }
 		 bool isEdge = true;
 		 if (directions[i] > 112.5 && directions[i] <= 157.5) {
 			 if (y > 0 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x + 1)]) isEdge = false;
@@ -769,109 +777,60 @@ void CV::SearchGrid::identifyLetters()
 		 }
 		 else {
 			 if (x > 0 && magnitudes[i] <= magnitudes[y * img.width() + (x - 1)]) isEdge = false;
-			 if (x < img.width() - 1 && magnitudes[i] <= magnitudes[y * img.width() + (x - 1)]) isEdge = false;
+			 if (x < img.width() - 1 && magnitudes[i] <= magnitudes[y * img.width() + (x + 1)]) isEdge = false;
 		 }
-		 if (isEdge)
-			 resultant->setPixel(255, 255, 255, x, y);
-		 else
-			 resultant->setPixel(0, 0, 0, x, y);
+		 if (isEdge) {
+			 if (((magnitudes[i] - minMag) / (maxMag - minMag)) >= upperThreshold)
+				 resultant->setPixel(255, 255, 255, x, y);
+			 else
+				 resultant->setPixel(128, 128, 128, x, y);
+		 }
 	 }
-	 //infinite loop
-	 bool imageChanged = false;
+	 bool imageChanged;
 	 do {
 		 imageChanged = false;
 		 for (int i = 0; i < img.width() * img.height(); ++i) {
 			 int x = i % img.width();
 			 int y = i / img.width();
-			 int intensity = resultant->getPixel(x, y).avg();
-			 if (intensity == 255) {
-				 resultant->setPixel(64, 64, 64, x, y);
+			 if (resultant->getPixel(x, y).avg() == 128) {
 				 if (directions[i] > 112.5 && directions[i] <= 157.5) {
-					 if (y > 1 && x > 1) {
-						 if (lowerThreshold <= magnitudes[(y - 1) * img.width() + (x - 1)] && resultant->getPixel(x - 1, y - 1).avg() != 64 &&
-							 directions[(y - 1) * img.width() + (x - 1)] > 112.5 && directions[(y - 1) * img.width() + (x - 1)] <= 157.5 &&
-							 magnitudes[(y - 1) * img.width() + (x - 1)] > magnitudes[(y - 2) * img.width() + x] &&
-							 magnitudes[(y - 1) * img.width() + (x - 1)] > magnitudes[y * img.width() + (x - 2)]) 
-						 {
-							 resultant->setPixel(255, 255, 255, x - 1, y - 1);
-							 imageChanged = true;
-						 }
+					 if (y > 0 && x < img.width() - 1 && resultant->getPixel(x + 1, y - 1).avg() == 255) {
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
-					 if (y < img.width() - 2 && x < img.width() - 2) {
-						 if (lowerThreshold <= magnitudes[(y + 1) * img.width() + (x + 1)] && resultant->getPixel(x + 1, y + 1).avg() != 64 &&
-							 directions[(y + 1) * img.width() + (x + 1)] > 112.5 && directions[(y + 1) * img.width() + (x + 1)] <= 157.5 &&
-							 magnitudes[(y + 1) * img.width() + (x + 1)] > magnitudes[(y + 2) * img.width() + x] &&
-							 magnitudes[(y + 1) * img.width() + (x + 1)] > magnitudes[y * img.width() + (x + 2)])
-						 {
-							 resultant->setPixel(255, 255, 255, x + 1, y + 1);
-							 imageChanged = true;
-						 }
+					 if (y < img.height() - 1 && x > 0 && resultant->getPixel(x - 1, y + 1).avg() == 255) {
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
 				 }
 				 else if (directions[i] > 67.5 && directions[i] <= 112.5) {
-					 if (y > 0 && y < img.height() - 1 && x > 0) {
-						 if (lowerThreshold <= magnitudes[(y) * img.width() + (x - 1)] && resultant->getPixel(x - 1, y).avg() != 64 &&
-							 directions[(y) * img.width() + (x - 1)] > 67.5 && directions[(y) * img.width() + (x - 1)] <= 112.5 &&
-							 magnitudes[(y) * img.width() + (x - 1)] > magnitudes[(y - 1) * img.width() + (x - 1)] &&
-							 magnitudes[(y) * img.width() + (x - 1)] > magnitudes[(y + 1) * img.width() + (x - 1)])
-						 {
-							 resultant->setPixel(255, 255, 255, x - 1, y);
-							 imageChanged = true;
-						 }
+					 if (y > 0 && resultant->getPixel(x, y - 1).avg() == 255) {
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
-					 if (x < img.width() - 1 && y > 0 && y < img.height() - 1) {
-						 if (lowerThreshold <= magnitudes[(y) * img.width() + (x + 1)] && resultant->getPixel(x + 1, y).avg() != 64 &&
-							 directions[(y) * img.width() + (x + 1)] > 67.5 && directions[(y) * img.width() + (x + 1)] <= 112.5 &&
-							 magnitudes[(y) * img.width() + (x + 1)] > magnitudes[(y - 1) * img.width() + (x + 1)] &&
-							 magnitudes[(y) * img.width() + (x + 1)] > magnitudes[(y + 1) * img.width() + (x + 1)])
-						 {
-							 resultant->setPixel(255, 255, 255, x + 1, y);
-							 imageChanged = true;
-						 }
+					 if (y < img.height() - 1 && resultant->getPixel(x, y + 1).avg() == 255) {
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
 				 }
 				 else if (directions[i] > 22.5 && directions[i] <= 67.5) {
-					 if (y > 1 && x > 1 && x < img.width() - 1) {
-						 if (lowerThreshold <= magnitudes[(y - 1) * img.width() + (x + 1)] && resultant->getPixel(x + 1, y - 1).avg() != 64 &&
-							 directions[(y - 1) * img.width() + (x + 1)] > 22.5 && directions[(y - 1) * img.width() + (x + 1)] <= 67.5 &&
-							 magnitudes[(y - 1) * img.width() + (x + 1)] > magnitudes[(y - 2) * img.width() + x] &&
-							 magnitudes[(y - 1) * img.width() + (x + 1)] > magnitudes[y * img.width() + (x - 2)])
-						 {
-							 resultant->setPixel(255, 255, 255, x + 1, y - 1);
-							 imageChanged = true;
-						 }
+					 if (y > 0 && x > 0 && resultant->getPixel(x - 1, y - 1).avg() == 255) {
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
-					 if (y < img.height() - 2 && x > 1) {
-						 if (lowerThreshold <= magnitudes[(y + 1) * img.width() + (x - 1)] && resultant->getPixel(x - 1, y + 1).avg() != 64 &&
-							 directions[(y + 1) * img.width() + (x - 1)] > 22.5 && directions[(y + 1) * img.width() + (x - 1)] <= 67.5 &&
-							 magnitudes[(y + 1) * img.width() + (x - 1)] > magnitudes[(y) * img.width() + (x - 2)] &&
-							 magnitudes[(y + 1) * img.width() + (x - 1)] > magnitudes[(y + 2) * img.width() + (x)])
-						 {
-							 resultant->setPixel(255, 255, 255, x - 1, y + 1);
-							 imageChanged = true;
-						 }
+					 if (y < img.height() - 1 && resultant->getPixel(x + 1, y + 1).avg() == 255) {
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
 				 }
 				 else {
-					 if (y > 0 && x > 0 && x < img.width() - 2) {
-						 if (lowerThreshold <= magnitudes[(y - 1) * img.width() + (x)] && resultant->getPixel(x, y - 1).avg() != 64 &&
-							 directions[(y - 1) * img.width() + (x)] < 22.5 || directions[(y - 1) * img.width() + (x)] >= 157.5 &&
-							 magnitudes[(y - 1) * img.width() + (x)] > magnitudes[(y - 1) * img.width() + (x - 1)] &&
-							 magnitudes[(y - 1) * img.width() + (x)] > magnitudes[(y - 1) * img.width() + (x + 2)])
-						 {
-							 resultant->setPixel(255, 255, 255, x, y - 1);
-							 imageChanged = true;
-						 }
-						 if (y < img.height() - 1 && x > 0 && x < img.width() - 1) {
-							 if (lowerThreshold <= magnitudes[(y + 1) * img.width() + (x)] && resultant->getPixel(x, y + 1).avg() != 64 &&
-								 directions[(y + 1) * img.width() + (x)] < 22.5 || directions[(y + 1) * img.width() + (x)] >= 157.5 &&
-								 magnitudes[(y + 1) * img.width() + (x)] > magnitudes[(y + 1) * img.width() + (x - 1)] &&
-								 magnitudes[(y + 1) * img.width() + (x)] > magnitudes[(y + 1) * img.width() + (x + 1)])
-							 {
-								 resultant->setPixel(255, 255, 255, x, y + 1);
-								 imageChanged = true;
-							 }
-						 }
+					 if (x > 0 && resultant->getPixel(x - 1, y).avg() == 255) {
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
+					 }
+					 if (x < img.width() - 1 && resultant->getPixel(x + 1, y).avg() == 255) {
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
 				 }
 			 }
@@ -880,8 +839,8 @@ void CV::SearchGrid::identifyLetters()
 	 for (int i = 0; i < img.width() * img.height(); ++i) {
 		 int x = i % img.width();
 		 int y = i / img.width();
-		 if (resultant->getPixel(x, y).avg() == 64)
-			 resultant->setPixel(255, 255, 255, x, y);
+		 if (resultant->getPixel(x, y).avg() == 128)
+			 resultant->setPixel(0, 0, 0, x, y);
 	 }
 
 	 return resultant;

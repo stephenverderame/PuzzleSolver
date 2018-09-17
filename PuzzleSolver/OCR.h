@@ -128,6 +128,6 @@ namespace CV {
 	Math::point getOrigin(IMG::Img & img);
 	void rotateImage(IMG::Img & img, float theta, Math::point origin);
 	void augmentDataSet(std::vector<Square> locations, std::vector<char> knowns, IMG::Img & img, int firstKnown = 0);
-	std::shared_ptr<IMG::Img> cannyEdgeDetection(IMG::Img & img, int upperThreshold, int lowerThreshold);
+	std::shared_ptr<IMG::Img> cannyEdgeDetection(IMG::Img & img, const double upperThreshold = 0.1, const double lowerThreshold = 0.05);
 	std::shared_ptr<IMG::Img> sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes = nullptr, std::vector<double> * directions = nullptr);
 }

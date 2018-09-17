@@ -42,56 +42,55 @@ OCR.cpp(592): warning C4018: '<': signed/unsigned mismatch
 OCR.cpp(594): warning C4018: '<': signed/unsigned mismatch
 OCR.cpp(645): warning C4018: '<': signed/unsigned mismatch
 OCR.cpp(750): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(753): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(759): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(760): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(764): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(768): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(772): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(754): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(761): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(769): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(770): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(774): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(778): warning C4018: '<': signed/unsigned mismatch
 OCR.cpp(782): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(794): warning C4018: '<': signed/unsigned mismatch
 OCR.cpp(799): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(811): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(821): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(803): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(813): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(823): warning C4018: '<': signed/unsigned mismatch
 OCR.cpp(833): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(843): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(855): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(864): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(879): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(903): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(913): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(930): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(937): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(938): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(940): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(942): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(944): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(946): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(964): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(982): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1101): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1111): warning C4244: '=': conversion from 'double' to 'std::size_t', possible loss of data
-OCR.cpp(1119): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1120): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1135): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1136): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1142): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1155): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1157): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1161): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1163): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1205): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1231): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(841): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(865): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(875): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(892): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(899): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(900): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(902): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(904): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(906): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(908): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(926): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(944): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1063): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1073): warning C4244: '=': conversion from 'double' to 'std::size_t', possible loss of data
+OCR.cpp(1081): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1082): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1097): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1098): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1104): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1117): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(1119): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(1123): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(1125): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(1167): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+OCR.cpp(1193): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1200): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1218): warning C4018: '<': signed/unsigned mismatch
 OCR.cpp(1238): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1256): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1276): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1282): warning C4018: '<': signed/unsigned mismatch
+OCR.cpp(1244): warning C4018: '<': signed/unsigned mismatch
 C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\utility(200): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
   OCR.cpp(591): note: see reference to function template instantiation 'std::pair<int,int>::pair<int,double,void,0>(std::pair<int,double> &&) noexcept' being compiled
   OCR.cpp(591): note: see reference to function template instantiation 'std::pair<int,int>::pair<int,double,void,0>(std::pair<int,double> &&) noexcept' being compiled
   Generating code
-  2 of 3959 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+  1 of 3960 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    13 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\documents\visual studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.exe
   Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\documents\visual studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.pdb (Full PDB)
