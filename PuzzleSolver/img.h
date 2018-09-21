@@ -33,6 +33,18 @@ namespace IMG {
 		imgState getState() { return state; }
 		ImgMemento(IMG::Img * img);
 	};
+	class GrayFunc {
+	public:
+		virtual color change(const color & original) = 0;
+	};
+	class LightFunc : public GrayFunc {
+	public:
+		color change(const color & original) override;
+	};
+	class LumFunc : public GrayFunc {
+	public:
+		color change(const color & original) override;
+	};
 	class Img {
 	private:
 		std::shared_ptr<Image> img;
@@ -46,10 +58,12 @@ namespace IMG {
 		void setPixel(const pixel c);
 		void setPixel(const channel r, const channel g, const channel b, const int x, const int y);
 		void rect(Math::point topLeft, Math::point btmRight, color c);
+		void drawRect(Math::point topLeft, Math::point btmRight, color c);
 		color getPixel(const Math::point p) const;
 		color getPixel(const int x, const int y) const;
 		void saveAsBmp(const char * path) const;
 		void greyscale();
+		void trueGrayscale(std::shared_ptr<GrayFunc> function);
 		void resize(int width, int height);
 		int integralImageValue(int x, int y);
 		ImgMemento getMemento();
@@ -58,4 +72,4 @@ namespace IMG {
 		void drawLine(Math::point start, Math::point end, color c);
 		void clear();
 	};
-} 
+}

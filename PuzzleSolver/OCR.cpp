@@ -349,6 +349,10 @@ void CV::SearchGrid::getCharacterLocations()
 	delete[] accumulator;
 	delete[] horzAccumulator;
 }
+void CV::SearchGrid::getCharacterLocations(pointList & lines)
+{
+
+}
 #define SAMPLE_WIDTH 10
 #define SAMPLE_HEIGHT 10
 bool isBmp(char * path) {
@@ -735,16 +739,7 @@ void CV::SearchGrid::identifyLetters()
  }
  std::shared_ptr<IMG::Img> CV::cannyEdgeDetection(IMG::Img & img, const double upperThreshold, const double lowerThreshold)
  {
-	 Kernel guassian({
-		 0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067,
-		 0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
-		 0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
-		 0.00038771, 0.01330373, 0.11098164, 0.22508352, 0.11098164, 0.01330373, 0.00038771,
-		 0.00019117, 0.00655965, 0.05472157, 0.11098164, 0.05472157, 0.00655965, 0.00019117,
-		 0.00002292, 0.00078633, 0.00655965, 0.01330373, 0.00655965, 0.00078633, 0.00002292,
-		 0.00000067, 0.00002292, 0.00019117, 0.00038771, 0.00019117, 0.00002292, 0.00000067
-	 });
-//	 auto image = guassian.apply(img);
+	 //in this case, only looking for horizontal and vertical lines
 	 std::vector<double> directions, magnitudes;
 	 auto resultant = sobelEdgeDetection(img, &magnitudes, &directions);
 	 for (int i = 0; i < directions.size(); ++i)
@@ -764,16 +759,19 @@ void CV::SearchGrid::identifyLetters()
 		 }
 		 bool isEdge = true;
 		 if (directions[i] > 112.5 && directions[i] <= 157.5) {
-			 if (y > 0 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x + 1)]) isEdge = false;
-			 if (y < img.height() - 1 && x > 0 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x - 1)]) isEdge = false;
+			 isEdge = false;
+//			 if (y > 0 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x + 1)]) isEdge = false;
+//			 if (y < img.height() - 1 && x > 0 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x - 1)]) isEdge = false;
 		 }
 		 else if (directions[i] > 67.5 && directions[i] <= 112.5) {
+			 isEdge = false;
 			 if (y > 0 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + x]) isEdge = false;
 			 if (y < img.height() - 1 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + x]) isEdge = false;
 		 }
 		 else if (directions[i] > 22.5 && directions[i] <= 67.5) {
-			 if (y > 0 && x > 0 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x - 1)]) isEdge = false;
-			 if (y < img.height() - 1 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x + 1)]) isEdge = false;
+			 isEdge = false;
+//			 if (y > 0 && x > 0 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x - 1)]) isEdge = false;
+//			 if (y < img.height() - 1 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x + 1)]) isEdge = false;
 		 }
 		 else {
 			 if (x > 0 && magnitudes[i] <= magnitudes[y * img.width() + (x - 1)]) isEdge = false;
@@ -795,12 +793,12 @@ void CV::SearchGrid::identifyLetters()
 			 if (resultant->getPixel(x, y).avg() == 128) {
 				 if (directions[i] > 112.5 && directions[i] <= 157.5) {
 					 if (y > 0 && x < img.width() - 1 && resultant->getPixel(x + 1, y - 1).avg() == 255) {
-						 resultant->setPixel(255, 255, 255, x, y);
-						 imageChanged = true;
+//						 resultant->setPixel(255, 255, 255, x, y);
+//						 imageChanged = true;
 					 }
 					 if (y < img.height() - 1 && x > 0 && resultant->getPixel(x - 1, y + 1).avg() == 255) {
-						 resultant->setPixel(255, 255, 255, x, y);
-						 imageChanged = true;
+//						 resultant->setPixel(255, 255, 255, x, y);
+//						 imageChanged = true;
 					 }
 				 }
 				 else if (directions[i] > 67.5 && directions[i] <= 112.5) {
@@ -815,12 +813,12 @@ void CV::SearchGrid::identifyLetters()
 				 }
 				 else if (directions[i] > 22.5 && directions[i] <= 67.5) {
 					 if (y > 0 && x > 0 && resultant->getPixel(x - 1, y - 1).avg() == 255) {
-						 resultant->setPixel(255, 255, 255, x, y);
-						 imageChanged = true;
+//						 resultant->setPixel(255, 255, 255, x, y);
+//						 imageChanged = true;
 					 }
 					 if (y < img.height() - 1 && resultant->getPixel(x + 1, y + 1).avg() == 255) {
-						 resultant->setPixel(255, 255, 255, x, y);
-						 imageChanged = true;
+//						 resultant->setPixel(255, 255, 255, x, y);
+//						 imageChanged = true;
 					 }
 				 }
 				 else {
@@ -1067,7 +1065,8 @@ CV::KnownSample & CV::KnownSample::operator=(const KnownSample & other)
 
 void CV::Hough::transform(IMG::Img & img)
 {
-	image = img;
+	imageWidth = img.width();
+	imageHeight = img.height();
 	accumulatorHeight = sqrt(2.0) * (double)max(img.height(), img.width());
 	accumulatorWidth = 180;
 	if (accumulator.size() > 0) accumulator.clear();
@@ -1078,7 +1077,7 @@ void CV::Hough::transform(IMG::Img & img)
 	center.y = img.height() / 2;
 	for (int y = 0; y < img.height(); ++y) {
 		for (int x = 0; x < img.width(); ++x) {
-			if (img.getPixel(x, y).avg() > 200) { //if light (dark in actual image) pixel
+			if (img.getPixel(x, y).avg() > 230) { //if light (dark in actual image) pixel
 				for (int t = 0; t < 180; ++t) {
 					//r = x cos0 + y sin0
 					double r = ((double)x - center.x) * cos(radians(t)) + ((double)y - center.y) * sin(radians(t));
@@ -1113,13 +1112,13 @@ CV::pointList CV::Hough::getLines(uint32_t threshold)
 					//y = (r - x cos0) / sin0
 					p1.x = 0;
 					p1.y = ((r - accumulatorHeight / 2.0) - (p1.x - center.x) * cos(radians(t))) / sin(radians(t)) + center.y;
-					p2.x = image.width();
+					p2.x = imageWidth;
 					p2.y = ((r - accumulatorHeight / 2.0) - (p2.x - center.x) * cos(radians(t))) / sin(radians(t)) + center.y;
 				}
 				else {
 					p1.y = 0;
 					p1.x = ((r - accumulatorHeight / 2.0) - (p1.y - center.y) * sin(radians(t))) / cos(radians(t)) + center.x;
-					p2.y = image.height();
+					p2.y = imageHeight;
 					p2.x = ((r - accumulatorHeight / 2.0) - (p2.y - center.y) * sin(radians(t))) / cos(radians(t)) + center.x;
 				}
 				lines.push_back(std::make_pair(p1, p2));
@@ -1272,4 +1271,65 @@ void CV::Kernel::scale(double scaler)
 			k[x][y] *= scaler;
 		}
 	}
+}
+
+void CV::ConnectedComponents::findConnectedComponents(IMG::Img & image)
+{
+	valueArray.resize(image.width());
+	labelArray.resize(image.width());
+	for (int i = 0; i < image.width(); ++i) {
+		valueArray[i].resize(image.height());
+		labelArray[i].resize(image.height());
+	}
+	for (int i = 0; i < image.width() * image.height(); ++i) {
+		int x = i % image.width();
+		int y = i / image.width();
+		int a = image.getPixel(x, y).avg();
+		if (a > 100)
+			valueArray[x][y] = 0;
+		else
+			valueArray[x][y] = 1;
+	}
+	uint32_t label = 0;
+	for (int y = 0; y < image.height(); ++y) {
+		for (int x = 0; x < image.width(); ++x) {
+			if (x > 0 && valueArray[x - 1][y] == valueArray[x][y])
+				labelArray[x][y] = labelArray[x - 1][y];
+			else if (y > 0 && valueArray[x][y - 1] == valueArray[x][y])
+				labelArray[x][y] = labelArray[x][y - 1];
+			else if (x > 0 && y > 0 && valueArray[x - 1][y - 1] == valueArray[x][y])
+				labelArray[x][y] = labelArray[x - 1][y - 1];
+			else if (y > 0 && x < image.width() - 1 && valueArray[x + 1][y - 1] == valueArray[x][y])
+				labelArray[x][y] = labelArray[x + 1][y - 1];
+			else
+				labelArray[x][y] = label++;
+		}
+	}
+	this->labels = label;
+}
+
+std::vector<CV::Square> CV::ConnectedComponents::componentLocations()
+{
+	std::vector<uint32_t> minX(labels), minY(labels), maxX(labels), maxY(labels);
+	for (uint32_t i = 0; i < labels; ++i) {
+		minX[i] = UINT_MAX;
+		minY[i] = UINT_MAX;
+		maxX[i] = 0;
+		maxY[i] = 0;
+	}
+	for (size_t j = 0; j < labelArray.size() * labelArray[0].size(); ++j) {
+		uint32_t x = j % labelArray.size();
+		uint32_t y = j / labelArray.size();
+		uint32_t label = labelArray[x][y];
+		minX[label] = min(minX[label], x);
+		minY[label] = min(minY[label], y);
+		maxX[label] = max(maxX[label], x);
+		maxY[label] = max(maxY[label], y);
+	}
+	std::vector<Square> locations(labels);
+	for (uint32_t i = 0; i < labels; ++i) {
+		locations[i] = { static_cast<int>(minX[i]), static_cast<int>(minY[i]), static_cast<int>(maxX[i] - minX[i]), static_cast<int>(maxY[i] - minY[i]) };
+
+	}
+	return locations;
 }

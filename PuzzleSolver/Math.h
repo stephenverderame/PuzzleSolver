@@ -1,6 +1,7 @@
 #pragma once
 #include <initializer_list>
 #include <math.h>
+#include <memory>
 #undef radians
 #undef min
 #undef max
@@ -8,6 +9,7 @@ namespace Math {
 	struct point {
 		int x;
 		int y;
+		bool operator==(const point & other) const;
 	};
 	struct matrix {
 		double a, b,
@@ -74,4 +76,9 @@ namespace Math {
 	};
 
 	using vec3f = Vector<3, double>;
+
+	point lineIntersection(point s1, point f1, point s2, point f2);
+
+	constexpr int int_max = std::numeric_limits<int>::max();
+	constexpr int int_min = std::numeric_limits<int>::min();
 }

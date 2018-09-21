@@ -55,6 +55,7 @@ namespace CV {
 		KnownSample(Image * ptr, char let) : image(ptr), letter(let) {};
 		KnownSample& operator=(const KnownSample & other);
 	};
+	using pointList = std::vector<std::pair<Math::point, Math::point>>;
 	class SearchGrid {
 	private:
 		std::vector<std::shared_ptr<Letter>> lettersInGrid;
@@ -69,6 +70,7 @@ namespace CV {
 		IMG::Img & seekImage;
 	private:
 		void getCharacterLocations();
+		void getCharacterLocations(pointList & lines);
 		void identifyLetters();
 	public:
 		void addLetter(char c, int x, int y);
@@ -88,23 +90,30 @@ namespace CV {
 		Square getLocation(int i) { return locations[i]; }
 		IMG::Img & getEditedImage() { return seekImage; }
 	};
+	class ConnectedComponents {
+		std::vector<std::vector<char>> valueArray;
+		std::vector<std::vector<uint32_t>> labelArray;
+		uint32_t labels;
+	public:
+		void findConnectedComponents(IMG::Img & image);
+		std::vector<Square> componentLocations();
+	};
 
-	using pointList = std::vector<std::pair<Math::point, Math::point>>;
 	class Hough {
 	private:
 		std::vector<std::vector<uint32_t>> accumulator;
 		size_t accumulatorHeight;
 		size_t accumulatorWidth;
+		size_t imageWidth, imageHeight;
 		struct {
 			double x;
 			double y;
 		} center;
-		IMG::Img & image;
 	public:
 		Hough(const Hough & other) = delete;
 		Hough& operator=(const Hough & other) = delete;
 	public:
-		Hough(IMG::Img & img) : image(img) {};
+		Hough() = default;
 		void transform(IMG::Img & img);
 		pointList getLines(uint32_t threshold);
 		void display(const char * filename) const;

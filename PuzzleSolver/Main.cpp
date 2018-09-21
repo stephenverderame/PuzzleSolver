@@ -13,6 +13,7 @@
 #include "Painter.h"
 #include "Maze.h"
 #include "Undo.h"
+#undef min
 using namespace Program;
 using namespace Notification;
 using namespace Control;
@@ -246,34 +247,90 @@ int main() {
 			{
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
-//				image.greyscale();
-/*				IMG::Img testImg;
-				testImg.createNew(3, 3);
-				for (int i = 0; i < 3; ++i) {
-					for (int j = 0; j < 3; ++j) {
-						testImg.setPixel(i * 100, i * 100, i * 100, j, i);
-						printf("%d ", i * 100);
-					}
-					printf("\n");
-				}*/
-				auto img = cannyEdgeDetection(image);
-/*				for (int i = 0; i < 3; ++i) {
-					for (int j = 0; j < 3; ++j) {
-						printf("%.2f ", mags[i * 3 + j][0]);
-					}
-					printf("\n");
-				}*/
+//				image.trueGrayscale(std::make_shared<IMG::LumFunc>());
+				auto img = cannyEdgeDetection(image, 0.05, 0.0002);
 				// HOUGH TEST
-/*				Hough hough(*img);
+				Hough hough;
 				hough.transform(*img);
-				auto list = hough.getLines(130);
-				//130 hough min for sobel
+				auto list = hough.getLines(50);
 //				hough.display("testHough.bmp");
 				printf("%d lines found!\n", list.size());
-				for (decltype(auto) line : list)
-					img->drawLine(line.first, line.second, { 255, 0, 0 });*/
-				window.drawImage(*img);
-				image = *img;
+				decltype(list) newList;
+				for (decltype(auto) line : list) {
+//					printf("(%d, %d) to (%d, %d)\n", line.first.x, line.first.y, line.second.x, line.second.y);
+					auto d = line.second - line.first;
+					if (abs(d.y) < 50 || abs(d.x) < 50) {
+						newList.push_back(line);
+//						image.drawLine(line.first, line.second, { 255, 0, 0 });
+					}
+				}
+				image.greyscale();
+				int i = 0;
+				for (auto it = newList.cbegin(); it != newList.cend(); ++it) {
+					for (auto itt = newList.cbegin(); itt != newList.cend(); ++itt) {
+						if (it == itt) continue;
+						point intersect = lineIntersection(it->first, it->second, itt->first, itt->second);
+						if (intersect.x != INT_MAX && intersect.y != INT_MIN) {
+							printf("intersect %d \n", i++);
+//							image.setPixel(0, 255, 0, intersect.x, intersect.y);
+							point start = { -1, -1 };
+							for (int y1 = 0; y1 < 5; ++y1) {
+								for (int x1 = 0; x1 < 5; ++x1) {
+									if (image.getPixel(intersect + point{ x1, y1 }).avg() < 100) {
+										start = intersect + point{ x1, y1 };
+										x1 = y1 = 20;
+									}
+								}
+							}
+							if (start.x != -1 && start.y != -1) {
+								//BFS
+								std::queue<point> availableNodes;
+								std::vector<point> visitedNodes;
+								availableNodes.push(start);
+								while(!availableNodes.empty()) {
+									point p = availableNodes.front();
+									availableNodes.pop();
+									if (p.x > 0 && image.getPixel(p.x - 1, p.y).avg() < 100 && 
+										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x - 1, p.y }) == visitedNodes.cend()) availableNodes.push({ p.x - 1, p.y });
+									if (p.x < image.width() - 1 && image.getPixel(p.x + 1, p.y).avg() < 100 
+										&& std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x + 1, p.y }) == visitedNodes.cend()) availableNodes.push({ p.x + 1, p.y });
+									if (p.y > 0 && image.getPixel(p.x, p.y - 1).avg() < 100 &&
+										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x, p.y - 1 }) == visitedNodes.cend()) availableNodes.push({ p.x, p.y - 1 });
+									if (p.y < image.height() - 1 && image.getPixel(p.x, p.y + 1).avg() < 100 &&
+										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x, p.y + 1 }) == visitedNodes.cend()) availableNodes.push({ p.x, p.y + 1 });
+/*									if (p.y > 0 && p.x > 0 && image.getPixel(p.x - 1, p.y - 1).avg() < 100 &&
+										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x - 1, p.y - 1 }) == visitedNodes.cend()) availableNodes.push({ p.x - 1, p.y - 1 });
+									if (p.y < image.height() - 1 && p.x < image.width() - 1 && image.getPixel(p.x + 1, p.y + 1).avg() < 100 &&
+										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x + 1, p.y + 1 }) == visitedNodes.cend()) availableNodes.push({ p.x + 1, p.y + 1 });
+									if (p.y > 0 && p.x < image.width() - 1 && image.getPixel(p.x + 1, p.y - 1).avg() < 100 &&
+										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x + 1, p.y - 1 }) == visitedNodes.cend()) availableNodes.push({ p.x + 1, p.y - 1 });
+									if (p.y < image.height() - 1 && p.x > 0 && image.getPixel(p.x - 1, p.y + 1).avg() < 100 &&
+										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x - 1, p.y + 1 }) == visitedNodes.cend()) availableNodes.push({ p.x - 1, p.y + 1 });*/
+									visitedNodes.push_back(p);
+								};
+								point minp = { int_max, int_max };
+								point maxp = { int_min, int_min };
+								for (auto it = visitedNodes.cbegin(); it != visitedNodes.cend(); ++it) {
+									minp.x = min(it->x, minp.x);
+									minp.y = min(it->y, minp.y);
+									maxp.x = max(it->x, maxp.x);
+									maxp.y = max(it->y, maxp.y);
+								}
+								image.drawRect(minp, maxp, { 0, 0, 255 });
+							}
+						}
+
+					}
+
+				}
+/*				ConnectedComponents cc;
+				cc.findConnectedComponents(image);
+				auto sqs = cc.componentLocations();
+				for (auto it = sqs.cbegin(); it != sqs.cend(); ++it) {
+//					image.drawRect({ (*it).x, (*it).y }, { (*it).x + (*it).width, (*it).y + (*it).height }, { 0, 0, 255 });
+				}*/
+				window.drawImage(image);
+//				image = *img;
 				window.redraw();
 				break;
 			}

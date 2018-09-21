@@ -64,3 +64,38 @@ int Math::gcd(int a, int b)
 	if (b == 0) return a;
 	return gcd(b, a % b);
 }
+
+Math::point Math::lineIntersection(point s1, point f1, point s2, point f2)
+{
+	//gets equation of a perpendicular line to the original in ax + by = c form
+	//a1(x) + b1(y) = c1
+	double a1 = f1.y - s1.y;
+	double b1 = s1.x - f1.x;
+	double c1 = a1 * s1.x + b1 * s1.y;
+
+	//a2(x) + b2(y) = c2
+	double a2 = f2.y - s2.y;
+	double b2 = s2.x - f2.x;
+	double c2 = a2 * s2.x + b2 * s2.y;
+	/*
+		[ a1	 b1	]	[x]	 =	[c1]
+		[ a2	 b2	]	[y]	 =	[c2]
+	*/
+	double determinent = a1 * b2 - a2 * b1;
+	if (determinent == 0) {
+		//lines are parallel
+		return{ INT_MAX, INT_MIN };
+	}
+	/*		   1	     [b2	 -b1]   [c1]  =   [x]
+	      ----------     [-a2	  a1]   [c2]  =   [y]
+		  a1*b2 - a2*b1
+	*/
+	double x = (b2 * c1 - b1 * c2) / determinent;
+	double y = (a1 * c2 - a2 * c1) / determinent;
+	return{ static_cast<int>(x), static_cast<int>(y) };
+}
+
+bool Math::point::operator==(const point & other) const
+{
+	return x == other.x && y == other.y;
+}

@@ -44,6 +44,18 @@ void IMG::Img::rect(Math::point topLeft, Math::point btmRight, color c)
 	}
 }
 
+void IMG::Img::drawRect(Math::point topLeft, Math::point btmRight, color c)
+{
+	for (int i = topLeft.x; i <= btmRight.x; ++i) {
+		img->setPixel(i, topLeft.y, (Color)c);
+		img->setPixel(i, btmRight.y, (Color)c);
+	}
+	for (int i = topLeft.y; i <= btmRight.y; ++i) {
+		img->setPixel(topLeft.x, i, (Color)c);
+		img->setPixel(btmRight.x, i, (Color)c);
+	}
+}
+
 IMG::color IMG::Img::getPixel(const Math::point p) const
 {
 	Color col = img->getPixel(p.x, p.y);
@@ -64,6 +76,16 @@ void IMG::Img::saveAsBmp(const char * path) const
 void IMG::Img::greyscale()
 {
 	img->toGreyscale();
+}
+
+void IMG::Img::trueGrayscale(std::shared_ptr<GrayFunc> function)
+{
+	for (int i = 0; i < img->getHeight(); ++i) {
+		for (int j = 0; j < img->getWidth(); ++j) {
+			auto c = img->getPixel(j, i);
+			img->setPixel(j, i, static_cast<Color>(function->change({c.r, c.g, c.b})));
+		}
+	}
 }
 
 void IMG::Img::resize(int width, int height)
@@ -99,9 +121,8 @@ void IMG::Img::loadFrom(ImgMemento memento)
 void IMG::Img::drawLine(Math::point start, Math::point end, color c)
 {
 	Math::point a = end - start;
-	double denominator = a.x == 0 ? 1 : a.x;
-	double t = atan(a.y / denominator);
-	double distance = sqrt((end.x - start.x) * (end.x - start.x) + (end.y - start.y) * (end.y - start.y));
+	double t = atan2(a.y, a.x);
+	double distance = sqrt(a.x * a.x + a.y * a.y);
 	Math::matrix m = {
 		cos(t),	-sin(t),
 		sin(t),	 cos(t)
@@ -169,3 +190,14 @@ IMG::ImgMemento::ImgMemento(IMG::Img * img)
 	}
 }
 
+IMG::color IMG::LightFunc::change(const color & original)
+{
+	int ret = (Math::max(Math::max(original.red, original.green), original.blue) + Math::min(Math::min(original.red, original.green), original.blue)) / 2.0;
+	return{ static_cast<channel>(ret), static_cast<channel>(ret), static_cast<channel>(ret) };
+}
+
+IMG::color IMG::LumFunc::change(const color & original)
+{
+	int ret = (0.21*original.red + 0.72*original.green + 0.07*original.blue);
+	return{ static_cast<channel>(ret), static_cast<channel>(ret), static_cast<channel>(ret) };
+}
