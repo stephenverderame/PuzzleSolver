@@ -22,6 +22,9 @@ using namespace DialogSpace;
 using namespace CV;
 using namespace Undo;
 
+bool inline notSeen(std::vector<point> & vec, const int x, const int y) {
+	return std::find(vec.cbegin(), vec.cend(), point{ x, y }) == vec.cend();
+}
 int main() {
 	//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { 
 	MSG msg;
@@ -266,69 +269,95 @@ int main() {
 				}
 				image.greyscale();
 				int i = 0;
+				std::vector<Square> foundLetters;
 				for (auto it = newList.cbegin(); it != newList.cend(); ++it) {
 					for (auto itt = newList.cbegin(); itt != newList.cend(); ++itt) {
 						if (it == itt) continue;
 						point intersect = lineIntersection(it->first, it->second, itt->first, itt->second);
-						if (intersect.x != INT_MAX && intersect.y != INT_MIN) {
-							printf("intersect %d \n", i++);
+						if (intersect.x != INT_MAX && intersect.y != INT_MIN) {							
+//							printf("intersect %d \n", i++);
 //							image.setPixel(0, 255, 0, intersect.x, intersect.y);
 							point start = { -1, -1 };
-							for (int y1 = 0; y1 < 5; ++y1) {
-								for (int x1 = 0; x1 < 5; ++x1) {
-									if (image.getPixel(intersect + point{ x1, y1 }).avg() < 100) {
-										start = intersect + point{ x1, y1 };
+							for (int y1 = 0; y1 <= 10 && image.yInBounds(intersect.y - y1); ++y1) {
+								for (int x1 = 0; x1 <= 10 && image.xInBounds(intersect.x + x1); ++x1) {
+									if (image.getPixel(intersect + point{ x1, -y1 }).avg() < 100) {
+										start = intersect + point{ x1, -y1 };
 										x1 = y1 = 20;
 									}
 								}
 							}
-							if (start.x != -1 && start.y != -1) {
-								//BFS
-								std::queue<point> availableNodes;
-								std::vector<point> visitedNodes;
-								availableNodes.push(start);
-								while(!availableNodes.empty()) {
-									point p = availableNodes.front();
-									availableNodes.pop();
-									if (p.x > 0 && image.getPixel(p.x - 1, p.y).avg() < 100 && 
-										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x - 1, p.y }) == visitedNodes.cend()) availableNodes.push({ p.x - 1, p.y });
-									if (p.x < image.width() - 1 && image.getPixel(p.x + 1, p.y).avg() < 100 
-										&& std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x + 1, p.y }) == visitedNodes.cend()) availableNodes.push({ p.x + 1, p.y });
-									if (p.y > 0 && image.getPixel(p.x, p.y - 1).avg() < 100 &&
-										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x, p.y - 1 }) == visitedNodes.cend()) availableNodes.push({ p.x, p.y - 1 });
-									if (p.y < image.height() - 1 && image.getPixel(p.x, p.y + 1).avg() < 100 &&
-										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x, p.y + 1 }) == visitedNodes.cend()) availableNodes.push({ p.x, p.y + 1 });
-/*									if (p.y > 0 && p.x > 0 && image.getPixel(p.x - 1, p.y - 1).avg() < 100 &&
-										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x - 1, p.y - 1 }) == visitedNodes.cend()) availableNodes.push({ p.x - 1, p.y - 1 });
-									if (p.y < image.height() - 1 && p.x < image.width() - 1 && image.getPixel(p.x + 1, p.y + 1).avg() < 100 &&
-										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x + 1, p.y + 1 }) == visitedNodes.cend()) availableNodes.push({ p.x + 1, p.y + 1 });
-									if (p.y > 0 && p.x < image.width() - 1 && image.getPixel(p.x + 1, p.y - 1).avg() < 100 &&
-										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x + 1, p.y - 1 }) == visitedNodes.cend()) availableNodes.push({ p.x + 1, p.y - 1 });
-									if (p.y < image.height() - 1 && p.x > 0 && image.getPixel(p.x - 1, p.y + 1).avg() < 100 &&
-										std::find(visitedNodes.cbegin(), visitedNodes.cend(), point{ p.x - 1, p.y + 1 }) == visitedNodes.cend()) availableNodes.push({ p.x - 1, p.y + 1 });*/
-									visitedNodes.push_back(p);
-								};
-								point minp = { int_max, int_max };
-								point maxp = { int_min, int_min };
-								for (auto it = visitedNodes.cbegin(); it != visitedNodes.cend(); ++it) {
-									minp.x = min(it->x, minp.x);
-									minp.y = min(it->y, minp.y);
-									maxp.x = max(it->x, maxp.x);
-									maxp.y = max(it->y, maxp.y);
+							image.setPixel(0, 255, 0, start.x, start.y);
+							if (image.xInBounds(start.x) && image.yInBounds(start.y)) {
+								int maxX = 0, minX = 0;
+								int minY = 0, maxY = 0;
+								int yoffset = 0;
+								int direction = 1;
+								while (true) {
+									int xoffset = 0;
+									int nxoffset = 0;
+									int totalIntensity = 0;
+									if (image.yInBounds(start.y + yoffset)) {
+										bool in = false, in2 = false;
+										while (image.xInBounds(start.x + xoffset) && (xoffset < maxX || (in = image.getPixel(start + point{ xoffset, yoffset }).avg() < 100))) {
+											if (in || image.getPixel(start + point{ xoffset, yoffset }).avg() < 100) totalIntensity++;
+											in = false;
+											++xoffset;
+										}
+										while (image.xInBounds(start.x + nxoffset) && (nxoffset > minX || (in2 = image.getPixel(start + point{ nxoffset, yoffset }).avg() < 100))) {
+											if (in2 || image.getPixel(start + point{ nxoffset, yoffset }).avg() < 100) totalIntensity++;
+											in2 = false;
+											--nxoffset;
+										}
+									}
+//									printf("Got here\n!");
+									maxX = max(maxX, xoffset);
+									minX = min(minX, nxoffset);
+									maxY = max(maxY, yoffset);
+									minY = min(minY, yoffset);
+									if (totalIntensity == 0) {
+										if (direction == -1) break;
+										direction = -1;
+										yoffset = 0;
+									}
+									yoffset += direction;
 								}
-								image.drawRect(minp, maxp, { 0, 0, 255 });
+								foundLetters.push_back({ start.x + minX, start.y + minY, start.x + maxX - (start.x + minX), start.y + maxY - (start.y + minY) });
+//								printf("Yoffset: %d\n", yoffset);
+//								image.drawRect(start + point{minX, minY}, start + point{maxX, maxY}, {30, 30, 255});
+//								image.setPixel(0, 0, 255, start.x + minX, start.y + minY);
+//								image.setPixel(0, 0, 255, start.x + maxX, start.y + maxY);
+//								printf("%d %d - %d %d \n", minX, minY, maxX, maxY);
 							}
 						}
 
 					}
 
 				}
+				for (auto it = foundLetters.begin(); it != foundLetters.end(); ++it) {
+					for (auto itt = foundLetters.begin(); itt != foundLetters.end(); ++itt) {
+						if (it == itt) continue;
+						if ((itt->x == -1 && itt->y == -1) || (it->x == -1 && it->y == -1)) continue;
+						if (it->x * itt->x + it->y * itt->y < 225 || (itt->x >= it->x && itt->x <= it->x + it->width && itt->y >= it->y && itt->y <= it->y + it->height)) {
+							it->x = min(it->x, itt->x);
+							it->y = min(it->y, itt->y);
+							it->width = max(it->width, itt->width);
+							it->height = max(it->height, itt->height);
+							itt->x = -1; 
+							itt->y = -1;
+						}
+					}
+				}
+				for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
+					if (it->x == -1 && it->y == -1) continue;
+					image.drawRect({ it->x, it->y }, { it->x + it->width, it->y + it->height }, { 30, 30, 255 });
+				}
 /*				ConnectedComponents cc;
 				cc.findConnectedComponents(image);
 				auto sqs = cc.componentLocations();
 				for (auto it = sqs.cbegin(); it != sqs.cend(); ++it) {
-//					image.drawRect({ (*it).x, (*it).y }, { (*it).x + (*it).width, (*it).y + (*it).height }, { 0, 0, 255 });
-				}*/
+					image.drawRect({ (*it).x, (*it).y }, { (*it).x + (*it).width, (*it).y + (*it).height }, { 0, 0, 255 });
+				}
+				*/
 				window.drawImage(image);
 //				image = *img;
 				window.redraw();

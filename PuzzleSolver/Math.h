@@ -2,6 +2,7 @@
 #include <initializer_list>
 #include <math.h>
 #include <memory>
+#include <exception>
 #undef radians
 #undef min
 #undef max
@@ -28,15 +29,15 @@ namespace Math {
 	point& operator+=(point& cur, const point& b);
 	point& operator-=(point& cur, const point& b);
 
-	int gcd(int a, int b);
+	int gcd(int a, int b) noexcept;
 
 	template<typename T>
-	inline T min(T a, T b) {
+	constexpr inline T min(T a, T b) noexcept {
 		return a < b ? a : b;
 	}
 
 	template<typename T>
-	inline T max(T a, T b) {
+	constexpr inline T max(T a, T b) noexcept {
 		return a < b ? b : a;
 	}
 
@@ -45,7 +46,10 @@ namespace Math {
 	private:
 		T * data;
 	public:
-		Vector() { data = new T[dimensions]; }
+		Vector() {
+			static_assert(dimensions > 0, "Math::Vector must be at least 1 dimension");
+			data = new T[dimensions]; 
+		}
 		Vector(std::initializer_list<T> list) : Vector() {
 			int i = 0;
 			for (auto item : list) {
@@ -62,13 +66,14 @@ namespace Math {
 				data[i] = other.data[i];
 			return *this;
 		}
-		T& operator[](const int index) {
+		T& operator[](const unsigned short index) {
+			if (index >= dimensions) throw std::out_of_range("Math::Vector access attempt at a nonexistant dimension");
 			return data[index];
 		}
 		~Vector() {
 			delete[] data;
 		}
-		Vector& operator+=(const T & scalar) {
+		Vector& operator+=(const T & scalar) noexcept {
 			for (int i = 0; i < dimensions; ++i)
 				data[i] += scalar;
 			return *this;

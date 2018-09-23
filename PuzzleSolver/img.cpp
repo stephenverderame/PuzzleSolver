@@ -12,22 +12,22 @@ void IMG::Img::createNew(int width, int height)
 	loaded = true;
 }
 
-unsigned int IMG::Img::width() const
+unsigned int IMG::Img::width() const noexcept
 {
 	return img->getWidth();
 }
 
-unsigned int IMG::Img::height() const
+unsigned int IMG::Img::height() const noexcept
 {
 	return img->getHeight();
 }
 
-void IMG::Img::setPixel(const pixel p)
+void IMG::Img::setPixel(const pixel p) noexcept
 {
 	img->setPixel(p.p.x, p.p.y, { p.c.red, p.c.green, p.c.blue });
 }
 
-void IMG::Img::setPixel(const channel r, const channel g, const channel b, const int x, const int y)
+void IMG::Img::setPixel(const channel r, const channel g, const channel b, const int x, const int y) noexcept
 {
 	img->setPixel(x, y, { r, g, b });
 }
@@ -56,14 +56,16 @@ void IMG::Img::drawRect(Math::point topLeft, Math::point btmRight, color c)
 	}
 }
 
-IMG::color IMG::Img::getPixel(const Math::point p) const
+IMG::color IMG::Img::getPixel(const Math::point p) const throw(IMG::ImgOutOfRangeException)
 {
+	if (p.x < 0 || p.x >= img->getWidth() || p.y < 0 || p.y >= img->getHeight()) throw ImgOutOfRangeException();
 	Color col = img->getPixel(p.x, p.y);
 	return{ col.r, col.g, col.b };
 }
 
-IMG::color IMG::Img::getPixel(const int x, const int y) const
+IMG::color IMG::Img::getPixel(const int x, const int y) const throw(IMG::ImgOutOfRangeException)
 {
+	if (x < 0 || x >= img->getWidth() || y < 0 || y >= img->getHeight()) throw ImgOutOfRangeException();
 	Color col = img->getPixel(x, y);
 	return{ col.r, col.g, col.b };
 }
@@ -135,9 +137,19 @@ void IMG::Img::drawLine(Math::point start, Math::point end, color c)
 	}
 }
 
-void IMG::Img::clear()
+void IMG::Img::clear() noexcept
 {
 	img->clearBmp(0);
+}
+
+bool IMG::Img::xInBounds(int x) noexcept
+{
+	return x >= 0 && x < img->getWidth();
+}
+
+bool IMG::Img::yInBounds(int y) noexcept
+{
+	return y >= 0 && y < img->getHeight();
 }
 
 int IMG::color::avg()

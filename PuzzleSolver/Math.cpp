@@ -59,7 +59,7 @@ Math::point & Math::operator-=(point & cur, const point & b)
 	return cur;
 }
 
-int Math::gcd(int a, int b)
+int Math::gcd(int a, int b) noexcept
 {
 	if (b == 0) return a;
 	return gcd(b, a % b);

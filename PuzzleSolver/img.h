@@ -4,6 +4,12 @@
 #include <assert.h>
 #include "Math.h"
 namespace IMG {
+	class ImgOutOfRangeException : public std::exception {
+	public:
+		const char * what() const noexcept override {
+			return "attempted access on a point that is not within the matrix's bounds";
+		}
+	};
 	struct color {
 		unsigned char red;
 		unsigned char green;
@@ -53,14 +59,14 @@ namespace IMG {
 		Img() : loaded(false) {};
 		void loadFromPath(const char * s);
 		void createNew(int width, int height);
-		unsigned int width() const;
-		unsigned int height() const;
-		void setPixel(const pixel c);
-		void setPixel(const channel r, const channel g, const channel b, const int x, const int y);
+		unsigned int width() const noexcept;
+		unsigned int height() const noexcept;
+		void setPixel(const pixel c) noexcept;
+		void setPixel(const channel r, const channel g, const channel b, const int x, const int y) noexcept;
 		void rect(Math::point topLeft, Math::point btmRight, color c);
 		void drawRect(Math::point topLeft, Math::point btmRight, color c);
-		color getPixel(const Math::point p) const;
-		color getPixel(const int x, const int y) const;
+		color getPixel(const Math::point p) const throw(ImgOutOfRangeException);
+		color getPixel(const int x, const int y) const throw(ImgOutOfRangeException);
 		void saveAsBmp(const char * path) const;
 		void greyscale();
 		void trueGrayscale(std::shared_ptr<GrayFunc> function);
@@ -68,8 +74,10 @@ namespace IMG {
 		int integralImageValue(int x, int y);
 		ImgMemento getMemento();
 		void loadFrom(ImgMemento memento);
-		bool isLoaded() { return loaded; }
+		bool isLoaded() noexcept { return loaded; }
 		void drawLine(Math::point start, Math::point end, color c);
-		void clear();
+		void clear() noexcept;
+		bool xInBounds(int x) noexcept;
+		bool yInBounds(int y) noexcept;
 	};
 }
