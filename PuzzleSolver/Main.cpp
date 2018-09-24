@@ -347,9 +347,13 @@ int main() {
 						}
 					}
 				}
+				RB::RedBlackTree<int, RB_COMPARE> xVals;
+				RB::RedBlackTree<int, RB_COMPARE> yVals;
 				for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
 					if (it->x == -1 && it->y == -1) continue;
-					image.drawRect({ it->x, it->y }, { it->x + it->width, it->y + it->height }, { 30, 30, 255 });
+					xVals.insert(it->x);
+					yVals.insert(it->y);
+//					image.drawRect({ it->x, it->y }, { it->x + it->width, it->y + it->height }, { 30, 30, 255 });
 				}
 /*				ConnectedComponents cc;
 				cc.findConnectedComponents(image);

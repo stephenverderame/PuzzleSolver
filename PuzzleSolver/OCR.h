@@ -9,6 +9,7 @@
 #include <time.h>
 #include <map>
 #include <algorithm>
+#include "RedBlackTree.h"
 #undef max
 //#define DEBUGGING_SPACE
 //#define SHOW_DEBUG_CHARS
@@ -139,4 +140,17 @@ namespace CV {
 	void augmentDataSet(std::vector<Square> locations, std::vector<char> knowns, IMG::Img & img, int firstKnown = 0);
 	std::shared_ptr<IMG::Img> cannyEdgeDetection(IMG::Img & img, const double upperThreshold = 0.1, const double lowerThreshold = 0.05);
 	std::shared_ptr<IMG::Img> sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes = nullptr, std::vector<double> * directions = nullptr);
+}
+namespace CV {
+	template <typename T = int>
+	class OCRCompare : public RB::RBCompare<T> {
+	private:
+		bool lessThanP(const T & a, const T & b) const noexcept override {
+			return a < b - 20;
+		}
+		bool greaterThanP(const T & a, const T & b) const noexcept override {
+			return a > b + 20;
+		}
+	};
+	using RB_COMPARE = OCRCompare<>;
 }
