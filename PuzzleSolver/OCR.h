@@ -142,15 +142,20 @@ namespace CV {
 	std::shared_ptr<IMG::Img> sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes = nullptr, std::vector<double> * directions = nullptr);
 }
 namespace CV {
-	template <typename T = int>
+	template <typename T = int, int buffer = 20>
 	class OCRCompare : public RB::RBCompare<T> {
 	private:
 		bool lessThanP(const T & a, const T & b) const noexcept override {
-			return a < b - 20;
+			return a < b - buffer;
 		}
 		bool greaterThanP(const T & a, const T & b) const noexcept override {
-			return a > b + 20;
+			return a > b + buffer;
 		}
 	};
-	using RB_COMPARE = OCRCompare<>;
+	using OCR_COMPARE = OCRCompare<>;
+	template<int BUFFER = 20>
+	using RB_COMPARE = OCRCompare<int, BUFFER>;
+	using OCR_TREE = RB::RedBlackTree<int, OCR_COMPARE>;
+	template<int BUFFER = 20>
+	using RB_TREE = RB::RedBlackTree<int, RB_COMPARE<BUFFER>>;
 }

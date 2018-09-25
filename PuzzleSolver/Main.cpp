@@ -347,13 +347,64 @@ int main() {
 						}
 					}
 				}
-				RB::RedBlackTree<int, RB_COMPARE> xVals;
-				RB::RedBlackTree<int, RB_COMPARE> yVals;
+/*				RB::RedBlackTree<int, OCR_COMPARE> test;
+				test.insert(30);
+				test.insert(700);
+				test.insert(900);
+				test.insert(1000);
+				test.insert(5000);
+				std::cout << test << std::endl;
+				std::cout << test.treeHeight() << std::endl;
+				test.breadthTraversal(std::cout);
+				printf("\nEnding code\n");
+				getchar();*/
+				OCR_TREE xVals;
+				OCR_TREE yVals;
+				printf("Init trees\n");
+				int ij = 0;
 				for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
 					if (it->x == -1 && it->y == -1) continue;
+//					printf("Adding %d\n", ij++);
 					xVals.insert(it->x);
 					yVals.insert(it->y);
 //					image.drawRect({ it->x, it->y }, { it->x + it->width, it->y + it->height }, { 30, 30, 255 });
+				}
+				printf("Setup trees\n");
+				std::vector<int> xList = xVals.inorderListNR();
+				std::vector<int> yList = yVals.inorderListNR();
+				printf("Setup lists\n");
+				std::vector<int> xSpace(xList.size()), ySpace(yList.size());
+				for (int i = 0; i < xList.size(); ++i) {
+					if (i == 0) xSpace.push_back(xList[i]);
+					if (i + 1 != xList.size()) xSpace.push_back(xList[i + 1] - xList[i]);
+					else xSpace.push_back(image.width() - xList[i]);
+				}
+				for (int i = 0; i < yList.size(); ++i) {
+					if (i == 0) ySpace.push_back(yList[i]);
+					if (i + 1 != yList.size()) ySpace.push_back(yList[i + 1] - yList[i]);
+					else ySpace.push_back(image.height() - yList[i]);
+				}
+				int xMedian = xSpace.size() & 1 ? xSpace[xSpace.size() / 2 + 1] : (xSpace[xSpace.size() / 2] + xSpace[xSpace.size() / 2 + 1]) / 2;
+				int yMedian = ySpace.size() & 1 ? ySpace[ySpace.size() / 2 + 1] : (ySpace[xSpace.size() / 2] + ySpace[ySpace.size() / 2 + 1]) / 2;
+				printf("Medians %d %d\n", xMedian, yMedian);
+				int xSpaceStart = image.width(), xSpaceEnd = 0;
+				int ySpaceStart = image.height(), ySpaceEnd = 0;
+				for (int i = 0; i < xList.size(); ++i) {
+					if (abs(xSpace[i] - xMedian) <= .5 * xMedian) {
+						xSpaceStart = min(xList[i], xSpaceStart);
+						xSpaceEnd = max(xList[i], xSpaceEnd);
+					}
+				}
+				for (int i = 0; i < yList.size(); ++i) {
+					if (abs(ySpace[i] - yMedian) <= .5 * yMedian) {
+						ySpaceStart = min(yList[i], ySpaceStart);
+						ySpaceEnd = max(yList[i], ySpaceEnd);
+					}
+				}
+				printf("Calc spaces\n");
+				for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
+					if (it->x + it->width > xSpaceStart && it->x < xSpaceEnd && it->y + it->height > ySpaceStart && it->y < ySpaceEnd)
+						image.drawRect({ it->x, it->y }, { it->x + it->width, it->y + it->height }, { 0, 0, 255 });
 				}
 /*				ConnectedComponents cc;
 				cc.findConnectedComponents(image);
