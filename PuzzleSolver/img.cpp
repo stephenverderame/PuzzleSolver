@@ -80,7 +80,7 @@ void IMG::Img::greyscale()
 	img->toGreyscale();
 }
 
-void IMG::Img::trueGrayscale(std::shared_ptr<GrayFunc> function)
+void IMG::Img::trueGrayscale(std::unique_ptr<GrayFunc> && function)
 {
 	for (int i = 0; i < img->getHeight(); ++i) {
 		for (int j = 0; j < img->getWidth(); ++j) {

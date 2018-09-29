@@ -86,4 +86,5 @@ namespace Math {
 
 	constexpr int int_max = std::numeric_limits<int>::max();
 	constexpr int int_min = std::numeric_limits<int>::min();
+
 }

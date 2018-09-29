@@ -69,7 +69,7 @@ namespace IMG {
 		color getPixel(const int x, const int y) const throw(ImgOutOfRangeException);
 		void saveAsBmp(const char * path) const;
 		void greyscale();
-		void trueGrayscale(std::shared_ptr<GrayFunc> function);
+		void trueGrayscale(std::unique_ptr<GrayFunc> && function);
 		void resize(int width, int height);
 		int integralImageValue(int x, int y);
 		ImgMemento getMemento();

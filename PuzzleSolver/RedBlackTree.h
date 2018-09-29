@@ -236,9 +236,9 @@ namespace RB {
 		int getTreeCount() const noexcept {
 			return sumOfCounts;
 		}
-		std::vector<T>& inorderList() const {
+		std::vector<T> inorderList() const {
 			std::vector<T> vec;
-			vec.reserve(totalNodes);
+			vec.reserve(sumOfCounts);
 			inorder(root, vec);
 			return vec;
 		}

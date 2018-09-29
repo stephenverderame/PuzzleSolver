@@ -19,6 +19,8 @@ namespace CV {
 		int y;
 		int width;
 		int height;
+		Square() : x(0), y(0), width(0), height(0) {};
+		Square(int x, int y, int width, int height) : x(x), y(y), width(width), height(height) {};
 	};
 	struct Space {
 		int start;
@@ -59,36 +61,28 @@ namespace CV {
 	using pointList = std::vector<std::pair<Math::point, Math::point>>;
 	class SearchGrid {
 	private:
-		std::vector<std::shared_ptr<Letter>> lettersInGrid;
-		std::vector<std::shared_ptr<KnownSample>> identifiedLetters;
-		std::vector<Square> locations;
-		int row0Y;
-		int column0X;
-		std::pair<int, int> lastRow;
-		std::pair<int, int> lastColumn;
-		int maxRows = 0;
-		int maxColumns = 0;
+		std::vector<int> columnPositions, rowPositions;
+		std::vector<std::vector<Square>> characterLocations;
+		std::vector<std::vector<char>> characters;
 		IMG::Img & seekImage;
 	private:
 		void getCharacterLocations();
-		void getCharacterLocations(pointList & lines);
+		void init();
 		void identifyLetters();
 	public:
 		void addLetter(char c, int x, int y);
 		SearchGrid(IMG::Img & wordSearch);
 		void load(IMG::Img & searchImage);
 		void iterateRowbyRow();
-		std::pair<int, int> getDimensions() { return std::pair<int, int>(maxRows, maxColumns); }
-		void matchLetter(std::shared_ptr<KnownSample> s) { identifiedLetters.push_back(s); }
-		std::shared_ptr<Letter> getLetter(int i) { return lettersInGrid[i]; }
-		char getLetter(int columns, int rows) { if (rows > maxRows || rows < 0 || columns > maxColumns || columns < 0) return '-'; return lettersInGrid[columns * (maxRows + 1) + rows]->letter; }
+		char getLetter(int columns, int rows) {
+			if (columns >= columnPositions.size() || columns < 0 || rows >= rowPositions.size() || rows < 0) return '-';
+			return characters[columns][rows];
+		}
 		void search(std::vector<std::string> words);
 		void copyFrom(SearchGrid g);
 		bool isEmpty() { return lettersInGrid.size() == 0; }
 		SearchGrid& operator=(const SearchGrid & other);
 		SearchGrid(const SearchGrid& other);
-		int getLocationsSize() { return locations.size(); }
-		Square getLocation(int i) { return locations[i]; }
 		IMG::Img & getEditedImage() { return seekImage; }
 	};
 	class ConnectedComponents {
