@@ -330,23 +330,15 @@ int main() {
 			{
 				if (viewRead) {
 					point mouse = window.getMousePos();
-					double minDistance = std::numeric_limits<double>::max();
-					int loc = 0;
-					for (int i = 0; i < wordSearch.getLocationsSize(); ++i) {
-						double dist = sqrt(pow(wordSearch.getLocation(i).x + (wordSearch.getLocation(i).width / 2) - mouse.x, 2) + pow(wordSearch.getLocation(i).y + (wordSearch.getLocation(i).height / 2) - mouse.y, 2));
-						if (dist < minDistance) {
-							minDistance = dist;
-							loc = i;						}
-
-					}
 					window.startDrawing();
 					window.canvasDraw();
 					Stroke s(1, { 0, 255, 0 });
 					window.setStroke(s);
 					window.setBrush(null_brush);
-					window.drawRect({ wordSearch.getLocation(loc).x, wordSearch.getLocation(loc).y }, { wordSearch.getLocation(loc).x + wordSearch.getLocation(loc).width, wordSearch.getLocation(loc).y + wordSearch.getLocation(loc).height });
+					auto letter = wordSearch.getLetterNearest(mouse);
+					window.drawRect({ letter.second.x, letter.second.y }, { letter.second.x + letter.second.width, letter.second.y + letter.second.height });
 					std::string str;
-					str += wordSearch.getLetter(loc)->letter;
+					str += letter.first;
 					gui.setStatusText(str.c_str());
 					window.swapBuffers();
 					window.stopDrawing();

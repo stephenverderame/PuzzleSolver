@@ -355,7 +355,6 @@ void CV::SearchGrid::init()
 {
 	seekImage.trueGrayscale(std::make_unique<IMG::LumFunc>());
 	auto img = cannyEdgeDetection(seekImage, 0.05, 0.0002);
-	// HOUGH TEST
 	Hough hough;
 	hough.transform(*img);
 	auto list = hough.getLines(50);
@@ -384,7 +383,9 @@ void CV::SearchGrid::init()
 						}
 					}
 				}
+#ifdef DEBUGGING
 				seekImage.setPixel(0, 255, 0, start.x, start.y);
+#endif
 				if (seekImage.xInBounds(start.x) && seekImage.yInBounds(start.y)) {
 					int maxX = 0, minX = 0;
 					int minY = 0, maxY = 0;
@@ -520,12 +521,17 @@ void CV::SearchGrid::init()
 	for (auto it : ySpaces)
 		if (it.second - it.first > ySpaceFinal.second - ySpaceFinal.first)
 			ySpaceFinal = it;
+	printf("Found search area\n");
+#ifdef DEBUGGING
 	seekImage.drawRect({ xSpaceFinal.first, ySpaceFinal.first }, { xSpaceFinal.second, ySpaceFinal.second }, { 255, 0, 0 });
+#endif
 	OCR_TREE finalX, finalY;
 	std::vector<Square> tempList;
 	for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
 		if (it->x + it->width >= xSpaceFinal.first - 10 && it->x <= xSpaceFinal.second + 10 && it->y + it->height >= ySpaceFinal.first - 10 && it->y <= ySpaceFinal.second + 10) {
+#ifdef DEBUGGING
 			seekImage.drawRect({ it->x, it->y }, { it->x + it->width, it->y + it->height }, { 0, 0, 255 });
+#endif
 			tempList.push_back(*it);
 			finalX.insert(it->x);
 			finalY.insert(it->y);
@@ -534,31 +540,35 @@ void CV::SearchGrid::init()
 	columnPositions = finalX.inorderListNR();
 	rowPositions = finalY.inorderListNR();
 	characterLocations.resize(columnPositions.size());
-	for (int i = 0; i < rowPositions.size(); ++i)
+	for (int i = 0; i < columnPositions.size(); ++i)
 		characterLocations[i].resize(rowPositions.size());
 	characters.resize(columnPositions.size());
 	for (int i = 0; i < columnPositions.size(); ++i)
 		characters[i].resize(rowPositions.size(), '?');
+	printf("Init all vectors\n");
+	printf("Grid: %d columns by %d rows \n", columnPositions.size(), rowPositions.size());
+	int iv = 0;
 	for (auto it : tempList) {
+		printf("%d ", iv++);
 		int minx = int_max;
 		int miny = int_max;
-		int yRow, xRow;
+		int yRow = 0, xRow = 0;
 		int px = 0;
-		for (auto x = columnPositions.cbegin(); x != columnPositions.cend(); ++x) {
+		for (auto x = columnPositions.cbegin(); x != columnPositions.cend(); ++px, ++x) {
 			int temp = minx;
 			minx = min(minx, (it.x - *x) * (it.x - *x));
 			if (temp != minx) xRow = px;
-			++px;
 		}
 		int py = 0;
-		for (auto y = rowPositions.cbegin(); y != rowPositions.cend(); ++y) {
+		for (auto y = rowPositions.cbegin(); y != rowPositions.cend(); ++py, ++y) {
 			int temp = miny;
 			miny = min(miny, (it.y - *y) * (it.y - *y));
 			if (temp != miny) yRow = py;
-			++py;
 		}
-		characterLocations[px][py] = it;
+		printf("Closest to: (%d, %d)\n", xRow, yRow);
+		characterLocations[xRow][yRow] = it;
 	}
+	printf("Done with init\n");
 
 }
 #define SAMPLE_WIDTH 10
@@ -892,6 +902,24 @@ void CV::SearchGrid::identifyLetters()
 	 GetClientRect(gui::GUI::useWindow(), &r);
 	 InvalidateRect(gui::GUI::useWindow(), &r, TRUE);
  }
+ std::pair<char, CV::Square> CV::SearchGrid::getLetterNearest(Math::point p)
+ {
+	 int minx = int_max, xPos = 0;
+	 int miny = int_max, yPos = 0;
+	 for (int i = 0; i < columnPositions.size(); ++i) {
+		 if ((p.x - columnPositions[i]) * (p.x - columnPositions[i]) < minx) {
+			 minx = (p.x - columnPositions[i]) * (p.x - columnPositions[i]);
+			 xPos = i;
+		 }
+	 }
+	 for (int i = 0; i < rowPositions.size(); ++i) {
+		 if ((p.y - rowPositions[i]) * (p.y - rowPositions[i]) < miny) {
+			 miny = (p.y - rowPositions[i]) * (p.y - rowPositions[i]);
+			 yPos = i;
+		 }
+	 }
+	 return std::pair<char, Square>(characters[xPos][yPos], characterLocations[xPos][yPos]);
+ }
  void CV::augmentDataSet(std::vector <CV::Square> locations, std::vector<char> knowns, IMG::Img & img, int firstKnown)
  {
 	 int size = min(locations.size(), firstKnown + knowns.size());
@@ -910,7 +938,7 @@ void CV::SearchGrid::identifyLetters()
 		 image->saveBmp(path);
 	 }
  }
- std::shared_ptr<IMG::Img> CV::cannyEdgeDetection(IMG::Img & img, const double upperThreshold, const double lowerThreshold)
+ std::unique_ptr<IMG::Img> CV::cannyEdgeDetection(IMG::Img & img, const double upperThreshold, const double lowerThreshold)
  {
 	 //in this case, only looking for horizontal and vertical lines
 	 std::vector<double> directions, magnitudes;
@@ -1017,7 +1045,7 @@ void CV::SearchGrid::identifyLetters()
 	 return resultant;
 
  }
- std::shared_ptr<IMG::Img> CV::sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes, std::vector<double> * directions)
+ std::unique_ptr<IMG::Img> CV::sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes, std::vector<double> * directions)
  {
 	 Kernel sobelY({
 		 -1, -2, -1,
@@ -1038,7 +1066,7 @@ void CV::SearchGrid::identifyLetters()
 		 if (directions != nullptr) directions->push_back(Math::degrees(atan(gy[i][0] / gx[i][0])));
 		 maxMag = max(maxMag, magnitude[i]);
 	 }
-	 std::shared_ptr<IMG::Img> newImage(new IMG::Img());
+	 auto newImage = std::make_unique<IMG::Img>();
 	 newImage->createNew(img.width(), img.height());
 	 newImage->clear();
 	 for (int i = 0; i < img.width() * img.height(); ++i) {
@@ -1191,7 +1219,8 @@ void CV::SearchGrid::load(IMG::Img & search)
 	seekImage = search;
 	characters.erase(characters.begin(), characters.end());
 	characterLocations.erase(characterLocations.begin(), characterLocations.end());
-	getCharacterLocations();
+//	getCharacterLocations();
+	init();
 	identifyLetters();
 }
 
@@ -1346,12 +1375,12 @@ CV::Kernel::Kernel(std::initializer_list<double> list)
 }
 
 
-std::shared_ptr<IMG::Img> CV::Kernel::apply(IMG::Img & img)
+std::unique_ptr<IMG::Img> CV::Kernel::apply(IMG::Img & img)
 {
 	//need to handle overflow of byte
 	int j = width / 2;
 	printf("J: %d\n", j);
-	std::shared_ptr<IMG::Img> newImage(new IMG::Img());
+	auto newImage = std::make_unique<IMG::Img>();
 	newImage->createNew(img.width(), img.height());
 //	newImage->clear();
 	double minSum = std::numeric_limits<double>::max();

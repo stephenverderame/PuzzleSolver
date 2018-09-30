@@ -66,11 +66,9 @@ namespace CV {
 		std::vector<std::vector<char>> characters;
 		IMG::Img & seekImage;
 	private:
-		void getCharacterLocations();
 		void init();
 		void identifyLetters();
 	public:
-		void addLetter(char c, int x, int y);
 		SearchGrid(IMG::Img & wordSearch);
 		void load(IMG::Img & searchImage);
 		void iterateRowbyRow();
@@ -79,10 +77,7 @@ namespace CV {
 			return characters[columns][rows];
 		}
 		void search(std::vector<std::string> words);
-		void copyFrom(SearchGrid g);
-		bool isEmpty() { return lettersInGrid.size() == 0; }
-		SearchGrid& operator=(const SearchGrid & other);
-		SearchGrid(const SearchGrid& other);
+		std::pair<char, Square> getLetterNearest(Math::point p);
 		IMG::Img & getEditedImage() { return seekImage; }
 	};
 	class ConnectedComponents {
@@ -122,7 +117,7 @@ namespace CV {
 	public:
 		Kernel(int width, int height);
 		Kernel(std::initializer_list<double> list);
-		std::shared_ptr<IMG::Img> apply(IMG::Img & img);
+		std::unique_ptr<IMG::Img> apply(IMG::Img & img);
 		std::vector<Math::vec3f> apply_matrix(IMG::Img & img);
 		void testShowMatrix(FILE * out);
 		void scale(double scalar);
@@ -132,8 +127,8 @@ namespace CV {
 	Math::point getOrigin(IMG::Img & img);
 	void rotateImage(IMG::Img & img, float theta, Math::point origin);
 	void augmentDataSet(std::vector<Square> locations, std::vector<char> knowns, IMG::Img & img, int firstKnown = 0);
-	std::shared_ptr<IMG::Img> cannyEdgeDetection(IMG::Img & img, const double upperThreshold = 0.1, const double lowerThreshold = 0.05);
-	std::shared_ptr<IMG::Img> sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes = nullptr, std::vector<double> * directions = nullptr);
+	std::unique_ptr<IMG::Img> cannyEdgeDetection(IMG::Img & img, const double upperThreshold = 0.1, const double lowerThreshold = 0.05);
+	std::unique_ptr<IMG::Img> sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes = nullptr, std::vector<double> * directions = nullptr);
 }
 namespace CV {
 	template <typename T = int, int buffer = 20>
