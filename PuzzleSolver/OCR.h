@@ -10,6 +10,7 @@
 #include <map>
 #include <algorithm>
 #include "RedBlackTree.h"
+#include <unordered_map>
 #undef max
 //#define DEBUGGING_SPACE
 //#define SHOW_DEBUG_CHARS
@@ -21,6 +22,12 @@ namespace CV {
 		int height;
 		Square() : x(0), y(0), width(0), height(0) {};
 		Square(int x, int y, int width, int height) : x(x), y(y), width(width), height(height) {};
+	};
+	struct SquareEx {
+		Square sq;
+		std::pair<Math::point, Math::point> line;
+		SquareEx() = default;
+		SquareEx(int x, int y, int width, int height, std::pair<Math::point, Math::point> line) : sq({ x, y, width, height }), line(line) {};
 	};
 	struct Space {
 		int start;
@@ -73,8 +80,8 @@ namespace CV {
 		void load(IMG::Img & searchImage);
 		void iterateRowbyRow();
 		char getLetter(int columns, int rows) {
-			if (columns >= columnPositions.size() || columns < 0 || rows >= rowPositions.size() || rows < 0) return '-';
-			return characters[columns][rows];
+			if (rows < 0 || rows >= characterLocations.size() || columns < 0 || columns >= characterLocations[rows].size()) return '-';
+			return characters[rows][columns];
 		}
 		void search(std::vector<std::string> words);
 		std::pair<char, Square> getLetterNearest(Math::point p);
@@ -129,6 +136,8 @@ namespace CV {
 	void augmentDataSet(std::vector<Square> locations, std::vector<char> knowns, IMG::Img & img, int firstKnown = 0);
 	std::unique_ptr<IMG::Img> cannyEdgeDetection(IMG::Img & img, const double upperThreshold = 0.1, const double lowerThreshold = 0.05);
 	std::unique_ptr<IMG::Img> sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes = nullptr, std::vector<double> * directions = nullptr);
+
+	bool isCloseTo(Line & a, Line & b, int buffer = 13);
 }
 namespace CV {
 	template <typename T = int, int buffer = 20>
@@ -147,4 +156,5 @@ namespace CV {
 	using OCR_TREE = RB::RedBlackTree<int, OCR_COMPARE>;
 	template<int BUFFER = 20>
 	using RB_TREE = RB::RedBlackTree<int, RB_COMPARE<BUFFER>>;
+
 }

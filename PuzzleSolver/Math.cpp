@@ -95,6 +95,20 @@ Math::point Math::lineIntersection(point s1, point f1, point s2, point f2)
 	return{ static_cast<int>(x), static_cast<int>(y) };
 }
 
+bool Math::lineRectIntersection(point lineStart, point lineEnd, point topLeft, point btmRt)
+{
+	point i1 = lineIntersection(lineStart, lineEnd, topLeft, { btmRt.x, topLeft.y });
+	point i2 = lineIntersection(lineStart, lineEnd, btmRt, { topLeft.x, btmRt.y });
+
+	point i3 = lineIntersection(lineStart, lineEnd, topLeft, { topLeft.x, btmRt.y });
+	point i4 = lineIntersection(lineStart, lineEnd, btmRt, { btmRt.x, topLeft.y });
+	if (i1.y == topLeft.y && i1.x >= topLeft.x && i1.x <= btmRt.x) return true;
+	if (i2.y == btmRt.y && i2.x >= topLeft.x && i2.x <= btmRt.x) return true;
+	if (i3.x == topLeft.x && i3.y >= topLeft.y && i3.y <= btmRt.y) return true;
+	if (i4.x == btmRt.x && i4.y >= topLeft.y && i4.y <= btmRt.y) return true;
+	return false;
+}
+
 bool Math::point::operator==(const point & other) const
 {
 	return x == other.x && y == other.y;

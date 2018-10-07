@@ -255,8 +255,30 @@ int main() {
 			{
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
-				window.drawImage(image);
-//				image = *img;
+				image.trueGrayscale(std::make_unique<IMG::LumFunc>());
+				auto img = cannyEdgeDetection(image, 0.05, 0.0002);
+				Hough hough;
+				hough.transform(*img);
+				auto list = hough.getLines(50);
+				printf("%d lines found!\n", list.size());
+				decltype(list) newList;
+				for (decltype(auto) line : list) {
+					auto d = line.second - line.first;
+					if (abs(d.y) < 50 || abs(d.x) < 50) {
+						bool add = true;
+//						for (int i = 0; i < newList.size(); ++i)
+//							if (isCloseTo(Line{ newList[i].first, newList[i].second }, Line{ line.first, line.second })) { add = false; break; }
+//						if (add) {
+//							newList.push_back(line);
+							img->drawLine(line.first, line.second, { 255, 0, 0 });
+//						}
+					}
+				}
+/*				image.drawRect({ 200, 200 }, { 400, 400 }, { 255, 0, 0 });
+				image.drawLine({ 300, 0 }, { 500, 500 }, { 255, 0, 0 });
+				printf("Collision: %d\n", Math::lineRectIntersection({ 300, 0 }, { 500, 500 }, { 200, 200 }, { 400, 400 }));*/
+				window.drawImage(*img);
+				image = *img;
 				window.redraw();
 				break;
 			}

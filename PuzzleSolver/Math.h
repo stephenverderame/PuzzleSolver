@@ -83,8 +83,10 @@ namespace Math {
 	using vec3f = Vector<3, double>;
 
 	point lineIntersection(point s1, point f1, point s2, point f2);
+	bool lineRectIntersection(point lineStart, point lineEnd, point topLeft, point btmRt);
 
 	constexpr int int_max = std::numeric_limits<int>::max();
 	constexpr int int_min = std::numeric_limits<int>::min();
+	
 
 }

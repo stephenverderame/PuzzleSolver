@@ -367,7 +367,6 @@ void CV::SearchGrid::init()
 		}
 	}
 	seekImage.greyscale();
-	int i = 0;
 	std::vector<Square> foundLetters;
 	for (auto it = newList.cbegin(); it != newList.cend(); ++it) {
 		for (auto itt = newList.cbegin(); itt != newList.cend(); ++itt) {
@@ -375,13 +374,34 @@ void CV::SearchGrid::init()
 			point intersect = lineIntersection(it->first, it->second, itt->first, itt->second);
 			if (intersect.x != INT_MAX && intersect.y != INT_MIN) {
 				point start = { -1, -1 };
-				for (int y1 = 0; y1 <= 10 && seekImage.yInBounds(intersect.y - y1); ++y1) {
-					for (int x1 = 0; x1 <= 10 && seekImage.xInBounds(intersect.x + x1); ++x1) {
-						if (seekImage.getPixel(intersect + point{ x1, -y1 }).avg() < 100) {
-							start = intersect + point{ x1, -y1 };
-							x1 = y1 = 20;
+				for (int dist = 0; dist <= 10; ++dist) {
+					bool found = false;
+					point tpLeft = { intersect.x - dist, intersect.y - dist };
+					point btmRit = { intersect.x + dist, intersect.y + dist };
+					for (int i = tpLeft.x; i <= btmRit.x; ++i) {
+						if (seekImage.xInBounds(i) && seekImage.yInBounds(tpLeft.y) && seekImage.getPixel({ i, tpLeft.y }).avg() <= 100) {
+							found = true; start = { i, tpLeft.y }; break;
 						}
 					}
+					if (found) break;
+					for (int i = tpLeft.x; i <= btmRit.x; ++i) {
+						if (seekImage.xInBounds(i) && seekImage.yInBounds(btmRit.y) && seekImage.getPixel({ i, btmRit.y }).avg() <= 100) {
+							found = true; start = { i, btmRit.y }; break;
+						}
+					}
+					if (found) break;
+					for (int i = tpLeft.y; i <= btmRit.y; ++i) {
+						if (seekImage.xInBounds(tpLeft.x) && seekImage.yInBounds(i) && seekImage.getPixel({ tpLeft.x, i }).avg() <= 100) {
+							found = true; start = { tpLeft.x, i }; break;
+						}
+					}
+					if (found) break;
+					for (int i = tpLeft.y; i <= btmRit.y; ++i) {
+						if (seekImage.xInBounds(btmRit.x) && seekImage.yInBounds(i) && seekImage.getPixel({ btmRit.x, i }).avg() <= 100) {
+							found = true; start = { btmRit.x, i }; break;
+						}
+					}
+					if (found) break;
 				}
 #ifdef DEBUGGING
 				seekImage.setPixel(0, 255, 0, start.x, start.y);
@@ -427,10 +447,11 @@ void CV::SearchGrid::init()
 
 	}
 	for (auto it = foundLetters.begin(); it != foundLetters.end(); ++it) {
-		for (auto itt = foundLetters.begin(); itt != foundLetters.end(); ++itt) {
+		int ittCount = 0;
+		for (auto itt = foundLetters.begin(); itt != foundLetters.end(); ++ittCount, ++itt) {
 			if (it == itt) continue;
 			if ((itt->x == -1 && itt->y == -1) || (it->x == -1 && it->y == -1)) continue;
-			if (it->x * itt->x + it->y * itt->y < 225 || (itt->x >= it->x && itt->x <= it->x + it->width && itt->y >= it->y && itt->y <= it->y + it->height)) {
+			if ((it->x - itt->x) * (it->x - itt->x) + (it->y - itt->y) * (it->y - itt->y) < 225 || (itt->x >= it->x && itt->x <= it->x + it->width && itt->y >= it->y && itt->y <= it->y + it->height)) {
 				it->x = min(it->x, itt->x);
 				it->y = min(it->y, itt->y);
 				it->width = max(it->width, itt->width);
@@ -450,8 +471,8 @@ void CV::SearchGrid::init()
 	}
 	auto widthList = widthVals.inorderList();
 	auto heightList = widthVals.inorderList();
-	int widthMedian = widthList.size() % 2 ? widthList[widthList.size() / 2 + 1] : (widthList[widthList.size() / 2] + widthList[widthList.size() / 2 + 1]) / 2;
-	int heightMedian = heightList.size() % 2 ? heightList[heightList.size() / 2 + 1] : (heightList[heightList.size() / 2] + heightList[heightList.size() / 2 + 1]) / 2;
+	int widthMedian = widthList.size() % 2 ? widthList[widthList.size() / 2] : (widthList[widthList.size() / 2] + widthList[widthList.size() / 2 - 1]) / 2;
+	int heightMedian = heightList.size() % 2 ? heightList[heightList.size() / 2] : (heightList[heightList.size() / 2] + heightList[heightList.size() / 2 - 1]) / 2;
 	printf("Median width: %d Median height: %d \n", widthMedian, heightMedian);
 	for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
 		if (it->x == -1 && it->y == -1) continue;
@@ -479,8 +500,8 @@ void CV::SearchGrid::init()
 			ySpace.push_back(yList[i] - yList[v]);
 		}
 	}
-	int xMedian = xSpace.size() % 2 ? xSpace[xSpace.size() / 2 + 1] : (xSpace[xSpace.size() / 2] + xSpace[xSpace.size() / 2 + 1]) / 2;
-	int yMedian = ySpace.size() % 2 ? ySpace[ySpace.size() / 2 + 1] : (ySpace[xSpace.size() / 2] + ySpace[ySpace.size() / 2 + 1]) / 2;
+	int xMedian = xSpace.size() % 2 ? xSpace[xSpace.size() / 2] : (xSpace[xSpace.size() / 2] + xSpace[xSpace.size() / 2 - 1]) / 2;
+	int yMedian = ySpace.size() % 2 ? ySpace[ySpace.size() / 2] : (ySpace[xSpace.size() / 2] + ySpace[ySpace.size() / 2 - 1]) / 2;
 	printf("Medians %d %d\n", xMedian, yMedian);
 	printf("XSpaceSize: %d XListSize: %d \n", xSpace.size(), xList.size());
 	assert(xSpace.size() == xList.size() && ySpace.size() == yList.size() && "Spaces and coordinate lists don't match up");
@@ -527,14 +548,20 @@ void CV::SearchGrid::init()
 #endif
 	OCR_TREE finalX, finalY;
 	std::vector<Square> tempList;
-	for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
-		if (it->x + it->width >= xSpaceFinal.first - 10 && it->x <= xSpaceFinal.second + 10 && it->y + it->height >= ySpaceFinal.first - 10 && it->y <= ySpaceFinal.second + 10) {
+	std::vector<std::pair<Line, Line>> lineList;
+	int itCount = 0;
+	IMG::ImgMemento backup = seekImage.getMemento();
+	seekImage.clear();
+	for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++itCount, ++it) {
+		if ((it->x != -1 && it->y != -1) && it->x + it->width >= xSpaceFinal.first - 10 && it->x <= xSpaceFinal.second + 10 && it->y + it->height >= ySpaceFinal.first - 10 && it->y <= ySpaceFinal.second + 10) {
 #ifdef DEBUGGING
 			seekImage.drawRect({ it->x, it->y }, { it->x + it->width, it->y + it->height }, { 0, 0, 255 });
 #endif
+			printf("(%d, %d)\n", it->x, it->y);
 			tempList.push_back(*it);
-			finalX.insert(it->x);
-			finalY.insert(it->y);
+			int px = (it->x + it->x + it->width) / 2;
+			int py = (it->y + it->y + it->height) / 2;
+			seekImage.rect({ px - 2, py - 2 }, { px + 2, py + 2 }, { 255, 255, 255 });
 		}
 	}
 	columnPositions = finalX.inorderListNR();
@@ -547,27 +574,38 @@ void CV::SearchGrid::init()
 		characters[i].resize(rowPositions.size(), '?');
 	printf("Init all vectors\n");
 	printf("Grid: %d columns by %d rows \n", columnPositions.size(), rowPositions.size());
-	int iv = 0;
-	for (auto it : tempList) {
-		printf("%d ", iv++);
-		int minx = int_max;
-		int miny = int_max;
-		int yRow = 0, xRow = 0;
-		int px = 0;
-		for (auto x = columnPositions.cbegin(); x != columnPositions.cend(); ++px, ++x) {
-			int temp = minx;
-			minx = min(minx, (it.x - *x) * (it.x - *x));
-			if (temp != minx) xRow = px;
+	Hough detectGrid;
+	detectGrid.transform(seekImage);
+	auto lines = detectGrid.getLines(80);
+	printf("Detected: %d\n", lines.size());
+	std::vector<std::pair<point, point>> linesFinal;
+	for (auto l : lines) {
+		if ((abs(l.second.x - l.first.x) > seekImage.width() * .5 && abs(l.second.y - l.first.y) < seekImage.height() * .5)) {
+			bool add = true;
+			for(auto lf : linesFinal)
+				if (isCloseTo(Line{ lf.first, lf.second }, Line{ l.first, l.second })) { add = false; break; }
+			if (add) {
+				seekImage.drawLine(l.first, l.second, { 255, 0, 0 });
+				linesFinal.push_back(l);
+			}
 		}
-		int py = 0;
-		for (auto y = rowPositions.cbegin(); y != rowPositions.cend(); ++py, ++y) {
-			int temp = miny;
-			miny = min(miny, (it.y - *y) * (it.y - *y));
-			if (temp != miny) yRow = py;
-		}
-		printf("Closest to: (%d, %d)\n", xRow, yRow);
-		characterLocations[xRow][yRow] = it;
 	}
+	columnPositions = { 0, 2, 4 };
+	rowPositions = { 0, 2, 4 };
+	characterLocations.resize(columnPositions.size());
+	characters.resize(columnPositions.size());
+	for (int i = 0; i < columnPositions.size(); ++i) {
+		characterLocations[i].resize(rowPositions.size());
+		characters[i].resize(rowPositions.size(), '?');
+	}
+	std::vector<Square> row;
+	for (auto line : linesFinal) {
+//		printf("Y: %d\n", line.first.y);
+		for (auto sq : tempList) {
+			if (lineRectIntersection(line.first, line.second, { sq.x, sq.y }, { sq.x + sq.width, sq.y + sq.height })) row.push_back(sq);
+		}
+	}
+//	seekImage.loadFrom(backup);
 	printf("Done with init\n");
 
 }
@@ -624,7 +662,7 @@ void CV::SearchGrid::identifyLetters()
 			printf("Reading %c \n", letter);
 			knownLetters.push_back(std::make_unique<KnownSample>(newImg, letter));
 			testNumber = knownLetters.size() - 1;
-			newImg->saveBmp("testReadLetter.bmp");
+//			newImg->saveBmp("testReadLetter.bmp");
 			delete buffer;
 		}
 
@@ -1078,6 +1116,22 @@ void CV::SearchGrid::identifyLetters()
 	 }
 	 if (magnitudes != nullptr) *magnitudes = magnitude;
 	 return newImage;
+ }
+ bool CV::isCloseTo(Line & a, Line & b, int buffer)
+ {
+	 if ((a.start.x - b.start.x) * (a.start.x - b.start.x) + (a.start.y - b.start.y) * (a.start.y - b.start.y) < buffer * buffer)
+//		if ((a.end.x - b.end.x) * (a.end.x - b.end.x) + (a.end.y - b.end.y) * (a.end.y - b.end.y) < buffer * buffer)
+			return true;
+	 if ((a.start.x - b.end.x) * (a.start.x - b.end.x) + (a.start.y - b.end.y) * (a.start.y - b.end.y) < buffer * buffer)
+//		 if ((a.end.x - b.start.x) * (a.end.x - b.start.x) + (a.end.y - b.start.y) * (a.end.y - b.start.y) < buffer * buffer)
+			 return true;
+	 point p = lineIntersection(a.start, a.end, b.start, b.end);
+	 if (p.x != int_max && p.y != int_min) {
+		 if (((a.start.x - b.start.x) * (a.start.x - b.start.x) + (a.start.y - b.start.y) * (a.start.y - b.start.y) < 15 * 15) ||
+			 ((a.end.x - b.start.x) * (a.end.x - b.start.x) + (a.end.y - b.start.y) * (a.end.y - b.start.y) < 15 * 15))
+			 return true;
+	 }
+	 return false;
  }
 point CV::getOrigin(IMG::Img & img)
 {
