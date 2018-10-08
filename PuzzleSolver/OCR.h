@@ -68,7 +68,8 @@ namespace CV {
 	using pointList = std::vector<std::pair<Math::point, Math::point>>;
 	class SearchGrid {
 	private:
-		std::vector<int> columnPositions, rowPositions;
+//		std::vector<int> columnPositions, rowPositions;
+		int rows, columns;
 		std::vector<std::vector<Square>> characterLocations;
 		std::vector<std::vector<char>> characters;
 		IMG::Img & seekImage;
@@ -138,6 +139,8 @@ namespace CV {
 	std::unique_ptr<IMG::Img> sobelEdgeDetection(IMG::Img & img, std::vector<double> * magnitudes = nullptr, std::vector<double> * directions = nullptr);
 
 	bool isCloseTo(Line & a, Line & b, int buffer = 13);
+
+	void letterXSort(std::vector<Square> & row);
 }
 namespace CV {
 	template <typename T = int, int buffer = 20>
