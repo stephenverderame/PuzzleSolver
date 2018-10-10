@@ -22,6 +22,12 @@ namespace IMG {
 		color c;
 		Math::point p;		
 	};
+	/**
+	 * Stores raw bitmap data.
+	 * When copying an Img, avoids creation of internal Gdi bitmaps and DIB sections
+	 * @see Img
+	 * @see ImgMememto
+	*/
 	struct imgState {
 		unsigned int width;
 		unsigned int height;
@@ -39,6 +45,7 @@ namespace IMG {
 		imgState getState() { return state; }
 		ImgMemento(IMG::Img * img);
 	};
+
 	class GrayFunc {
 	public:
 		virtual color change(const color & original) = 0;
@@ -51,11 +58,18 @@ namespace IMG {
 	public:
 		color change(const color & original) override;
 	};
+
 	class Img {
 	private:
 		std::shared_ptr<Image> img;
 		bool loaded;
 	public:
+		/** 
+		 * Constructor which does NOT initialize any important state
+		 * @see Img::loadFromPath()
+		 * @see Img::createNew()
+		 * @see Img::loadFrom()
+		*/
 		Img() : loaded(false) {};
 		void loadFromPath(const char * s);
 		void createNew(int width, int height);
@@ -68,8 +82,14 @@ namespace IMG {
 		color getPixel(const Math::point p) const throw(ImgOutOfRangeException);
 		color getPixel(const int x, const int y) const throw(ImgOutOfRangeException);
 		void saveAsBmp(const char * path) const;
+		//* Wrapper for Image::greyscale(). Turns an image monochrome
 		void greyscale();
+		/**
+		 * Actually makes an image greyscale
+		 * @param function pointer to subclass of GrayFunc which determines implementation of GrayScale algorithm
+		*/
 		void trueGrayscale(std::unique_ptr<GrayFunc> && function);
+		//* Resizes the image, does not rescale. Image is also set to black
 		void resize(int width, int height);
 		int integralImageValue(int x, int y);
 		ImgMemento getMemento();

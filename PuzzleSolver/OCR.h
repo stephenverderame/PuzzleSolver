@@ -23,12 +23,6 @@ namespace CV {
 		Square() : x(0), y(0), width(0), height(0) {};
 		Square(int x, int y, int width, int height) : x(x), y(y), width(width), height(height) {};
 	};
-	struct SquareEx {
-		Square sq;
-		std::pair<Math::point, Math::point> line;
-		SquareEx() = default;
-		SquareEx(int x, int y, int width, int height, std::pair<Math::point, Math::point> line) : sq({ x, y, width, height }), line(line) {};
-	};
 	struct Space {
 		int start;
 		int size;
@@ -88,15 +82,6 @@ namespace CV {
 		std::pair<char, Square> getLetterNearest(Math::point p);
 		IMG::Img & getEditedImage() { return seekImage; }
 	};
-	class ConnectedComponents {
-		std::vector<std::vector<char>> valueArray;
-		std::vector<std::vector<uint32_t>> labelArray;
-		uint32_t labels;
-	public:
-		void findConnectedComponents(IMG::Img & image);
-		std::vector<Square> componentLocations();
-	};
-
 	class Hough {
 	private:
 		std::vector<std::vector<uint32_t>> accumulator;
@@ -126,6 +111,7 @@ namespace CV {
 		Kernel(int width, int height);
 		Kernel(std::initializer_list<double> list);
 		std::unique_ptr<IMG::Img> apply(IMG::Img & img);
+		void kernelConvolution(IMG::Img & img);
 		std::vector<Math::vec3f> apply_matrix(IMG::Img & img);
 		void testShowMatrix(FILE * out);
 		void scale(double scalar);

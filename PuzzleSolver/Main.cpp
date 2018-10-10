@@ -254,20 +254,34 @@ int main() {
 			case messages::wnd_monochrome:
 			{
 				if (!image.isLoaded()) break;
+				//testing 
 				UndoStack::getInstance()->saveState(image.getMemento());
+				Kernel guassian({
+					1,  4,  6,  4, 1,
+					4, 16, 24, 16, 4,
+					6, 24, 36, 24, 6,
+					4, 16, 24, 16, 4,
+					1,  4,  6,  4, 1
+				});
+				guassian.scale(1 / 256.0);
 				image.trueGrayscale(std::make_unique<IMG::LumFunc>());
-				auto img = cannyEdgeDetection(image, 0.05, 0.0002);
+//				guassian.kernelConvolution(image);
+				int avg = (image.integralImageValue(image.width() - 1, image.height() - 1) - image.integralImageValue(image.width() - 1, 0) - image.integralImageValue(0, image.height() - 1) + image.integralImageValue(0, 0)) / (image.width() * image.height());
+				avg = 255 - avg;
+				auto img = cannyEdgeDetection(image);
 				Hough hough;
 				hough.transform(*img);
-				auto list = hough.getLines(50);
+				avg *= 1.7;
+				printf("AVG: %d \n", avg);
+				auto list = hough.getLines(avg);
 				printf("%d lines found!\n", list.size());
 				decltype(list) newList;
 				for (decltype(auto) line : list) {
 					auto d = line.second - line.first;
-					if (abs(d.y) < 50 || abs(d.x) < 50) {
+					if ((abs(d.y) < img->height() * 0.05 && abs(d.x) > img->width() * 0.95) || (abs(d.x) < img->width() * 0.05 && abs(d.y) > img->height() * 0.95)) {
 						bool add = true;
 //						for (int i = 0; i < newList.size(); ++i)
-//							if (isCloseTo(Line{ newList[i].first, newList[i].second }, Line{ line.first, line.second })) { add = false; break; }
+//							if (isCloseTo(Line{ newList[i].first, newList[i].second }, Line{ line.first, line.second }, 10)) { add = false; break; }
 //						if (add) {
 //							newList.push_back(line);
 							img->drawLine(line.first, line.second, { 255, 0, 0 });

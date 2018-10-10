@@ -9,6 +9,9 @@ namespace Cursor {
 		CURSOR_DRAW,
 		CURSOR_SELECT
 	};
+	/**
+	 * Singleton handling different cursors
+	*/
 	class CustomCursor {
 	private:
 		HCURSOR cursorArray[4];
@@ -19,6 +22,10 @@ namespace Cursor {
 	public:
 		CustomCursor();
 		void setCursor(cursors c);
+		/**
+		 * Wrapper for SetCursor()
+		 * Must be called WM_SETCURSOR message (not a permanent draw)
+		*/
 		void drawCursor();
 	};
 }

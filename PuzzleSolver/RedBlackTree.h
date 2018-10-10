@@ -2,10 +2,16 @@
 #include <queue>
 #include <vector>
 namespace RB {
+	/**
+	 * ::value is true if T is an RBCompare type
+	*/
 	template<class T, typename P, typename = void>
 	struct is_comparable : std::false_type {};
 	template<typename... Ts>
 	struct is_comparable_helper {};
+	/**
+	* ::value is true if T is an RBCompare type
+	*/
 	template<class T, typename P>
 	struct is_comparable<T, P, std::void_t<
 		is_comparable_helper<
@@ -16,10 +22,18 @@ namespace RB {
 		>
 	>> : std::true_type {};
 
-
+	/**
+	 * Defines interface for creating custom greaterThan and lessThan functions for use in RedBlackTree
+	 * If neither greaterThan nor lessThan is true, equal to is assumed
+	 * @see RedBlackTree
+	*/
 	template<typename T>
 	class RBCompare {
 	private:
+		/**
+		 * Internal functions to be overrided
+		 * NVI idiom
+		*/
 		virtual bool lessThanP(const T & a, const T & b) const noexcept {
 			return a < b;
 		}
@@ -34,6 +48,12 @@ namespace RB {
 			return greaterThanP(a, b);
 		}
 	};
+	/**
+	 * Red Black Tree where equivalent values increment the amount of that value and does not create a different node
+	 * @template CType subclass of RBCompare to customize what constitutes as less than, greater than and equal to
+	 * @template T type of element being stored
+	 * @see RBCompare
+	*/
 	template <typename T, class CType>
 	class RedBlackTree {
 	private:
@@ -188,6 +208,9 @@ namespace RB {
 			auto rightHeight = height(root->right);
 			return leftHeight > rightHeight ? leftHeight + 1 : rightHeight + 1;
 		}
+		/*
+		 * Inorder helper function, equivilant data is counted x times
+		*/
 		void inorder(node<T> * n, std::vector<T> & out) const {
 			if (n != nil) {
 				inorder(n->left, out);
@@ -196,6 +219,9 @@ namespace RB {
 				inorder(n->right, out);
 			}
 		}
+		/*
+		 * Inorder helper function. No repeats
+		*/
 		void inorder_nor(node<T> * n, std::vector<T> & out) const {
 			if (n != nil) {
 				inorder_nor(n->left, out);
@@ -230,24 +256,34 @@ namespace RB {
 		int treeHeight() const noexcept {
 			return height(root);
 		}
+		//* @return amount of nodes in the tree. Each node counts as 1 regardless of amount of values within the node
 		int getTreeSize() const noexcept {
 			return totalNodes;
 		}
+		//* @return amount of total data in the tree. Each node is counted x times where x is the amount of values within the node
 		int getTreeCount() const noexcept {
 			return sumOfCounts;
 		}
+		/**
+		 * @return A vector containing all data within the tree, in an order defined by CType
+		 * @see getTreeCount()
+		*/
 		std::vector<T> inorderList() const {
 			std::vector<T> vec;
 			vec.reserve(sumOfCounts);
 			inorder(root, vec);
 			return vec;
 		}
+		/**
+		 * @return A vector containing all nodes within the tree. Equivalent values are Not Repeated. Vector is sorted
+		*/
 		std::vector<T> inorderListNR() const {
 			std::vector<T> vec;
 			vec.reserve(totalNodes);
 			inorder_nor(root, vec);
 			return vec;
 		}
+		//for debugging
 		void breadthTraversal(std::ostream & out) const {
 			if (root == nil || root == nullptr) return;
 			std::queue<node<T>*> q;
@@ -269,6 +305,7 @@ namespace RB {
 	template<typename T>
 	struct is_outputable<T, std::void_t<decltype(std::declval<std::ostream>() << std::declval<T>())>> : std::true_type {};
 
+	//for debugging
 	template<typename T, class CType>
 	std::ostream& operator<<(std::ostream & out, const RB::RedBlackTree<T, CType> & tree) {
 		static_assert(is_outputable<T>::value, "RBTree << operator attempted with objects that do not support << operator");

@@ -3,6 +3,10 @@
 #include "img.h"
 #include "Observer.h"
 #include <ctime>
+/**
+ * Basically just a class to keep clutter out of main message handling.
+ * Handles most paint messages sent
+*/
 class Painter : public Notification::Subject {
 private:
 	struct impl {
@@ -20,6 +24,8 @@ private:
 	std::shared_ptr<impl> pimpl;
 public:
 	Painter(Wnd * w, IMG::Img * i);
+	//*@param n unhandled paint notification
 	void draw(Notification::notification n);
+	//*@param c bool to determine if crop grid lines should be shown
 	void crop(const bool c);
 };

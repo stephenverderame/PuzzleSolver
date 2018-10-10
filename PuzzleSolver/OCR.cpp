@@ -1,5 +1,13 @@
 #include "OCR.h"
 using namespace Math;
+/**
+ * From the origin, determines the angle in which the most dark pixels lie on a straight line
+ * Ideally the line picked is parallel to a row of text in the search
+ * @param img        image to perform angle find on
+ * @param origin     optional parameter (nullptr if not set), custom origin point for the search
+ * @param skewBounds optional parameter (nullptr if not set), enforces that the angle must be within these bounds
+ * @return           float up to the tenth place in precision for the detected skew angle
+*/
 float CV::findSkewAngle(IMG::Img & img, Math::point * origin, Bounds * skewBounds) {
 	if (origin == nullptr)
 		*origin = getOrigin(img);
@@ -75,294 +83,45 @@ float CV::findSkewAngle(IMG::Img & img, Math::point * origin, Bounds * skewBound
 	return angle;
 
 }
-/*
-void CV::SearchGrid::getCharacterLocations()
-{
-#pragma region columnSpaces
-	int * accumulator = new int[seekImage.width()];
-	memset(accumulator, 0, seekImage.width() * sizeof(int));
-	std::vector<Space> spaces;
-	std::vector<int> spaceSizes;
-	int totalIntensity = seekImage.integralImageValue(seekImage.width() - 1, seekImage.height() - 1) - seekImage.integralImageValue(0, seekImage.height() - 1) - seekImage.integralImageValue(seekImage.width() - 1, 0) + seekImage.integralImageValue(0, 0);
-	int totalColumnAvg = totalIntensity / seekImage.width();
-	int totalRowAvg = totalIntensity / seekImage.height();
-	for (int i = 0; i < seekImage.width(); i++) {
-		for (int y = 0; y < seekImage.height(); y++) {
-			accumulator[i] += seekImage.getPixel({ i, y }).avg();
-		}
-	}
-	int lastDark = 0;
-	for (int i = 0; i <= seekImage.width(); i++) {
-		if (i == seekImage.width()) {
-			spaces.push_back({ lastDark + 1, i - lastDark });
-			spaceSizes.push_back(i - lastDark);
-			break;
-		}
-		if (accumulator[i] < totalColumnAvg) {
-			if (i - lastDark > 1) {
-				spaces.push_back({ lastDark + 1, i - lastDark });
-				spaceSizes.push_back(i - lastDark);
-			}
-			lastDark = i;
-		}
-	}
-	int avgSpaceSize = 0;
-	for (int i = 0; i < spaceSizes.size(); i++) {
-		for (int j = 0; j < spaceSizes.size(); j++) {
-			if (spaceSizes[j] < spaceSizes[i]) {
-				int size = spaceSizes[i];
-				spaceSizes[i] = spaceSizes[j];
-				spaceSizes[j] = size;
-			}
-		}
-	}
-	if (spaceSizes.size() % 2) //if odd number
-		avgSpaceSize = spaceSizes[(spaceSizes.size() / 2) + 1];
-	else {
-		avgSpaceSize = (spaceSizes[spaceSizes.size() / 2] + spaceSizes[spaceSizes.size() / 2 + 1]) / 2;
-	}
-	printf("Median space size: %d \n", avgSpaceSize);
-	for (int i = 0; i < spaces.size(); i++) { //combining small spaces close together
-		if (i == 0) continue;
-		int x = 1;
-		while (i - x >= 0 && spaces[i - x].start == -1) ++x;
-		int lastSpace = i - x;
-		if (spaces[i].size <= round(.2 * avgSpaceSize) || abs(spaces[i].start - (spaces[lastSpace].start + spaces[lastSpace].size)) <= round(.3 * avgSpaceSize)) {
-			spaces[lastSpace].size = spaces[i].start + spaces[i].size - spaces[lastSpace].start;
-			spaces[i] = { -1, -1 };
-		}
-	}
-	if (spaces.size() == 0) printf("no spaces!");
-	int lastSpaceSize = 0;
-	Space equalSpacing{ -1, -1 };
-	for (int i = 0; i < spaces.size(); i++) {
-		int lastSpace = max(i - 1, 0);
-		Space s = spaces[i];
-		if (s.size == -1 || s.start == -1) continue;
-		if (abs(s.size - avgSpaceSize) <= round(.5 * avgSpaceSize)) {
-			if (equalSpacing.size != -1) {
-				equalSpacing.size = s.start + s.size - equalSpacing.start;
-				lastSpaceSize = s.size;
-			}
-			else if (equalSpacing.size == -1) {
-				equalSpacing.start = spaces[lastSpace].start + spaces[lastSpace].size;
-				equalSpacing.size = s.start + s.size - equalSpacing.start;
-				lastSpaceSize = s.size;
-			}
-		}
-		else {
-			if (s.size - avgSpaceSize > round(.5 * avgSpaceSize) && equalSpacing.size != -1) {
-				equalSpacing.size = s.start - equalSpacing.start;
-				break;
-			}
-		}
-	}
-	printf("Equal spacing from: %d to %d \n", equalSpacing.start, equalSpacing.start + equalSpacing.size);
-	for (int i = 0; i < seekImage.height(); i++) {
-		seekImage.setPixel({ { 255, 0, 0 }, equalSpacing.start, i, });
-		seekImage.setPixel({ { 255, 0, 0 }, equalSpacing.start + equalSpacing.size, i, });
-	}
-#pragma endregion
-#pragma region horzSpacing
-	int * horzAccumulator = new int[seekImage.height()];
-	memset(horzAccumulator, 0, seekImage.height() * sizeof(int));
-	std::vector<Space> horzSpaces;
-	std::vector<int> horzSpaceSizes;
-	for (int i = 0; i < seekImage.height(); i++) {
-		for(int x = 0; x < seekImage.width(); x++)
-			horzAccumulator[i] += seekImage.getPixel(x, i ).avg();
-	}
-	lastDark = 0;
-	for (int i = 0; i <= seekImage.height(); i++) {
-		if (i == seekImage.height()) {
-			horzSpaces.push_back({ lastDark + 1, i - lastDark });
-			horzSpaceSizes.push_back(i - lastDark);
-			break;
-		}
-		if (horzAccumulator[i] < totalRowAvg) {
-			if (i - lastDark > 1) {
-				horzSpaces.push_back({ lastDark + 1, i - lastDark });
-				horzSpaceSizes.push_back(i - lastDark);
-			}
-			lastDark = i;
-		}
-	}
-	avgSpaceSize = 0;
-	for (int i = 0; i < horzSpaceSizes.size(); i++) {
-		for (int j = 0; j < horzSpaceSizes.size(); j++) {
-			if (horzSpaceSizes[j] < horzSpaceSizes[i]) {
-				int size = horzSpaceSizes[i];
-				horzSpaceSizes[i] = horzSpaceSizes[j];
-				horzSpaceSizes[j] = size;
-			}
-		}
-	}
-	if (horzSpaceSizes.size() % 2) //if odd number
-		avgSpaceSize = horzSpaceSizes[(horzSpaceSizes.size() / 2) + 1];
-	else {
-		avgSpaceSize = (horzSpaceSizes[horzSpaceSizes.size() / 2] + horzSpaceSizes[horzSpaceSizes.size() / 2 + 1]) / 2;
-	}
-	printf("Median HorzSpace size: %d \n", avgSpaceSize);
-	for (int i = 0; i < horzSpaces.size(); i++) {
-		if (i == 0) continue;
-		int x = 1;
-		while (i - x >= 0 && spaces[i - x].start == -1) ++x;
-		int lastSpace = i - x;
-		if (horzSpaces[i].size <= round(.2 * avgSpaceSize) || abs(horzSpaces[i].start - (horzSpaces[lastSpace].start + horzSpaces[lastSpace].size)) <= round(.3 * avgSpaceSize)) {
-			horzSpaces[lastSpace].size = horzSpaces[i].start + horzSpaces[i].size - horzSpaces[lastSpace].start;
-			horzSpaces[i] = { -1, -1 };
-		}
-	}
-#ifdef DEBUGGING_SPACE
-	for (Space s : horzSpaces) {
-		printf("Horz Space Size: %d \n", s.size);
-		for (int i = 0; i < seekImage.width(); i++) {
-			for (int y = s.start; y < s.start + s.size; y++) {
-				img->setPixel(i, y, { 0, 0, 255 });
-			}
-		}
-	}
-	printf("\n");
-	for (Space s : spaces) {
-		printf("Vert Space Size: %d \n", s.size);
-		for (int i = 0; i < img->getHeight(); i++) {
-			for (int x = s.start; x < s.start + s.size; x++) {
-				img->setPixel(x, i, { 0, 0, 255 });
-			}
-		}
-	}
-#endif
-	printf("Next! \n");
-	if (horzSpaces.size() == 0) printf("no spaces!");
-	lastSpaceSize = 0;
-	Space horzEqualSpacing{ -1, -1 };
-	for (int i = 0; i < horzSpaces.size(); i++) {
-		int lastSpace = max(i - 1, 0);
-		Space s = horzSpaces[i];
-		if (s.size == -1 || s.start == -1) continue;
-		if (abs(s.size - avgSpaceSize) <= round(.5 * avgSpaceSize)) {
-			if (horzEqualSpacing.size != -1) {
-				horzEqualSpacing.size = s.start + s.size - horzEqualSpacing.start;
-				lastSpaceSize = s.size;
-			}
-			else if (horzEqualSpacing.size == -1) {
-				horzEqualSpacing.start = horzSpaces[lastSpace].start + horzSpaces[lastSpace].size;
-				horzEqualSpacing.size = s.start + s.size - horzEqualSpacing.start;
-				lastSpaceSize = s.size;
-			}
-		}
-		else {
-			printf("Stopped bc %d size \n", s.size);
-			if (s.size - avgSpaceSize > round(.5 * avgSpaceSize) && horzEqualSpacing.size != -1) {
-				horzEqualSpacing.size = s.start - horzEqualSpacing.start;
-				break;
-			}
-		}
-	}
-	for (int i = 0; i < seekImage.width(); i++) {
-		seekImage.setPixel({ { 255, 0, 0 }, i, horzEqualSpacing.start});
-		seekImage.setPixel({ { 255, 0, 0 }, i, horzEqualSpacing.start + horzEqualSpacing.size });
-	}
-#pragma endregion
-#ifndef DEBUGGING_SPACE
-	spaces.push_back({ (int)seekImage.width(), 0 });
-	horzSpaces.push_back({ (int)seekImage.height(), 0 });
-	for (int x = 0; x < spaces.size() - 1; x++) {
-		if (spaces[x].size == -1) continue;
-		if (spaces[x].start + spaces[x].size >= equalSpacing.start && spaces[x].start <= equalSpacing.start + equalSpacing.size) {
-			for (int y = 0; y < horzSpaces.size() - 1; y++) {
-				if (horzSpaces[y].start == -1) continue;
-				if (horzSpaces[y].start + horzSpaces[y].size >= horzEqualSpacing.start && horzSpaces[y].start <= horzEqualSpacing.start + horzEqualSpacing.size) {
-					Square sq;
-					int i = 1;
-					while (x + i < spaces.size() && spaces[x + i].start == -1) ++i;
-					int nextX = x + i;
-					i = 1;
-					while (y + i < horzSpaces.size() && horzSpaces[y + i].start == -1) ++i;
-					int nextY = y + i;
-					sq.x = spaces[x].start + spaces[x].size;
-					sq.y = horzSpaces[y].start + horzSpaces[y].size;
-					sq.width = spaces[nextX].start - (spaces[x].start + spaces[x].size);
-					sq.height = horzSpaces[nextY].start - (horzSpaces[y].start + horzSpaces[y].size);
-					if (sq.width < 3 || sq.height < 3) continue;
-					if (sq.y > horzEqualSpacing.start + horzEqualSpacing.size) continue;
-					if (sq.x > equalSpacing.start + equalSpacing.size) continue;
-					int upY = sq.y;
-					int downY = sq.y + sq.height;
-					int leftX = sq.x;
-					int rightX = sq.x + sq.width;
-					bool done[4] = { false, false, false, false };
-					while (!(done[0] && done[1] && done[2] && done[3])) {
-						int upAcc = 0, downAcc = 0;
-						for (int i = -1; i < sq.width + 1; i++) {
-							upAcc += seekImage.getPixel(sq.x + i, upY).avg() < 180 ? 1 : 0;
-							downAcc += seekImage.getPixel(sq.x + i, downY).avg() < 180 ? 1 : 0;
-						}
-						if (upAcc > 1 && upY <= sq.y) upY--;
-//						else if (upY >= sq.y && upAcc <= 1) upY++;
-						else done[0] = true;
-						if (downAcc > 1 && downY >= sq.y + sq.height) downY++;
-//						else if (downY <= sq.y + sq.height && downAcc <= 1) downY--;
-						else done[1] = true;
-
-						int leftAcc = 0, rightAcc = 0;
-						for (int i = -1; i < sq.height + 1; i++) {
-							leftAcc += seekImage.getPixel(leftX, sq.y + i).avg() < 180 ? 1 : 0;
-							rightAcc += seekImage.getPixel(rightX, sq.y + i).avg() < 180 ? 1 : 0;
-						}
-						if (leftAcc > 1 && leftX <= sq.x) leftX--;
-//						else if (leftAcc <= 1 && leftX >= sq.x) leftX++;
-						else done[2] = true;
-						if (rightAcc > 1 && rightX >= sq.x + sq.width) rightX++;
-//						else if (rightAcc <= 1 && rightX <= sq.x + sq.width) rightX--;
-						else done[3] = true;
-						
-					}
-					sq.y = upY;
-					sq.height = downY - sq.y;
-					sq.x = leftX;
-					sq.width = rightX - sq.x;					
-					if (sq.width < 3 || sq.height < 3) continue;
-					if (sq.y > horzEqualSpacing.start + horzEqualSpacing.size) continue;
-					locations.push_back(sq);
-				}
-			}
-		}
-	}
-#endif
-#ifndef DEBUGGING_SPACE
-#ifdef SHOW_DEBUG_CHARS
-	for (Square s : characters) {
-		for (int i = s.y; i < s.y + s.height; i++) {
-			seekImage.setPixel(s.x, i, { 0, 255, 0 });
-			seekImage.setPixel(s.x + s.width, i, { 0, 255, 0 });
-		}
-		for (int i = s.x; i < s.x + s.width; i++) {
-			seekImage.setPixel(i, s.y, { 0, 255, 0 });
-			seekImage.setPixel(i, s.y + s.height, { 0, 255, 0 });
-		}
-	}
-#endif
-#endif
-	RECT r;
-	GetClientRect(gui::GUI::useWindow(), &r);
-	InvalidateRect(gui::GUI::useWindow(), &r, TRUE);
-	delete[] accumulator;
-	delete[] horzAccumulator;
-}
-*/
+/**
+ * Initializes search grid
+ * Saves bounding boxes by adding rows to characterLocations[][]
+ * Depends on seekImage
+ * Assumes image is rotation corrected (majority of skew is "fixed")
+ * @see SearchGrid
+ */
 void CV::SearchGrid::init()
 {
+	/**
+	  Perform canny edge detection followed by a hough transform to find vertical and horizontal lines
+	  Lines determined if the change in x or y between its enpoints is small in proportion to image dimensions
+	  At the intersection of the hough transform lines, look for a dark pixel within a small radius
+	  Create and expand a bounding box around that pixel until there are no more connected dark pixels
+	*/
+
+	Kernel guassian({
+		1,  4,  6,  4, 1,
+		4, 16, 24, 16, 4,
+		6, 24, 36, 24, 6,
+		4, 16, 24, 16, 4,
+		1,  4,  6,  4, 1
+	});
+	guassian.scale(1 / 256.0);
 	seekImage.trueGrayscale(std::make_unique<IMG::LumFunc>());
-	auto img = cannyEdgeDetection(seekImage, 0.05, 0.0002);
+//	guassian.kernelConvolution(seekImage);
+	int avg = (seekImage.integralImageValue(seekImage.width() - 1, seekImage.height() - 1) - seekImage.integralImageValue(seekImage.width() - 1, 0) - seekImage.integralImageValue(0, seekImage.height() - 1) + seekImage.integralImageValue(0, 0)) / (seekImage.width() * seekImage.height());
+	avg = 255 - avg;
+	auto img = cannyEdgeDetection(seekImage);
 	Hough hough;
 	hough.transform(*img);
-	auto list = hough.getLines(50);
+	avg *= 1.7;
+	printf("AVG: %d \n", avg);
+	auto list = hough.getLines(avg);
 	printf("%d lines found!\n", list.size());
 	decltype(list) newList;
 	for (decltype(auto) line : list) {
 		auto d = line.second - line.first;
-		if (abs(d.y) < 50 || abs(d.x) < 50) {
+		if ((abs(d.y) < img->height() * 0.05 && abs(d.x) > img->width() * 0.95) || (abs(d.x) < img->width() * 0.05 && abs(d.y) > img->height() * 0.95)) {
 			newList.push_back(line);
 		}
 	}
@@ -446,6 +205,7 @@ void CV::SearchGrid::init()
 		}
 
 	}
+	//* For all bounding boxes that overlap or are very close together: merge them
 	for (auto it = foundLetters.begin(); it != foundLetters.end(); ++it) {
 		int ittCount = 0;
 		for (auto itt = foundLetters.begin(); itt != foundLetters.end(); ++ittCount, ++itt) {
@@ -461,16 +221,23 @@ void CV::SearchGrid::init()
 			}
 		}
 	}
+	/**
+	  Calculate median width and median height of all bounding boxes
+	  For all bounding boxes within x% of those medians, create a sorted list of their x and y coordinates
+	  Use the ordered list of coordinates to create an ordered list of horizontal and vertical spaces between bounding boxes
+	  Determine median space in horizontal and vertical direction
+	*/
+
 	RB_TREE<6> widthVals, heightVals;
 	OCR_TREE xVals;
 	OCR_TREE yVals;
 	for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
 		if (it->x == -1 && it->y == -1) continue;
 		widthVals.insert(it->width);
-		widthVals.insert(it->height);
+		heightVals.insert(it->height);
 	}
 	auto widthList = widthVals.inorderList();
-	auto heightList = widthVals.inorderList();
+	auto heightList = heightVals.inorderList();
 	int widthMedian = widthList.size() % 2 ? widthList[widthList.size() / 2] : (widthList[widthList.size() / 2] + widthList[widthList.size() / 2 - 1]) / 2;
 	int heightMedian = heightList.size() % 2 ? heightList[heightList.size() / 2] : (heightList[heightList.size() / 2] + heightList[heightList.size() / 2 - 1]) / 2;
 	printf("Median width: %d Median height: %d \n", widthMedian, heightMedian);
@@ -481,14 +248,14 @@ void CV::SearchGrid::init()
 			yVals.insert(it->y);
 		}
 	};
-	std::vector<int> xList = xVals.inorderList();
-	std::vector<int> yList = yVals.inorderList();
+	std::vector<int> xList = xVals.inorderListNR();
+	std::vector<int> yList = yVals.inorderListNR();
 	std::vector<int> xSpace, ySpace;
 	for (int i = 0; i < xList.size(); ++i) {
 		if (i == 0) xSpace.push_back(xList[i]);
 		else {
 			int v = i;
-			while (v >= 0 && xList[i] == yList[v]) --v;
+			while (v >= 0 && xList[i] == xList[v]) --v;
 			xSpace.push_back(xList[i] - xList[v]);
 		}
 	}
@@ -508,9 +275,16 @@ void CV::SearchGrid::init()
 	std::vector<std::pair<int, int>> xSpaces;
 	std::vector<std::pair<int, int>> ySpaces;
 	int v = 0;
+	/**
+	  creates pairs <startPos, endPos> to represent groups of equal spacing
+	  when a large space is found, a new group is added to the list
+	  the largest group is deemed as the true search area
+	  calculation is down twice, once in the x direction, once in the y direction
+	*/
+
 	xSpaces.push_back(std::make_pair(seekImage.width(), 0));
 	for (int i = 0; i < xList.size(); ++i) {
-		if (abs(xSpace[i] - xMedian) <= .3 * xMedian || (i + 1 < xList.size() && abs(xSpace[i + 1] - xMedian) <= .3 * xMedian)) {
+		if (abs(xSpace[i] - xMedian) <= .5 * xMedian || (i + 1 < xList.size() && abs(xSpace[i + 1] - xMedian) <= .5 * xMedian)) {
 			xSpaces[v].first = min(xList[i], xSpaces[v].first);
 			xSpaces[v].second = max(xList[i], xSpaces[v].second);
 		}
@@ -524,7 +298,7 @@ void CV::SearchGrid::init()
 	v = 0;
 	ySpaces.push_back(std::make_pair(seekImage.height(), 0));
 	for (int i = 0; i < yList.size(); ++i) {
-		if (abs(ySpace[i] - yMedian) <= .3 * yMedian || (i + 1 < yList.size() && abs(ySpace[i + 1] - yMedian) <= .3 * yMedian)) {
+		if (abs(ySpace[i] - yMedian) <= .5 * yMedian || (i + 1 < yList.size() && abs(ySpace[i + 1] - yMedian) <= .5 * yMedian)) {
 			ySpaces[v].first = min(yList[i], ySpaces[v].first);
 			ySpaces[v].second = max(yList[i], ySpaces[v].second);
 		}
@@ -535,6 +309,8 @@ void CV::SearchGrid::init()
 			ySpaces[v].second = max(yList[i], ySpaces[v].second);
 		}
 	}
+	//* Finds the biggest group of relativly equal spacing and determines that as the search area
+
 	std::pair<int, int> xSpaceFinal{ 0, 0 }, ySpaceFinal{ 0, 0 };
 	for (auto it : xSpaces)
 		if (it.second - it.first > xSpaceFinal.second - xSpaceFinal.first)
@@ -544,18 +320,26 @@ void CV::SearchGrid::init()
 			ySpaceFinal = it;
 	printf("Found search area\n");
 #ifdef DEBUGGING
+	//* draw search area
 	seekImage.drawRect({ xSpaceFinal.first, ySpaceFinal.first }, { xSpaceFinal.second, ySpaceFinal.second }, { 255, 0, 0 });
 #endif
+	/**
+	  For all bounding boxes in the search area, draw central point on image
+	  Perform the hough transform to find horizontal lines which will be the rows of the search
+	  For all lines, identify the bounding boxes it passes through and sort them based on x-coordinate
+	  Add each row to grid and reset image to its saved state before drawing occurred
+	*/
+
 	std::vector<Square> tempList;
 	int itCount = 0;
 	IMG::ImgMemento backup = seekImage.getMemento();
 	seekImage.clear();
 	for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++itCount, ++it) {
-		if ((it->x != -1 && it->y != -1) && it->x + it->width >= xSpaceFinal.first - 10 && it->x <= xSpaceFinal.second + 10 && it->y + it->height >= ySpaceFinal.first - 10 && it->y <= ySpaceFinal.second + 10) {
+		if ((it->x != -1 && it->y != -1) && it->x + it->width >= xSpaceFinal.first - 20 && it->x <= xSpaceFinal.second + 20 && it->y + it->height >= ySpaceFinal.first - 20 && it->y <= ySpaceFinal.second + 20) {
 #ifdef DEBUGGING
 			seekImage.drawRect({ it->x, it->y }, { it->x + it->width, it->y + it->height }, { 0, 0, 255 });
 #endif
-			printf("(%d, %d)\n", it->x, it->y);
+//			printf("(%d, %d)\n", it->x, it->y);
 			tempList.push_back(*it);
 			int px = (it->x + it->x + it->width) / 2;
 			int py = (it->y + it->y + it->height) / 2;
@@ -670,16 +454,16 @@ void CV::SearchGrid::identifyLetters()
 	for (int y = 0; y < rows; y++) {
 		for (int x = 0; x < columns; ++x) {
 			std::pair<char, double> minDifference = std::make_pair(0, DBL_MAX);
-			if (characterLocations[y][x].width > 0 && characterLocations[y][x].height > 0) {
+			if (characterLocations[y][x].width > 3 && characterLocations[y][x].height > 3 && seekImage.xInBounds(characterLocations[y][x].x) && seekImage.yInBounds(characterLocations[y][x].y)) {
 				std::unique_ptr<Image> letter = std::make_unique<Image>(characterLocations[y][x].width, characterLocations[y][x].height);
 				for (int x2 = 0; x2 < characterLocations[y][x].width; x2++) {
 					for (int y2 = 0; y2 < characterLocations[y][x].height; y2++) {
 						letter->setPixel(x2, y2, (Color)seekImage.getPixel(x2 + characterLocations[y][x].x, y2 + characterLocations[y][x].y));
 					}
 				}
-				if (y == 1 && x == 2) letter->saveBmp("testUnknownPreScale.bmp");
+//				if (y == 1 && x == 2) letter->saveBmp("testUnknownPreScale.bmp");
 				letter->scaleTo(SAMPLE_WIDTH, SAMPLE_HEIGHT);
-				if (y == 1 && x == 2) letter->saveBmp("testUnknown.bmp");
+//				if (y == 1 && x == 2) letter->saveBmp("testUnknown.bmp");
 				for (int j = 0; j < knownLetters.size(); j++) {
 					double diffScore = 0;
 					for (int k = 0; k < SAMPLE_WIDTH * SAMPLE_HEIGHT; k++) {
@@ -698,6 +482,12 @@ void CV::SearchGrid::identifyLetters()
 	}
 	iterateRowbyRow();
  }
+/**
+ * Using the initialized characters[][] to search for diagnol, vertical, horizontal and backwords words
+ * Will select the closest match and if there is a letter that does not match up correctly, will save that in the data.ml file
+ * @param words list of words (strings) to search
+ * @see SearchGrid
+*/
  void CV::SearchGrid::search(std::vector<std::string> words)
  {
 	 std::map<std::string, int> foundWords;
@@ -939,6 +729,11 @@ void CV::SearchGrid::identifyLetters()
 	 GetClientRect(gui::GUI::useWindow(), &r);
 	 InvalidateRect(gui::GUI::useWindow(), &r, TRUE);
  }
+ /**
+  * Gets letter with closest eulicidean distance from the point
+  * @param p point to test
+  * @see Math::point
+ */
  std::pair<char, CV::Square> CV::SearchGrid::getLetterNearest(Math::point p)
  {
 	 int minDist = int_max, xPos = 0, yPos = 0;
@@ -956,6 +751,12 @@ void CV::SearchGrid::identifyLetters()
 	 }
 	 return std::pair<char, Square>(characters[yPos][xPos], characterLocations[yPos][xPos]);
  }
+ /**
+  * Saves a set of Squares with its corresponding character from knowns
+  * @param locations array of Squares to correlate to letters
+  * @param knowns array of characters to correlate to squares
+  * @param firstKnown offset of locations, locations[firstKnown] correlates to knowns[0]
+ */
  void CV::augmentDataSet(std::vector <CV::Square> locations, std::vector<char> knowns, IMG::Img & img, int firstKnown)
  {
 	 int size = min(locations.size(), firstKnown + knowns.size());
@@ -976,7 +777,6 @@ void CV::SearchGrid::identifyLetters()
  }
  std::unique_ptr<IMG::Img> CV::cannyEdgeDetection(IMG::Img & img, const double upperThreshold, const double lowerThreshold)
  {
-	 //in this case, only looking for horizontal and vertical lines
 	 std::vector<double> directions, magnitudes;
 	 auto resultant = sobelEdgeDetection(img, &magnitudes, &directions);
 	 for (int i = 0; i < directions.size(); ++i)
@@ -991,31 +791,28 @@ void CV::SearchGrid::identifyLetters()
 	 for (int i = 0; i < img.width() * img.height(); ++i) {
 		 int x = i % img.width();
 		 int y = i / img.width();
-		 if (((magnitudes[i] - minMag) / (maxMag - minMag)) < lowerThreshold) {
+		 if (abs((magnitudes[i] - minMag) / (maxMag - minMag)) < lowerThreshold) {
 			 continue;
 		 }
 		 bool isEdge = true;
 		 if (directions[i] > 112.5 && directions[i] <= 157.5) {
-			 isEdge = false;
-//			 if (y > 0 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x + 1)]) isEdge = false;
-//			 if (y < img.height() - 1 && x > 0 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x - 1)]) isEdge = false;
+			 if (y > 0 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x + 1)]) isEdge = false;
+			 if (y < img.height() - 1 && x > 0 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x - 1)]) isEdge = false;
 		 }
 		 else if (directions[i] > 67.5 && directions[i] <= 112.5) {
-			 isEdge = false;
 			 if (y > 0 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + x]) isEdge = false;
 			 if (y < img.height() - 1 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + x]) isEdge = false;
 		 }
 		 else if (directions[i] > 22.5 && directions[i] <= 67.5) {
-			 isEdge = false;
-//			 if (y > 0 && x > 0 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x - 1)]) isEdge = false;
-//			 if (y < img.height() - 1 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x + 1)]) isEdge = false;
+			 if (y > 0 && x > 0 && magnitudes[i] <= magnitudes[(y - 1) * img.width() + (x - 1)]) isEdge = false;
+			 if (y < img.height() - 1 && x < img.width() - 1 && magnitudes[i] <= magnitudes[(y + 1) * img.width() + (x + 1)]) isEdge = false;
 		 }
 		 else {
 			 if (x > 0 && magnitudes[i] <= magnitudes[y * img.width() + (x - 1)]) isEdge = false;
 			 if (x < img.width() - 1 && magnitudes[i] <= magnitudes[y * img.width() + (x + 1)]) isEdge = false;
 		 }
 		 if (isEdge) {
-			 if (((magnitudes[i] - minMag) / (maxMag - minMag)) >= upperThreshold)
+			 if (abs((magnitudes[i] - minMag) / (maxMag - minMag)) >= upperThreshold)
 				 resultant->setPixel(255, 255, 255, x, y);
 			 else
 				 resultant->setPixel(128, 128, 128, x, y);
@@ -1030,12 +827,12 @@ void CV::SearchGrid::identifyLetters()
 			 if (resultant->getPixel(x, y).avg() == 128) {
 				 if (directions[i] > 112.5 && directions[i] <= 157.5) {
 					 if (y > 0 && x < img.width() - 1 && resultant->getPixel(x + 1, y - 1).avg() == 255) {
-//						 resultant->setPixel(255, 255, 255, x, y);
-//						 imageChanged = true;
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
 					 if (y < img.height() - 1 && x > 0 && resultant->getPixel(x - 1, y + 1).avg() == 255) {
-//						 resultant->setPixel(255, 255, 255, x, y);
-//						 imageChanged = true;
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
 				 }
 				 else if (directions[i] > 67.5 && directions[i] <= 112.5) {
@@ -1050,12 +847,12 @@ void CV::SearchGrid::identifyLetters()
 				 }
 				 else if (directions[i] > 22.5 && directions[i] <= 67.5) {
 					 if (y > 0 && x > 0 && resultant->getPixel(x - 1, y - 1).avg() == 255) {
-//						 resultant->setPixel(255, 255, 255, x, y);
-//						 imageChanged = true;
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
-					 if (y < img.height() - 1 && resultant->getPixel(x + 1, y + 1).avg() == 255) {
-//						 resultant->setPixel(255, 255, 255, x, y);
-//						 imageChanged = true;
+					 if (y < img.height() - 1 && x < img.width() - 1 && resultant->getPixel(x + 1, y + 1).avg() == 255) {
+						 resultant->setPixel(255, 255, 255, x, y);
+						 imageChanged = true;
 					 }
 				 }
 				 else {
@@ -1115,6 +912,12 @@ void CV::SearchGrid::identifyLetters()
 	 if (magnitudes != nullptr) *magnitudes = magnitude;
 	 return newImage;
  }
+ /**
+  * Determines if too lines are close to one another
+  * @param lines a and b to test
+  * @param buffer less than this distance to determine if two lines are close
+  * @return true if one of the enpoints are within buffer distance or if there is an intersection and an enpoint is within 15 units
+ */
  bool CV::isCloseTo(Line & a, Line & b, int buffer)
  {
 	 if ((a.start.x - b.start.x) * (a.start.x - b.start.x) + (a.start.y - b.start.y) * (a.start.y - b.start.y) < buffer * buffer)
@@ -1131,7 +934,8 @@ void CV::SearchGrid::identifyLetters()
 	 }
 	 return false;
  }
- void CV::letterXSort(std::vector<Square>& row) //insertion sort
+ //* insertion sort based off x coordinate
+ void CV::letterXSort(std::vector<Square>& row)
  {
 	 for (int i = 1; i < row.size(); ++i) {
 		 int j = i - 1;
@@ -1145,6 +949,11 @@ void CV::SearchGrid::identifyLetters()
 
 	 }
  }
+ /**
+  * Uses integral image to find a suitable origin of rotation
+  * Ideally the origin is in the middle of a letter in a row in the search.
+  * @return Math::point of the rotational origin
+  */
 point CV::getOrigin(IMG::Img & img)
 {
 	int startY = 0;
@@ -1184,6 +993,12 @@ point CV::getOrigin(IMG::Img & img)
 	}
 	return { startX, startY };
 }
+/**
+ * Rotates entire set of pixels about origin by angle theta
+ * Also enlarges image to image diagnol x image diagnol to prevent a part of the image being rotated off the canvas
+ * @param theta angle
+ * @param origin point to rotate about
+*/
 void CV::rotateImage(IMG::Img & img, float theta, point origin)
 {
 	int diagnol = ceil(sqrt(img.width() * img.width() + img.height() * img.height()));
@@ -1221,65 +1036,16 @@ void CV::rotateImage(IMG::Img & img, float theta, point origin)
 	GetClientRect(gui::GUI::useWindow(), &r);
 	InvalidateRect(gui::GUI::useWindow(), &r, TRUE);
 }
-/*
-void CV::SearchGrid::addLetter(char c, int x, int y)
-{
-	if (lettersInGrid.size() < 1) {
-		row0Y = y;
-		column0X = x;
-		lastRow = std::make_pair(0, y);
-		lastColumn = std::make_pair(0, x);
-		lettersInGrid.push_back(std::shared_ptr<Letter>(new Letter{ 0, 0, c }));
-	}
-	else {
-		int currentRow;
-		int currentColumn;
-		if (abs(lastRow.second - y) < 5)
-			currentRow = lastRow.first;
-		else if (y > lastRow.second) {
-			//this row is further down
-			lastRow = std::make_pair(lastRow.first + 1, y);
-			currentRow = lastRow.first;
-			maxRows = max(maxRows, currentRow);
-		}
-		else if (y < lastRow.second) {
-			if (abs(row0Y - y) < 5) {
-				lastRow = std::make_pair(0, row0Y);
-				currentRow = 0;
-//				printf("Row reset \n");
-			}
-			else
-				printf("IDK how to handle this row \n");
-		}
-
-		if (abs(lastColumn.second - x) < 10) {
-			currentColumn = lastColumn.first;
-//			printf("Current column \n");
-		}
-		else if (x > lastColumn.second) {
-			lastColumn = std::make_pair(lastColumn.first + 1, x);
-			currentColumn = lastColumn.first;
-			maxColumns = max(maxColumns, currentColumn);
-//			printf("Column greater: %d \n", currentColumn);
-		}
-		else if (x < lastColumn.second) {
-			if (abs(x - column0X) < 10) {
-				lastColumn = std::make_pair(0, column0X);
-				currentColumn = 0;
-//				printf("Column reset \n");
-			}
-			else
-				printf("IDK column \n");
-		}
-//		printf("%d %d \n", currentRow, currentColumn);
-		lettersInGrid.push_back(std::shared_ptr<Letter>(new Letter{ currentRow, currentColumn, c }));
-	}
-}
-*/
 CV::SearchGrid::SearchGrid(IMG::Img & wordSearch) : seekImage(wordSearch)
 {
 }
 
+/**
+ * Sets up SearchGrid for searching for words
+ * Erases all past data from a previous search if the object is reused
+ * @see init()
+ * @see identifyLetters()
+*/
 void CV::SearchGrid::load(IMG::Img & search)
 {
 	seekImage = search;
@@ -1352,7 +1118,9 @@ void CV::Hough::transform(IMG::Img & img)
 		}
 	}
 }
-
+/**
+ * Get straight lines from hough transform with >= threshold amount of light pixels on it
+*/
 CV::pointList CV::Hough::getLines(uint32_t threshold)
 {
 	pointList lines;
@@ -1392,7 +1160,10 @@ CV::pointList CV::Hough::getLines(uint32_t threshold)
 	}
 	return lines;
 }
-
+/*
+ * For debug only, saves data from Hough transform
+ * Image is a graph of hough space
+*/
 void CV::Hough::display(const char * filename) const
 {
 	IMG::Img img;
@@ -1440,7 +1211,10 @@ CV::Kernel::Kernel(std::initializer_list<double> list)
 	}
 }
 
-
+/**
+ * Applies the kernel to img. Linearly scales results into 0 - 255 range
+ * @return unique_ptr to newly created img
+*/
 std::unique_ptr<IMG::Img> CV::Kernel::apply(IMG::Img & img)
 {
 	//need to handle overflow of byte
@@ -1492,7 +1266,50 @@ std::unique_ptr<IMG::Img> CV::Kernel::apply(IMG::Img & img)
 //	printf("\n\n");
 	return newImage;
 }
-
+/**
+ * Applies kernel to img. Linearly scales into 0 - 255 range.
+ * Saves result directly to img.
+*/
+void CV::Kernel::kernelConvolution(IMG::Img & img)
+{
+	int j = width / 2;
+	double minSum = std::numeric_limits<double>::max();
+	double maxSum = std::numeric_limits<double>::min();
+	std::vector<vec3f> mat(img.width() * img.height());
+	for (int i = 0; i < img.width() * img.height(); ++i) {
+		int x = i % img.width();
+		int y = i / img.width();
+		double sumRed = 0, sumGreen = 0, sumBlue = 0;
+		for (int y1 = -j; y1 <= j; ++y1) {
+			for (int x1 = -j; x1 <= j; ++x1) {
+				if (x + x1 >= 0 && x + x1 < img.width() && y + y1 >= 0 && y + y1 < img.height()) {
+					IMG::color c = img.getPixel({ x + x1, y + y1 });
+					double r = c.red * k[x1 + j][y1 + j];
+					sumGreen += c.green * k[x1 + j][y1 + j];
+					sumBlue += c.blue * k[x1 + j][y1 + j];
+					sumRed += r;
+				}
+			}
+		}
+		minSum = min(minSum, min(min(sumRed, sumGreen), sumBlue));
+		maxSum = max(maxSum, max(sumRed, max(sumGreen, sumBlue)));
+		mat[i] = { sumRed, sumGreen, sumBlue };
+	}
+	if (minSum < 0) maxSum -= minSum;
+	for (int i = 0; i < mat.size(); ++i) {
+		int x = i % img.width();
+		int y = i / img.width();
+		if (minSum < 0) mat[i] += -minSum;
+		double red = mat[i][0] * 255.0 / maxSum;
+		double green = mat[i][1] * 255.0 / maxSum;
+		double blue = mat[i][2] * 255.0 / maxSum;
+		img.setPixel(static_cast<channel>(red), static_cast<channel>(green), static_cast<channel>(blue), x, y);
+	}
+}
+/**
+ * Applies kernel to img. Does not scale. Use for multi-pass operations
+ * @return unscaled raw data matrix. For each element [0] = red, [1] = blue [2] = green
+*/
 std::vector<Math::vec3f> CV::Kernel::apply_matrix(IMG::Img & img)
 {
 	int j = width / 2;
@@ -1528,7 +1345,9 @@ void CV::Kernel::testShowMatrix(FILE * out)
 		fprintf(out, "\n");
 	}
 }
-
+/**
+ * @param scaler scaler to multiply with each element in the kernel
+*/
 void CV::Kernel::scale(double scaler)
 {
 	for (int y = 0; y < height; ++y) {
@@ -1536,65 +1355,4 @@ void CV::Kernel::scale(double scaler)
 			k[x][y] *= scaler;
 		}
 	}
-}
-
-void CV::ConnectedComponents::findConnectedComponents(IMG::Img & image)
-{
-	valueArray.resize(image.width());
-	labelArray.resize(image.width());
-	for (int i = 0; i < image.width(); ++i) {
-		valueArray[i].resize(image.height());
-		labelArray[i].resize(image.height());
-	}
-	for (int i = 0; i < image.width() * image.height(); ++i) {
-		int x = i % image.width();
-		int y = i / image.width();
-		int a = image.getPixel(x, y).avg();
-		if (a > 100)
-			valueArray[x][y] = 0;
-		else
-			valueArray[x][y] = 1;
-	}
-	uint32_t label = 0;
-	for (int y = 0; y < image.height(); ++y) {
-		for (int x = 0; x < image.width(); ++x) {
-			if (x > 0 && valueArray[x - 1][y] == valueArray[x][y])
-				labelArray[x][y] = labelArray[x - 1][y];
-			else if (y > 0 && valueArray[x][y - 1] == valueArray[x][y])
-				labelArray[x][y] = labelArray[x][y - 1];
-			else if (x > 0 && y > 0 && valueArray[x - 1][y - 1] == valueArray[x][y])
-				labelArray[x][y] = labelArray[x - 1][y - 1];
-			else if (y > 0 && x < image.width() - 1 && valueArray[x + 1][y - 1] == valueArray[x][y])
-				labelArray[x][y] = labelArray[x + 1][y - 1];
-			else
-				labelArray[x][y] = label++;
-		}
-	}
-	this->labels = label;
-}
-
-std::vector<CV::Square> CV::ConnectedComponents::componentLocations()
-{
-	std::vector<uint32_t> minX(labels), minY(labels), maxX(labels), maxY(labels);
-	for (uint32_t i = 0; i < labels; ++i) {
-		minX[i] = UINT_MAX;
-		minY[i] = UINT_MAX;
-		maxX[i] = 0;
-		maxY[i] = 0;
-	}
-	for (size_t j = 0; j < labelArray.size() * labelArray[0].size(); ++j) {
-		uint32_t x = j % labelArray.size();
-		uint32_t y = j / labelArray.size();
-		uint32_t label = labelArray[x][y];
-		minX[label] = min(minX[label], x);
-		minY[label] = min(minY[label], y);
-		maxX[label] = max(maxX[label], x);
-		maxY[label] = max(maxY[label], y);
-	}
-	std::vector<Square> locations(labels);
-	for (uint32_t i = 0; i < labels; ++i) {
-		locations[i] = { static_cast<int>(minX[i]), static_cast<int>(minY[i]), static_cast<int>(maxX[i] - minX[i]), static_cast<int>(maxY[i] - minY[i]) };
-
-	}
-	return locations;
 }

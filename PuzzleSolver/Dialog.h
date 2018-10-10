@@ -9,6 +9,12 @@
 	assert(!(WMSG)); \
 }
 namespace DialogSpace {
+	/**
+	 * For dialogs that contain text boxes, gets current input value as a float
+	 * @param parent handle to dialog
+	 * @param control control ID
+	 * @see res.h
+	*/
 	inline float getWndVal(HWND parent, int control);
 	enum DialogMessage {
 		dlgm_update_origin,
@@ -55,6 +61,10 @@ namespace DialogSpace {
 	template<typename T>
 	struct is_dialog<T, std::void_t<decltype(std::declval<T&>().callback(HWND(), UINT(), WPARAM(), LPARAM()))>> : std::true_type {};
 
+	/**
+	 * Bridge between dialog classes and Win32 C API. 
+	 * By holding a static pointer to a dialog class, allows the callback function to be called from Win32 C functions
+	*/
 	template <typename T>
 	class DialogHelper {
 	private:

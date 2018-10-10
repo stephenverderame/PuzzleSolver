@@ -20,6 +20,9 @@ namespace Math {
 
 	double radians(double degrees);
 	double degrees(double radians);
+	/**
+	 * @return Math::point Matrix-Vector product
+	*/
 	point matVecProd(const matrix & mat, const point & vec);
 	matrix rotationMatrix(const double degrees);
 
@@ -82,7 +85,16 @@ namespace Math {
 
 	using vec3f = Vector<3, double>;
 
+	/**
+	 * Determines if lines defined by endpoints s1, f1 and s2, f2 intersect
+	 * @return intersection point or {INT_MAX, INT_MIN} if they are parallel
+	 * No check is done to make sure return value is on the line between enpoints
+	 */
 	point lineIntersection(point s1, point f1, point s2, point f2);
+	/**
+	 * Determines if line defined by end points lineStart, lineEnd intersects rect defined by topLeft, btmRt
+	 * Internally tests lineIntersection on all four sides of rect with line
+	*/
 	bool lineRectIntersection(point lineStart, point lineEnd, point topLeft, point btmRt);
 
 	constexpr int int_max = std::numeric_limits<int>::max();
