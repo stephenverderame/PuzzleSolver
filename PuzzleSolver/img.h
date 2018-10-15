@@ -71,6 +71,11 @@ namespace IMG {
 		 * @see Img::loadFrom()
 		*/
 		Img() : loaded(false) {};
+
+		/**
+		 * Loads an image at the specefied path.
+		 * Underlying API code uses stb_image
+		*/
 		void loadFromPath(const char * s);
 		void createNew(int width, int height);
 		unsigned int width() const noexcept;
@@ -81,7 +86,13 @@ namespace IMG {
 		void drawRect(Math::point topLeft, Math::point btmRight, color c);
 		color getPixel(const Math::point p) const throw(ImgOutOfRangeException);
 		color getPixel(const int x, const int y) const throw(ImgOutOfRangeException);
+
+		/**
+		 * Saves the image as a 24-bit RGB bitmap
+		 * @param path filename to be saved. Should end with ".bmp"
+		*/
 		void saveAsBmp(const char * path) const;
+
 		//* Wrapper for Image::greyscale(). Turns an image monochrome
 		void greyscale();
 		/**
@@ -89,15 +100,34 @@ namespace IMG {
 		 * @param function pointer to subclass of GrayFunc which determines implementation of GrayScale algorithm
 		*/
 		void trueGrayscale(std::unique_ptr<GrayFunc> && function);
+
 		//* Resizes the image, does not rescale. Image is also set to black
 		void resize(int width, int height);
+
+		/**
+		 * Gets integral image table value for specefied pixel
+		 * Throws IMG::ImgOutOfRangeException if specefied point is not within the matrix
+		*/
 		int integralImageValue(int x, int y);
 		ImgMemento getMemento();
 		void loadFrom(ImgMemento memento);
 		bool isLoaded() noexcept { return loaded; }
 		void drawLine(Math::point start, Math::point end, color c);
+
+		//* Sets image to all black
 		void clear() noexcept;
 		bool xInBounds(int x) noexcept;
 		bool yInBounds(int y) noexcept;
+		/**
+		 * For pictures coming from a camera, rotates 90 degrees to put into coreect orientation
+		 * Overall the function completely turns the image by 90 degrees
+		*/
+		void transpose();
+
+		/**
+		 * Resamples entire image by the given factor
+		 * @param scaler resampling factor. 
+		*/
+		void scaleByFactor(double scaler);
 	};
 }

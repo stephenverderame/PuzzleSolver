@@ -62,7 +62,7 @@ private:
 	HPEN oldPen;
 	bool firstPen, firstBrush;
 	PAINTSTRUCT paint;
-	std::shared_ptr<Window> display;
+	std::unique_ptr<Window> display;
 	int __stdcall callback(HWND hwnd, UINT msg, WPARAM w, LPARAM l);
 	bool overrideErase = false;
 	bool dcIsValid = false;
@@ -71,11 +71,11 @@ private:
 	 * Used to ensure only one image is on the screen at a time
 	*/
 	Image * img;
-	Wnd(const Wnd& other);
 public:
 	Wnd();
 	~Wnd();
-	Wnd& operator=(const Wnd& other);
+	Wnd& operator=(const Wnd& other) = delete;
+	Wnd(const Wnd& other) = delete;
 
 	//* Sends redraw message to window.
 	void redraw() const;

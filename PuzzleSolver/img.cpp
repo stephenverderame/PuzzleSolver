@@ -2,13 +2,13 @@
 
 void IMG::Img::loadFromPath(const char * s)
 {
-	img = std::shared_ptr<Image>(new Image(s));
+	img = std::make_shared<Image>(s);
 	loaded = true;
 }
 
 void IMG::Img::createNew(int width, int height)
 {
-	img = std::shared_ptr<Image>(new Image(width, height));
+	img = std::make_shared<Image>(width, height);
 	loaded = true;
 }
 
@@ -95,8 +95,9 @@ void IMG::Img::resize(int width, int height)
 	img->resize(width, height);
 }
 
-int IMG::Img::integralImageValue(int x, int y)
+int IMG::Img::integralImageValue(int x, int y) 
 {
+	if (x < 0 || x >= img->getWidth() || y < 0 || y >= img->getHeight()) throw ImgOutOfRangeException();
 	return img->integralImageValue(x, y);
 }
 
@@ -150,6 +151,22 @@ bool IMG::Img::xInBounds(int x) noexcept
 bool IMG::Img::yInBounds(int y) noexcept
 {
 	return y >= 0 && y < img->getHeight();
+}
+
+void IMG::Img::transpose()
+{
+	std::shared_ptr<Image> newImg = std::make_shared<Image>(img->getHeight(), img->getWidth());
+	for (int x = 0; x < img->getWidth(); ++x) {
+		for (int y = 0; y < img->getHeight(); ++y) {
+			newImg->setPixel(img->getHeight() - y - 1, x, img->getPixel(x, y));
+		}
+	}
+	img = newImg;
+}
+
+void IMG::Img::scaleByFactor(double scaler)
+{
+	img = std::make_shared<Image>(*img->scale(scaler * img->getWidth(), scaler * img->getHeight()));
 }
 
 int IMG::color::avg()

@@ -251,48 +251,13 @@ int main() {
 				delete mem;
 				break;
 			}
-			case messages::wnd_monochrome:
+			case messages::wnd_tranpose:
 			{
 				if (!image.isLoaded()) break;
-				//testing 
 				UndoStack::getInstance()->saveState(image.getMemento());
-				Kernel guassian({
-					1,  4,  6,  4, 1,
-					4, 16, 24, 16, 4,
-					6, 24, 36, 24, 6,
-					4, 16, 24, 16, 4,
-					1,  4,  6,  4, 1
-				});
-				guassian.scale(1 / 256.0);
-				image.trueGrayscale(std::make_unique<IMG::LumFunc>());
-//				guassian.kernelConvolution(image);
-				int avg = (image.integralImageValue(image.width() - 1, image.height() - 1) - image.integralImageValue(image.width() - 1, 0) - image.integralImageValue(0, image.height() - 1) + image.integralImageValue(0, 0)) / (image.width() * image.height());
-				avg = 255 - avg;
-				auto img = cannyEdgeDetection(image);
-				Hough hough;
-				hough.transform(*img);
-				avg *= 1.7;
-				printf("AVG: %d \n", avg);
-				auto list = hough.getLines(avg);
-				printf("%d lines found!\n", list.size());
-				decltype(list) newList;
-				for (decltype(auto) line : list) {
-					auto d = line.second - line.first;
-					if ((abs(d.y) < img->height() * 0.05 && abs(d.x) > img->width() * 0.95) || (abs(d.x) < img->width() * 0.05 && abs(d.y) > img->height() * 0.95)) {
-						bool add = true;
-//						for (int i = 0; i < newList.size(); ++i)
-//							if (isCloseTo(Line{ newList[i].first, newList[i].second }, Line{ line.first, line.second }, 10)) { add = false; break; }
-//						if (add) {
-//							newList.push_back(line);
-							img->drawLine(line.first, line.second, { 255, 0, 0 });
-//						}
-					}
-				}
-/*				image.drawRect({ 200, 200 }, { 400, 400 }, { 255, 0, 0 });
-				image.drawLine({ 300, 0 }, { 500, 500 }, { 255, 0, 0 });
-				printf("Collision: %d\n", Math::lineRectIntersection({ 300, 0 }, { 500, 500 }, { 200, 200 }, { 400, 400 }));*/
-				window.drawImage(*img);
-				image = *img;
+				image.transpose();
+				//Testing
+				window.drawImage(image);
 				window.redraw();
 				break;
 			}
@@ -303,6 +268,10 @@ int main() {
 				if (path.size() > 1) {
 					if(image.isLoaded()) UndoStack::getInstance()->saveState(image.getMemento());
 					image.loadFromPath(path.c_str());
+					if (image.width() * image.height() > 1500000) {
+						image.scaleByFactor(1500000.0 / (image.width() * image.height()));
+						printf("Scale done\n");
+					}
 					gui.updateScrollBar(image.width(), image.height());
 					window.drawImage(image);
 					window.redraw();
@@ -313,7 +282,6 @@ int main() {
 			{	
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
-#ifndef DEBUGGING_SPACE
 				wordSearch.load(image);
 				char * buffer = (char*)note.data1;
 				std::string word;
@@ -341,7 +309,6 @@ int main() {
 				wordSearch.search(words);
 				window.drawImage(wordSearch.getEditedImage());
 				window.redraw();
-#endif
 				break;
 			}
 			case messages::wnd_solve_maze:
@@ -357,6 +324,7 @@ int main() {
 				gui.showProgressBar(false);
 				window.drawImage(image);
 				window.redraw();
+				printf("Maze solved!\n");
 				break;
 			case messages::mze_selecting:
 				maze.loadMaze(image);

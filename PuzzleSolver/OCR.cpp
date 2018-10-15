@@ -99,13 +99,13 @@ void CV::SearchGrid::init()
 	  Create and expand a bounding box around that pixel until there are no more connected dark pixels
 	*/
 
-	Kernel guassian({
+	Kernel guassian = {
 		1,  4,  6,  4, 1,
 		4, 16, 24, 16, 4,
 		6, 24, 36, 24, 6,
 		4, 16, 24, 16, 4,
 		1,  4,  6,  4, 1
-	});
+	};
 	guassian.scale(1 / 256.0);
 	seekImage.trueGrayscale(std::make_unique<IMG::LumFunc>());
 //	guassian.kernelConvolution(seekImage);
@@ -114,7 +114,7 @@ void CV::SearchGrid::init()
 	auto img = cannyEdgeDetection(seekImage);
 	Hough hough;
 	hough.transform(*img);
-	avg *= 1.7;
+//	avg *= 1.7;
 	printf("AVG: %d \n", avg);
 	auto list = hough.getLines(avg);
 	printf("%d lines found!\n", list.size());
@@ -122,9 +122,12 @@ void CV::SearchGrid::init()
 	for (decltype(auto) line : list) {
 		auto d = line.second - line.first;
 		if ((abs(d.y) < img->height() * 0.05 && abs(d.x) > img->width() * 0.95) || (abs(d.x) < img->width() * 0.05 && abs(d.y) > img->height() * 0.95)) {
+//			img->drawLine(line.first, line.second, { 255, 0, 0 });
 			newList.push_back(line);
 		}
 	}
+//	seekImage = *img;
+//	return;
 	seekImage.greyscale();
 	std::vector<Square> foundLetters;
 	for (auto it = newList.cbegin(); it != newList.cend(); ++it) {
@@ -199,6 +202,7 @@ void CV::SearchGrid::init()
 						yoffset += direction;
 					}
 					foundLetters.push_back({ start.x + minX, start.y + minY, start.x + maxX - (start.x + minX), start.y + maxY - (start.y + minY) });
+//					seekImage.drawRect({ start.x + minX, start.y + minY }, { start.x + maxX, start.y + maxX }, { 0, 0, 255 });
 				}
 			}
 
@@ -228,7 +232,7 @@ void CV::SearchGrid::init()
 	  Determine median space in horizontal and vertical direction
 	*/
 
-	RB_TREE<6> widthVals, heightVals;
+	RB_TREE<2> widthVals, heightVals;
 	OCR_TREE xVals;
 	OCR_TREE yVals;
 	for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
@@ -241,9 +245,9 @@ void CV::SearchGrid::init()
 	int widthMedian = widthList.size() % 2 ? widthList[widthList.size() / 2] : (widthList[widthList.size() / 2] + widthList[widthList.size() / 2 - 1]) / 2;
 	int heightMedian = heightList.size() % 2 ? heightList[heightList.size() / 2] : (heightList[heightList.size() / 2] + heightList[heightList.size() / 2 - 1]) / 2;
 	printf("Median width: %d Median height: %d \n", widthMedian, heightMedian);
-	for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++it) {
+	for (auto it = foundLetters.begin(); it != foundLetters.end(); ++it) {
 		if (it->x == -1 && it->y == -1) continue;
-		if (abs(it->width - widthMedian) <= .3 * widthMedian && abs(it->height - heightMedian) <= .3 * heightMedian) {
+		if ((abs(it->width - widthMedian) <= .3 * widthMedian && abs(it->height - heightMedian) <= .3 * heightMedian)) {
 			xVals.insert(it->x);
 			yVals.insert(it->y);
 		}
@@ -284,7 +288,7 @@ void CV::SearchGrid::init()
 
 	xSpaces.push_back(std::make_pair(seekImage.width(), 0));
 	for (int i = 0; i < xList.size(); ++i) {
-		if (abs(xSpace[i] - xMedian) <= .5 * xMedian || (i + 1 < xList.size() && abs(xSpace[i + 1] - xMedian) <= .5 * xMedian)) {
+		if (abs(xSpace[i] - xMedian) <= .5  * xMedian || (i + 1 < xList.size() && abs(xSpace[i + 1] - xMedian) <= .5 * xMedian)) {
 			xSpaces[v].first = min(xList[i], xSpaces[v].first);
 			xSpaces[v].second = max(xList[i], xSpaces[v].second);
 		}
@@ -334,11 +338,12 @@ void CV::SearchGrid::init()
 	int itCount = 0;
 	IMG::ImgMemento backup = seekImage.getMemento();
 	seekImage.clear();
+	const int amountOfBoundingBoxes = std::count_if(foundLetters.begin(), foundLetters.end(), [](const Square& s) -> bool {
+		return s.x != -1 && s.y != -1;
+	});
+	printf("Amount of identified boxes: %d \n", amountOfBoundingBoxes);
 	for (auto it = foundLetters.cbegin(); it != foundLetters.cend(); ++itCount, ++it) {
-		if ((it->x != -1 && it->y != -1) && it->x + it->width >= xSpaceFinal.first - 20 && it->x <= xSpaceFinal.second + 20 && it->y + it->height >= ySpaceFinal.first - 20 && it->y <= ySpaceFinal.second + 20) {
-#ifdef DEBUGGING
-			seekImage.drawRect({ it->x, it->y }, { it->x + it->width, it->y + it->height }, { 0, 0, 255 });
-#endif
+		if ((it->x != -1 && it->y != -1) && it->x + it->width >= xSpaceFinal.first - 50 && it->x <= xSpaceFinal.second + 50 && it->y + it->height >= ySpaceFinal.first - 50 && it->y <= ySpaceFinal.second + 50) {
 //			printf("(%d, %d)\n", it->x, it->y);
 			tempList.push_back(*it);
 			int px = (it->x + it->x + it->width) / 2;
@@ -349,11 +354,13 @@ void CV::SearchGrid::init()
 	printf("Init all vectors\n");
 	Hough detectGrid;
 	detectGrid.transform(seekImage);
-	auto lines = detectGrid.getLines(80);
+	const int houghThreshold = sqrt(amountOfBoundingBoxes) * 3.5;
+	printf("Hough Threshold: %d \n", houghThreshold);
+	const auto lines = detectGrid.getLines(houghThreshold);
 	printf("Detected: %d\n", lines.size());
 	std::vector<std::pair<point, point>> linesFinal;
 	for (auto l : lines) {
-		if ((abs(l.second.x - l.first.x) > seekImage.width() * .5 && abs(l.second.y - l.first.y) < seekImage.height() * .5)) {
+		if ((abs(l.second.x - l.first.x) >= seekImage.width() * .95 && abs(l.second.y - l.first.y) <= seekImage.height() * .05)) {
 			bool add = true;
 			for(auto lf : linesFinal)
 				if (isCloseTo(Line{ lf.first, lf.second }, Line{ l.first, l.second })) { add = false; break; }
@@ -364,29 +371,25 @@ void CV::SearchGrid::init()
 		}
 	}
 	std::vector<Square> row;
+	int maxColumns = 0;
 	for (auto line : linesFinal) {
-//		printf("Y: %d\n", line.first.y);
 		for (auto it = tempList.cbegin(); it != tempList.end(); ++it) {
 			auto sq = *it;
 			if (lineRectIntersection(line.first, line.second, { sq.x, sq.y }, { sq.x + sq.width, sq.y + sq.height })) {
 				row.push_back(sq);
-//				point center = { (sq.x + sq.x + sq.width) / 2, (sq.y + sq.y + sq.height) / 2 };
-//				seekImage.rect({ center.x - 2, center.y - 2 }, { center.x + 2, center.y + 2 }, { 0, 255, 0 });
 			}
 		}
 		letterXSort(row);
+		maxColumns = max(static_cast<int>(row.size()), maxColumns);
 		characterLocations.push_back(row);
 		row.clear();
 	}
 	characters.resize(characterLocations.size());
 	for (int i = 0; i < characterLocations.size(); ++i)
-		characters[i].resize(characterLocations[i].size(), '?');
+		characters[i].resize(maxColumns, '?');
 	rows = characterLocations.size();
-	columns = characterLocations[0].size();
+	columns = maxColumns;
 	printf("Grid of %d rows by %d columns \n", rows, columns);
-//	auto rc = characterLocations[0][2];
-//	point cr = { (rc.x + rc.x + rc.width) / 2, (rc.y + rc.y + rc.height) / 2 };
-//	seekImage.rect({ cr.x - 2, cr.y - 2 }, { cr.x + 2, cr.y + 2 }, { 0, 255, 0 });
 	seekImage.loadFrom(backup);
 	printf("Done with init\n");
 
@@ -454,11 +457,12 @@ void CV::SearchGrid::identifyLetters()
 	for (int y = 0; y < rows; y++) {
 		for (int x = 0; x < columns; ++x) {
 			std::pair<char, double> minDifference = std::make_pair(0, DBL_MAX);
-			if (characterLocations[y][x].width > 3 && characterLocations[y][x].height > 3 && seekImage.xInBounds(characterLocations[y][x].x) && seekImage.yInBounds(characterLocations[y][x].y)) {
+			if (characterLocations[y][x].width > 3 && characterLocations[y][x].height > 3 && x < characterLocations[y].size()) {
 				std::unique_ptr<Image> letter = std::make_unique<Image>(characterLocations[y][x].width, characterLocations[y][x].height);
 				for (int x2 = 0; x2 < characterLocations[y][x].width; x2++) {
 					for (int y2 = 0; y2 < characterLocations[y][x].height; y2++) {
-						letter->setPixel(x2, y2, (Color)seekImage.getPixel(x2 + characterLocations[y][x].x, y2 + characterLocations[y][x].y));
+						if(seekImage.xInBounds(x + x2) && seekImage.yInBounds(y + y2))
+							letter->setPixel(x2, y2, (Color)seekImage.getPixel(x2 + characterLocations[y][x].x, y2 + characterLocations[y][x].y));
 					}
 				}
 //				if (y == 1 && x == 2) letter->saveBmp("testUnknownPreScale.bmp");
@@ -639,7 +643,7 @@ void CV::SearchGrid::identifyLetters()
 					 
 				 }
 			 }
-/**/	}
+	}
 		std::pair<int, int> maxSame = std::make_pair(0, round(word.size() * 0.3));
 		for (int j = 0; j < possibilities.size(); j++) {
 			int same = 0;
@@ -693,7 +697,8 @@ void CV::SearchGrid::identifyLetters()
 	 FILE * file = fopen("C:\\Users\\stephen\\Documents\\Visual Studio 2015\\Projects\\PuzzleSolver\\PuzzleSolver\\data.ml", "ab");
 	 for (auto it = foundWords.begin(); it != foundWords.end(); it++) {
 		 //implement 'machine learning'
-		 if (possibleLetterLocations[it->first].size() > 0 && it->second != it->first.size()) {
+		 //* if a detected word is mostly matched but a few letters aren't perfect, reassign those letters and save them
+		 if (possibleLetterLocations[it->first].size() > 0 && it->second != it->first.size() && it->second / (float)it->first.size() > 0.5) {
 			 for (int i = 0; i < it->first.size(); i++) {
 				 int x = possibleLetterLocations[it->first][i].x;
 				 int y = possibleLetterLocations[it->first][i].y;

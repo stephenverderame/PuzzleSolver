@@ -48,7 +48,7 @@ int Wnd::callback(HWND hwnd, UINT msg, WPARAM w, LPARAM l)
 
 Wnd::Wnd() : img(nullptr)
 {
-	display = std::shared_ptr<Window>(new Window("Puzzle Solver"));
+	display = std::make_unique<Window>(static_cast<char*>("Puzzle Solver"));
 	display->use();
 	WNDCLASSEX update;
 	update.lpszMenuName = MAKEINTRESOURCE(ID_MENU);
@@ -80,8 +80,8 @@ Wnd::Wnd() : img(nullptr)
 		case IDM_CROP:
 			n.msg = messages::wnd_crop;
 			break;
-		case IDM_MONOCHROME:
-			n.msg = messages::wnd_monochrome;
+		case IDM_TRANSPOSE:
+			n.msg = messages::wnd_tranpose;
 			break;
 		case IDM_ROTATE:
 			n.msg = messages::wnd_rotate;
@@ -127,22 +127,6 @@ Wnd::~Wnd()
 	if (img != nullptr)
 		delete img;
 }
-
-Wnd & Wnd::operator=(const Wnd & other)
-{
-	display = other.display;
-	if (img != nullptr)
-		delete img;
-	if (other.img != nullptr) {
-		img = new Image(other.img->getWidth(), other.img->getHeight());
-		for (int i = 0; i < other.img->getWidth() * other.img->getHeight(); i++) {
-			int x = i % other.img->getWidth();
-			int y = i / other.img->getWidth();
-			img->setPixel(x, y, other.img->getPixel(x, y));
-		}
-	}
-}
-
 void Wnd::redraw() const
 {
 	RECT r;

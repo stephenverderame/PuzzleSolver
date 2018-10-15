@@ -1,93 +1,34 @@
-﻿  OCR.cpp
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(68): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(69): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\OCR.h(59): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\OCR.h(84): warning C4018: '>=': signed/unsigned mismatch
-OCR.cpp(11): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(17): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(23): warning C4018: '>=': signed/unsigned mismatch
-OCR.cpp(40): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-OCR.cpp(42): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(48): warning C4018: '>=': signed/unsigned mismatch
-OCR.cpp(59): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-OCR.cpp(109): warning C4244: '*=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(246): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(254): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(278): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(279): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(292): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(293): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(374): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(459): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(493): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(502): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(518): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(535): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(551): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(567): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(583): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(600): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(616): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(630): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(632): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(683): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(757): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(761): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(766): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(774): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(775): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(779): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(783): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(787): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(799): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(804): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(808): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(818): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(828): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(838): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(846): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(870): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(880): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(908): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(927): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(934): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(935): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(937): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(939): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(941): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(943): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(961): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(979): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1041): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1052): warning C4244: '=': conversion from 'double' to 'std::size_t', possible loss of data
-OCR.cpp(1060): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1061): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1076): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1077): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1083): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1096): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1098): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1102): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1104): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1146): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-OCR.cpp(1172): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1179): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1197): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1219): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1225): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1239): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1254): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1260): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1299): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1303): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1313): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1314): warning C4018: '<': signed/unsigned mismatch
-OCR.cpp(1321): warning C4018: '<': signed/unsigned mismatch
-C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include\utility(200): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-  OCR.cpp(629): note: see reference to function template instantiation 'std::pair<int,int>::pair<int,double,void,0>(std::pair<int,double> &&) noexcept' being compiled
-  OCR.cpp(629): note: see reference to function template instantiation 'std::pair<int,int>::pair<int,double,void,0>(std::pair<int,double> &&) noexcept' being compiled
+﻿  Main.cpp
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(51): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(87): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(88): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\OCR.h(53): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\OCR.h(78): warning C4018: '>=': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(289): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(308): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(315): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(325): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(333): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(339): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(344): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(349): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\gui.h(41): warning C4373: 'Gui::update': virtual function overrides 'Notification::Observer::update', previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
+  c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Observer.h(41): note: see declaration of 'Notification::Observer::update'
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Wnd.h(132): warning C4373: 'Wnd::update': virtual function overrides 'Notification::Observer::update', previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
+  c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Observer.h(41): note: see declaration of 'Notification::Observer::update'
+Main.cpp(107): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+Main.cpp(113): warning C4018: '<': signed/unsigned mismatch
+Main.cpp(125): warning C4018: '<': signed/unsigned mismatch
+Main.cpp(129): warning C4018: '<': signed/unsigned mismatch
+Main.cpp(134): warning C4018: '<': signed/unsigned mismatch
+Main.cpp(35): warning C4101: 'msg': unreferenced local variable
+  Maze.cpp
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(87): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(88): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(51): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
+Maze.cpp(27): warning C4018: '<': signed/unsigned mismatch
   Generating code
-  4 of 4602 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+  2 of 4655 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     2 functions had inline decision re-evaluated but remain unchanged
   Finished generating code

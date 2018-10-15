@@ -11,7 +11,7 @@ namespace Notification {
 		wnd_size,
 		wnd_load,
 		wnd_crop,
-		wnd_monochrome,
+		wnd_tranpose,
 		wnd_save,
 		wnd_rotate,
 		wnd_undo,

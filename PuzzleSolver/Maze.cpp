@@ -1,6 +1,18 @@
 #include "Maze.h"
+#include <thread>
+#include <atomic>
+struct CV::Maze::impl {
+	std::atomic<bool> solving, invalidate;
+	impl() : solving(false), invalidate(false) {}
+};
 
-CV::Maze::Maze(IMG::Img & i) : img(i) {}
+CV::Maze::Maze(IMG::Img & i) : img(i) {
+	pimpl = std::make_unique<impl>();
+}
+
+//* default behavior is fine, just had to be implemented in .cpp file after impl definition otherwise 
+//* the deletion of pimpl would cause an error bc impl wasn't defined yet
+CV::Maze::~Maze() = default;
 
 void CV::Maze::loadMaze(IMG::Img & im)
 {
@@ -9,12 +21,10 @@ void CV::Maze::loadMaze(IMG::Img & im)
 
 void CV::Maze::choosePoint()
 {
-	sMu.lock();
-	bool s = solving;
-	sMu.unlock();
+	const bool s = pimpl->solving;
 	if (!s) {
 		buffer.reserve(img.height() * img.width());
-		for (int i = 0; i < img.height() * img.width(); i++) {
+		for (int i = 0; i < img.height() * img.width(); ++i) {
 			int x = i % img.width();
 			int y = i / img.width();
 			IMG::color c = img.getPixel({ x, y });
@@ -35,9 +45,7 @@ void CV::Maze::calculatePath(Math::point start, Math::point end, Math::point cro
 
 void CV::Maze::calculatePathThread(Math::point start, Math::point end, Math::point crop_1, Math::point crop_2)
 {
-	sMu.lock();
-	solving = true;
-	sMu.unlock();
+	pimpl->solving = true;
 	Grid g(img.width(), img.height(), buffer.data());
 	if (crop_1.x != crop_2.x && crop_1.y != crop_2.y)
 		g.setBound({ crop_1.x, crop_1.y }, { crop_2.x, crop_2.y });
@@ -50,12 +58,8 @@ void CV::Maze::calculatePathThread(Math::point start, Math::point end, Math::poi
 		img.setPixel(p);
 		path.pop();
 	}
-	sMu.lock();
-	solving = false;
-	sMu.unlock();
-	iMu.lock();
-	invalidate = true;
-	iMu.unlock();
+	pimpl->solving = false;
+	pimpl->invalidate = true;
 	Notification::notification n;
 	n.msg = Notification::messages::mze_finish;
 	notify(n);
@@ -63,7 +67,6 @@ void CV::Maze::calculatePathThread(Math::point start, Math::point end, Math::poi
 
 bool CV::Maze::isSolving()
 {
-	std::lock_guard<std::mutex> guard(sMu);
-	bool s = solving;
+	bool s = pimpl->solving;
 	return s;
 }

@@ -8,8 +8,8 @@ struct pos {
 	int x;
 	int y;
 	pos * parent;
-	pos() {};
-	pos(int x, int y) : x(x), y(y) {};
+	pos() : parent(nullptr) {};
+	pos(int x, int y) : x(x), y(y), parent(nullptr) {};
 	bool operator==(pos other) {
 		return x == other.x && y == other.y;
 	}
@@ -31,6 +31,7 @@ struct pos {
 };
 class Grid {
 private:
+	//* NO LONGER AN OWNED RESOURCE OF THIS CLASS
 	int * map;
 	int length;
 	int height;
@@ -104,7 +105,7 @@ public:
 			for (int i = -1; i <= 1; i++) {
 				for (int j = -1; j <= 1; j++) {
 					if (i == 0 && j == 0) continue;
-					pos s = minF.first + pos{ i, j };
+					pos s = minF.first + pos{ i, j };				
 					s.parent = new pos(minF.first);
 					successors.push_back(s);
 				}
@@ -114,7 +115,8 @@ public:
 				if (p.x < 0 || p.x >= length || p.y < 0 || p.y >= height) continue;
 				if (cropped && (p.x < Math::min(crop1.x, crop2.x) || p.x > Math::max(crop1.x, crop2.x) || p.y < Math::min(crop1.y, crop2.y) || p.y > Math::max(crop1.y, crop2.y))) continue;
 				bool cont = false;
-				for (auto itt = open.begin(); itt != open.end(); itt++) {
+				//more likely that if it was already added, it would be towards the end
+				for (auto itt = open.end(); itt != open.begin(); itt--) {
 					if (p == *itt/* && f > get((*itt).x, (*itt).y) + diagnolHeuristic(*itt, goal)*/) {
 						cont = true;
 						break;
@@ -144,7 +146,7 @@ public:
 		}
 		while (c != start) {
 			path.push(c);
-			c = *c.parent;
+ 			c = *c.parent;
 		}
 		path.push(start);
 		return path;
