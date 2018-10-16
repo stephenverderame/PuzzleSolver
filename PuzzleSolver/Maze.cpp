@@ -21,8 +21,7 @@ void CV::Maze::loadMaze(IMG::Img & im)
 
 void CV::Maze::choosePoint()
 {
-	const bool s = pimpl->solving;
-	if (!s) {
+	if (!pimpl->solving) {
 		buffer.reserve(img.height() * img.width());
 		for (int i = 0; i < img.height() * img.width(); ++i) {
 			int x = i % img.width();
@@ -37,24 +36,24 @@ void CV::Maze::choosePoint()
 	}
 }
 
-void CV::Maze::calculatePath(Math::point start, Math::point end, Math::point crop_1, Math::point crop_2)
+void CV::Maze::calculatePath(Math::point start, Math::point end)
 {
-	std::thread t([this, start, end, crop_1, crop_2]() {calculatePathThread(start, end, crop_1, crop_2); });
+	std::thread t([this, start, end]() {calculatePathThread(start, end); });
 	t.detach();
 }
 
-void CV::Maze::calculatePathThread(Math::point start, Math::point end, Math::point crop_1, Math::point crop_2)
+void CV::Maze::calculatePathThread(Math::point start, Math::point end)
 {
 	pimpl->solving = true;
 	Grid g(img.width(), img.height(), buffer.data());
-	if (crop_1.x != crop_2.x && crop_1.y != crop_2.y)
-		g.setBound({ crop_1.x, crop_1.y }, { crop_2.x, crop_2.y });
+//	if (crop_1.x != crop_2.x && crop_1.y != crop_2.y)
+//		g.setBound({ crop_1.x, crop_1.y }, { crop_2.x, crop_2.y });
 	auto path = g.search({ start.x, start.y }, { end.x, end.y });
 	while (!path.empty()) {
-		pos color = path.top();
+		auto color = path.top();
 		IMG::pixel p;
 		p.c = { 0, 0, 255 };
-		p.p = { color.x, color.y };
+		p.p = { color.first, color.second };
 		img.setPixel(p);
 		path.pop();
 	}

@@ -20,7 +20,7 @@ namespace CV {
 		 * Helper for calculatePath(). Called in a seperate thread to allow gui events to continue to be polled
 		 * Should not be called outside the Maze class
 		*/
-		void calculatePathThread(Math::point start, Math::point end, Math::point crop_1 = { 0, 0 }, Math::point crop_2 = { 0, 0 });
+		void calculatePathThread(Math::point start, Math::point end);
 	public:
 		Maze(IMG::Img & i);
 		~Maze();
@@ -31,7 +31,7 @@ namespace CV {
 		 * Function to calculate the path to get from the start point to end point.
 		 * Calls calculatePathThred() in a seperate thread
 		*/
-		void calculatePath(Math::point start, Math::point end, Math::point crop_1 = { 0, 0 }, Math::point crop_2 = { 0, 0 });
+		void calculatePath(Math::point start, Math::point end);
 		bool isSolving();
 	};
 }

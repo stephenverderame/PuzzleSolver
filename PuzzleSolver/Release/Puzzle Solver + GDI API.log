@@ -1,5 +1,7 @@
 ﻿  Main.cpp
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(51): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(75): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(98): warning C4244: 'argument': conversion from 'double' to 'unsigned int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(136): warning C4018: '<': signed/unsigned mismatch
 c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(87): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(88): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\OCR.h(53): warning C4018: '<': signed/unsigned mismatch
@@ -25,12 +27,14 @@ Main.cpp(35): warning C4101: 'msg': unreferenced local variable
   Maze.cpp
 c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(87): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
 c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(88): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(51): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
-Maze.cpp(27): warning C4018: '<': signed/unsigned mismatch
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(75): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(98): warning C4244: 'argument': conversion from 'double' to 'unsigned int', possible loss of data
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(136): warning C4018: '<': signed/unsigned mismatch
+Maze.cpp(26): warning C4018: '<': signed/unsigned mismatch
   Generating code
-  2 of 4655 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+  0 of 4678 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+    0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\Documents\Visual Studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.exe
-  Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\Documents\Visual Studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.pdb (Full PDB)
+  Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\documents\visual studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.exe
+  Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\documents\visual studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.pdb (Full PDB)

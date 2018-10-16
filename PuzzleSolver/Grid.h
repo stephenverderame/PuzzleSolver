@@ -4,151 +4,138 @@
 #include <list>
 #include <stack>
 #include "Math.h"
+#include <set>
+/**
+ * While parent is allocated memory, each instance has shared ownership of the resouce
+ * Therefore the destructor is intentially left out and deallocation is handled manually
+*/
+namespace maze_helper {
+	static int length = 0;
+}
+/**
+ * Depends on global maze_helper::length
+ * maze_helper::length must be initialized before a pos instance is created
+ * Not the safest design decision but its for (much needed) efficiency
+*/
 struct pos {
 	int x;
 	int y;
 	pos * parent;
+	int id;
 	pos() : parent(nullptr) {};
-	pos(int x, int y) : x(x), y(y), parent(nullptr) {};
-	bool operator==(pos other) {
-		return x == other.x && y == other.y;
+	pos(int x, int y) : x(x), y(y), parent(nullptr), id(y * maze_helper::length + x) {};
+	inline bool operator==(const pos & other) const {
+		return id == other.id;
 	}
-	bool operator!=(pos other) {
-		return !(*this == other);
+	inline bool operator!=(const pos & other) const {
+		return id != other.id;
 	}
-	pos operator=(pos other) {
+	pos& operator=(const pos & other) {
 		x = other.x;
 		y = other.y;
 		parent = other.parent;
+		id = other.id;
 		return *this;
 	}
-	pos operator+(pos other) {
+	inline pos& operator+(const pos & other) const {
 		return pos{ x + other.x, y + other.y };
 	}
-	pos operator-(pos other) {
+	inline pos& operator+(const pos && other) const {
+		return pos{ x + other.x, y + other.y };
+	}
+	inline pos& operator-(const pos & other) const {
 		return pos{ x - other.x, y - other.y };
 	}
+	inline bool operator<(const pos & other) const {
+		return id < other.id;
+	}
+	inline bool operator>(const pos & other) const {
+		return id > other.id;
+	}
 };
+/**
+ * Map is not a resource owned by this class
+*/
 class Grid {
 private:
 	//* NO LONGER AN OWNED RESOURCE OF THIS CLASS
 	int * map;
 	int length;
 	int height;
-	pos crop1;
-	pos crop2;
-	bool cropped;
 private:
-	int diagnolHeuristic(pos current, pos goal) {
+	inline int diagnolHeuristic(const pos & current, const pos & goal) const noexcept {
 		//for 8 directional mobility
 		return Math::max(abs(current.x - goal.x), abs(current.y - goal.y));
 	}
-	int manhattenHeuristic(pos current, pos goal) {
+	inline int manhattenHeuristic(const pos & current, const pos & goal) const noexcept {
 		//for 4 directional mobility
 		return abs(current.x - goal.x) + abs(current.y - goal.y);
 	}
-	int distanceHeuristic(pos current, pos goal) {
+	inline int distanceHeuristic(const pos & current, const pos & goal) const {
 		return floorl(sqrt(pow(current.x - goal.x, 2) + pow(current.y - goal.y, 2)));
 	}
 public:
-	Grid(int length, int height, std::initializer_list<int> l) : length(length), height(height), cropped(false) {
-		map = new int[length * height];
-		int i = 0;
-		for (auto it = l.begin(); it != l.end(); it++) {
-			map[i] = *it;
-			i++;
-		}
-
-	};
-	Grid(int length, int height) : length(length), height(height), cropped(false) {
-		map = new int[length * height];
-	};
-	Grid(int length, int height, int * map) : length(length), height(height), map(map), cropped(false) {}
-	~Grid() {
-//		delete map;			now map is managed data by a std::vector
+	/**
+	 * @param length, height Length and height of image
+	 * @param map result of data() method on std::vector. Map is not managed by this class
+	*/
+	Grid(int length, int height, int * map) : length(length), height(height), map(map) {
+		maze_helper::length = length;
 	}
-	int get(int x, int y) {
+	inline int get(int x, int y) const {
 		return map[y * length + x];
 	}
-	void setBound(pos p1, pos p2) {
-		crop1 = p1;
-		crop2 = p2;
-		cropped = true;
-	}
-	void set(int x, int y, int weight) {
+	inline void set(int x, int y, int weight) {
 		map[y * length + x] = weight;
 	}
-	std::stack<pos> search(pos start, pos goal) {
+	std::stack<std::pair<int, int>> search(const pos & start, const pos & goal) const {
 		//implementing A*
-		std::list<pos> open;
-		std::vector<pos> closed;
-		open.push_back(start);
+		std::set<pos> open, closed;
+		//Handles memory deallocation
+		std::vector<pos*> allocatedMemory;
+
+		//rough estimates of memory needed
+		allocatedMemory.reserve(length * height * 0.15);
+		int memIndex = -1;
+		open.insert(start);
 		pos current = start;
-		while (!open.empty()) {
+		while (++memIndex, !open.empty()) {
 			std::pair<pos, int> minF = std::make_pair(pos{ 0, 0 }, INT_MAX);
-			for (auto it = open.begin(); it != open.end(); it++) {
-				//				printf("loop\n");
+			for (auto it = open.begin(); it != open.end(); ++it) {
 				pos p = *it;
-				int f = get(p.x, p.y) + diagnolHeuristic(p, goal);
-				//				printf("(%d, %d) F: %d\n", p.x, p.y, f);
+				int f = map[p.id] + diagnolHeuristic(p, goal);
 				if (f < minF.second)
 					minF = std::make_pair(p, f);
 			}
 
-			//			printf("Point with least f: (%d, %d) of %d \n", minF.first.x, minF.first.y, minF.second);
-			open.remove(minF.first);
+			open.erase(minF.first);
 			if (minF.first == goal) {
-				closed.push_back(minF.first);
+				closed.insert(minF.first);
 				break;
 			}
-			std::vector<pos> successors;
-			for (int i = -1; i <= 1; i++) {
-				for (int j = -1; j <= 1; j++) {
-					if (i == 0 && j == 0) continue;
-					pos s = minF.first + pos{ i, j };				
-					s.parent = new pos(minF.first);
-					successors.push_back(s);
+			allocatedMemory.push_back(new pos(minF.first));
+			for (int i = -1; i <= 1; ++i) {
+				for (int j = -1; j <= 1; ++j) {
+					if ((i == 0 && j == 0) || minF.first.x + i < 0 || minF.first.x + i >= length || minF.first.y + j < 0 || minF.first.y + j >= height) continue;
+					pos s = minF.first + pos{ i, j };					
+					s.parent = allocatedMemory[memIndex];
+					if (closed.find(s) != closed.end()) continue;
+					open.insert(s);
 				}
 			}
-			for (auto it = successors.begin(); it != successors.end(); it++) {
-				pos p = *it;
-				if (p.x < 0 || p.x >= length || p.y < 0 || p.y >= height) continue;
-				if (cropped && (p.x < Math::min(crop1.x, crop2.x) || p.x > Math::max(crop1.x, crop2.x) || p.y < Math::min(crop1.y, crop2.y) || p.y > Math::max(crop1.y, crop2.y))) continue;
-				bool cont = false;
-				//more likely that if it was already added, it would be towards the end
-				for (auto itt = open.end(); itt != open.begin(); itt--) {
-					if (p == *itt/* && f > get((*itt).x, (*itt).y) + diagnolHeuristic(*itt, goal)*/) {
-						cont = true;
-						break;
-					}
-				}
-				if (cont) continue;
-				cont = false;
-				for (auto itt = closed.begin(); itt != closed.end(); itt++) { 
-					if (p == *itt/* && f > get((*itt).x, (*itt).y) + diagnolHeuristic(*itt, goal)*/) {
-						cont = true;
-						break;
-					}
-				}
-				if (cont) continue;
-				open.push_back(p);
-			}
-			closed.push_back(minF.first);
+			closed.insert(minF.first);
 
 		}
-		std::stack<pos> path;
+		std::stack<std::pair<int, int>> path;
 		pos c;
-		for (auto it = closed.begin(); it != closed.end(); it++) {
-			if (*it == goal) {
-				c = *it;
-				break;
-			}
-		}
+		c = *closed.find(goal);
 		while (c != start) {
-			path.push(c);
+			path.push(std::make_pair(c.x, c.y));
  			c = *c.parent;
 		}
-		path.push(start);
+		for (int i = 0; i < allocatedMemory.size(); ++i)
+			delete allocatedMemory[i];
+		path.push(std::make_pair(start.x, start.y));
 		return path;
 	}
 
