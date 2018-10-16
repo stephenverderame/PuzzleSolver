@@ -5,10 +5,6 @@
 #include <stack>
 #include "Math.h"
 #include <set>
-/**
- * While parent is allocated memory, each instance has shared ownership of the resouce
- * Therefore the destructor is intentially left out and deallocation is handled manually
-*/
 namespace maze_helper {
 	static int length = 0;
 }
@@ -16,6 +12,8 @@ namespace maze_helper {
  * Depends on global maze_helper::length
  * maze_helper::length must be initialized before a pos instance is created
  * Not the safest design decision but its for (much needed) efficiency
+ * While parent is allocated memory, each instance has shared ownership of the resouce
+ * Therefore the destructor is intentially left out and deallocation is handled manually
 */
 struct pos {
 	int x;
