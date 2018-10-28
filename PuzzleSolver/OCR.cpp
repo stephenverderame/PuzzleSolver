@@ -1,5 +1,6 @@
 #include "OCR.h"
 using namespace Math;
+using namespace ML;
 /**
  * From the origin, determines the angle in which the most dark pixels lie on a straight line
  * Ideally the line picked is parallel to a row of text in the search
@@ -486,6 +487,42 @@ void CV::SearchGrid::identifyLetters()
 	}
 	iterateRowbyRow();
  }
+void CV::SearchGrid::identifyLettersML()
+{
+	NeuralNetwork network({ SAMPLE_WIDTH * SAMPLE_HEIGHT, 16, 16, 26 });
+	network.populate();
+	for (int y = 0; y < rows; ++y) {
+		for (int x = 0; x < columns; ++x) {
+			if (characterLocations[y][x].width > 3 && characterLocations[y][x].height > 3 && x < characterLocations[y].size()) {
+				std::unique_ptr<Image> letter = std::make_unique<Image>(characterLocations[y][x].width, characterLocations[y][x].height);
+				for (int x2 = 0; x2 < characterLocations[y][x].width; x2++) {
+					for (int y2 = 0; y2 < characterLocations[y][x].height; y2++) {
+						if (seekImage.xInBounds(x + x2) && seekImage.yInBounds(y + y2))
+							letter->setPixel(x2, y2, (Color)seekImage.getPixel(x2 + characterLocations[y][x].x, y2 + characterLocations[y][x].y));
+					}
+				}
+				letter->scaleTo(SAMPLE_WIDTH, SAMPLE_HEIGHT);
+				Matrix letterMatrix(letter->getWidth() * letter->getHeight(), 1);
+				for (int i = 0; i < letterMatrix.size(); ++i) {
+					int x = i % letter->getWidth();
+					int y = i / letter->getWidth();
+					letterMatrix.set(i, letter->getPixel(x, y).r);
+				}
+				Matrix output = network.calculate(letterMatrix);
+				assert(output.size() == 26 && output.getRows() == 26);
+				for (int i = 0; i < output.size(); ++i)
+					printf("%f ", output.get(i));
+				printf("\n");
+				std::pair<char, double> bestChoice = std::make_pair(-1, 0);
+				for (int i = 0; i < 26; ++i) {
+					if (output.get(i) * output.get(i) > bestChoice.second) 
+						bestChoice = std::make_pair(i, output.get(i) * output.get(i));
+				}
+				characters[y][x] = bestChoice.first + 'A';
+			}
+		}
+	}
+}
 /**
  * Using the initialized characters[][] to search for diagnol, vertical, horizontal and backwords words
  * Will select the closest match and if there is a letter that does not match up correctly, will save that in the data.ml file
@@ -1058,7 +1095,8 @@ void CV::SearchGrid::load(IMG::Img & search)
 	characterLocations.erase(characterLocations.begin(), characterLocations.end());
 //	getCharacterLocations();
 	init();
-	identifyLetters();
+	identifyLettersML();
+	iterateRowbyRow();
 }
 
 void CV::SearchGrid::iterateRowbyRow()

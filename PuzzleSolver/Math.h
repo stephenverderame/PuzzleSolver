@@ -3,6 +3,7 @@
 #include <math.h>
 #include <memory>
 #include <exception>
+#include <vector>
 #undef radians
 #undef min
 #undef max
@@ -99,6 +100,4 @@ namespace Math {
 
 	constexpr int int_max = std::numeric_limits<int>::max();
 	constexpr int int_min = std::numeric_limits<int>::min();
-	
-
 }

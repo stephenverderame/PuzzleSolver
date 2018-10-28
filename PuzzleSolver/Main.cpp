@@ -22,14 +22,6 @@ using namespace DialogSpace;
 using namespace CV;
 using namespace Undo;
 
-bool inline notSeen(std::vector<point> & vec, const int x, const int y) {
-	return std::find(vec.cbegin(), vec.cend(), point{ x, y }) == vec.cend();
-}
-void inline printVector(std::vector<int> & v) {
-	for (auto e : v)
-		printf("%d ", e);
-	printf("\n");
-}
 int main() {
 	//int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) { 
 	MSG msg;
@@ -256,7 +248,6 @@ int main() {
 				if (!image.isLoaded()) break;
 				UndoStack::getInstance()->saveState(image.getMemento());
 				image.transpose();
-				//Testing
 				window.drawImage(image);
 				window.redraw();
 				break;

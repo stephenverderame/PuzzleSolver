@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "RedBlackTree.h"
 #include <unordered_map>
+#include "NeuralNetwork.h"
 #undef max
 //#define DEBUGGING_SPACE
 //#define SHOW_DEBUG_CHARS
@@ -70,6 +71,7 @@ namespace CV {
 	private:
 		void init();
 		void identifyLetters();
+		void identifyLettersML();
 	public:
 		SearchGrid(IMG::Img & wordSearch);
 		void load(IMG::Img & searchImage);

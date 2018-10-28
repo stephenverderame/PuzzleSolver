@@ -4,13 +4,14 @@
 #include <list>
 #include <stack>
 #include "Math.h"
+#include <assert.h>
 #include <set>
 /**
  * While parent is allocated memory, each instance has shared ownership of the resouce
  * Therefore the destructor is intentially left out and deallocation is handled manually
 */
 namespace maze_helper {
-	static int length = 0;
+	static int length = -1;
 }
 /**
  * Depends on global maze_helper::length
@@ -22,34 +23,38 @@ struct pos {
 	int y;
 	pos * parent;
 	int id;
-	pos() : parent(nullptr) {};
-	pos(int x, int y) : x(x), y(y), parent(nullptr), id(y * maze_helper::length + x) {};
-	inline bool operator==(const pos & other) const {
+	pos() : parent(nullptr) {
+		assert(maze_helper::length != -1 && "Global maze length not set!");
+	};
+	pos(int x, int y) : x(x), y(y), parent(nullptr), id(y * maze_helper::length + x) {
+		assert(maze_helper::length != -1 && "Global maze length not set!");
+	};
+	inline bool operator==(const pos & other) const noexcept {
 		return id == other.id;
 	}
-	inline bool operator!=(const pos & other) const {
+	inline bool operator!=(const pos & other) const noexcept {
 		return id != other.id;
 	}
-	pos& operator=(const pos & other) {
+	pos& operator=(const pos & other) noexcept {
 		x = other.x;
 		y = other.y;
 		parent = other.parent;
 		id = other.id;
 		return *this;
 	}
-	inline pos& operator+(const pos & other) const {
+	inline pos& operator+(const pos & other) const noexcept {
 		return pos{ x + other.x, y + other.y };
 	}
-	inline pos& operator+(const pos && other) const {
+	inline pos& operator+(const pos && other) const noexcept {
 		return pos{ x + other.x, y + other.y };
 	}
-	inline pos& operator-(const pos & other) const {
+	inline pos& operator-(const pos & other) const noexcept {
 		return pos{ x - other.x, y - other.y };
 	}
-	inline bool operator<(const pos & other) const {
+	inline bool operator<(const pos & other) const noexcept {
 		return id < other.id;
 	}
-	inline bool operator>(const pos & other) const {
+	inline bool operator>(const pos & other) const noexcept {
 		return id > other.id;
 	}
 };
@@ -71,7 +76,7 @@ private:
 		//for 4 directional mobility
 		return abs(current.x - goal.x) + abs(current.y - goal.y);
 	}
-	inline int distanceHeuristic(const pos & current, const pos & goal) const {
+	inline int distanceHeuristic(const pos & current, const pos & goal) const noexcept {
 		return floorl(sqrt(pow(current.x - goal.x, 2) + pow(current.y - goal.y, 2)));
 	}
 public:
@@ -117,9 +122,9 @@ public:
 			for (int i = -1; i <= 1; ++i) {
 				for (int j = -1; j <= 1; ++j) {
 					if ((i == 0 && j == 0) || minF.first.x + i < 0 || minF.first.x + i >= length || minF.first.y + j < 0 || minF.first.y + j >= height) continue;
-					pos s = minF.first + pos{ i, j };					
-					s.parent = allocatedMemory[memIndex];
+					pos s = minF.first + pos{ i, j };
 					if (closed.find(s) != closed.end()) continue;
+					s.parent = allocatedMemory[memIndex];					
 					open.insert(s);
 				}
 			}

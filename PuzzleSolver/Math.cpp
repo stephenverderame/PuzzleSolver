@@ -1,4 +1,5 @@
 #include "Math.h"
+#include <assert.h>
 
 double Math::radians(double degrees)
 {
@@ -113,3 +114,4 @@ bool Math::point::operator==(const point & other) const
 {
 	return x == other.x && y == other.y;
 }
+

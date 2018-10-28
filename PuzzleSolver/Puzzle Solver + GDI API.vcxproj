@@ -132,6 +132,7 @@
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Maze.cpp" />
     <ClCompile Include="Mediator.cpp" />
+    <ClCompile Include="NeuralNetwork.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="OCR.cpp" />
     <ClCompile Include="Painter.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="Math.h" />
     <ClInclude Include="Maze.h" />
     <ClInclude Include="Mediator.h" />
+    <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="OCR.h" />
     <ClInclude Include="Painter.h" />

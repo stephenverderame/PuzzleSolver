@@ -1,40 +1,29 @@
-﻿  Main.cpp
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(75): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(98): warning C4244: 'argument': conversion from 'double' to 'unsigned int', possible loss of data
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(136): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(87): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(88): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\OCR.h(53): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\OCR.h(78): warning C4018: '>=': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(289): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(308): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(315): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(325): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(333): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(339): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(344): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzle solver + gdi api\gdi api\guiMain.h(349): warning C4018: '<': signed/unsigned mismatch
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\gui.h(41): warning C4373: 'Gui::update': virtual function overrides 'Notification::Observer::update', previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
-  c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Observer.h(41): note: see declaration of 'Notification::Observer::update'
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Wnd.h(132): warning C4373: 'Wnd::update': virtual function overrides 'Notification::Observer::update', previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers
-  c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Observer.h(41): note: see declaration of 'Notification::Observer::update'
-Main.cpp(107): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-Main.cpp(113): warning C4018: '<': signed/unsigned mismatch
-Main.cpp(125): warning C4018: '<': signed/unsigned mismatch
-Main.cpp(129): warning C4018: '<': signed/unsigned mismatch
-Main.cpp(134): warning C4018: '<': signed/unsigned mismatch
-Main.cpp(35): warning C4101: 'msg': unreferenced local variable
-  Maze.cpp
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(87): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\img.h(88): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(75): warning C4244: 'return': conversion from 'long double' to 'int', possible loss of data
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(98): warning C4244: 'argument': conversion from 'double' to 'unsigned int', possible loss of data
-c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\Grid.h(136): warning C4018: '<': signed/unsigned mismatch
-Maze.cpp(26): warning C4018: '<': signed/unsigned mismatch
+﻿  NeuralNetwork.cpp
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\NeuralNetwork.h(21): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\NeuralNetwork.h(22): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\NeuralNetwork.h(23): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\NeuralNetwork.h(24): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\NeuralNetwork.h(34): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\NeuralNetwork.h(35): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+c:\users\stephen\documents\visual studio 2015\projects\puzzlesolver\puzzlesolver\NeuralNetwork.h(36): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+NeuralNetwork.cpp(11): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+NeuralNetwork.cpp(17): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+NeuralNetwork.cpp(23): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+NeuralNetwork.cpp(28): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+NeuralNetwork.cpp(36): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+NeuralNetwork.cpp(64): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+NeuralNetwork.cpp(75): warning C4101: 'e': unreferenced local variable
+NeuralNetwork.cpp(82): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
+NeuralNetwork.cpp(94): warning C4101: 'e': unreferenced local variable
+NeuralNetwork.cpp(110): warning C4101: 'e': unreferenced local variable
+NeuralNetwork.cpp(121): warning C4018: '<': signed/unsigned mismatch
+NeuralNetwork.cpp(133): warning C4018: '<': signed/unsigned mismatch
+NeuralNetwork.cpp(144): warning C4018: '<': signed/unsigned mismatch
+NeuralNetwork.cpp(151): warning C4018: '<': signed/unsigned mismatch
   Generating code
-  0 of 4678 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+  3 of 4792 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\documents\visual studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.exe
   Puzzle Solver + GDI API.vcxproj -> C:\Users\stephen\documents\visual studio 2015\Projects\PuzzleSolver\Release\Puzzle Solver.pdb (Full PDB)
