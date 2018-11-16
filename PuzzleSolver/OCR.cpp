@@ -506,17 +506,14 @@ void CV::SearchGrid::identifyLettersML()
 				for (int i = 0; i < letterMatrix.size(); ++i) {
 					int x = i % letter->getWidth();
 					int y = i / letter->getWidth();
-					letterMatrix.set(i, letter->getPixel(x, y).r);
+					letterMatrix.set(i, letter->getPixel(x, y).avg());
 				}
 				Matrix output = network.calculate(letterMatrix);
 				assert(output.size() == 26 && output.getRows() == 26);
-				for (int i = 0; i < output.size(); ++i)
-					printf("%f ", output.get(i));
-				printf("\n");
 				std::pair<char, double> bestChoice = std::make_pair(-1, 0);
 				for (int i = 0; i < 26; ++i) {
-					if (output.get(i) * output.get(i) > bestChoice.second) 
-						bestChoice = std::make_pair(i, output.get(i) * output.get(i));
+					if (output.get(i) > bestChoice.second) 
+						bestChoice = std::make_pair(i, output.get(i));
 				}
 				characters[y][x] = bestChoice.first + 'A';
 			}

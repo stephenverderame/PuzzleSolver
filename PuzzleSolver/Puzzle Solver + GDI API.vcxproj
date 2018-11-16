@@ -158,6 +158,7 @@
     <ClInclude Include="Program.h" />
     <ClInclude Include="RedBlackTree.h" />
     <ClInclude Include="res.h" />
+    <ClInclude Include="Ringbuffer.h" />
     <ClInclude Include="Undo.h" />
     <ClInclude Include="Wnd.h" />
   </ItemGroup>

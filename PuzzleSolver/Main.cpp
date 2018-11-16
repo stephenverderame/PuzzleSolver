@@ -13,6 +13,7 @@
 #include "Painter.h"
 #include "Maze.h"
 #include "Undo.h"
+#include "NeuralNetwork.h"
 #undef min
 using namespace Program;
 using namespace Notification;
@@ -54,6 +55,17 @@ int main() {
 	}mazeData{ {0, 0}, {0, 0} };
 	point rotationOrigin;
 	SearchGrid wordSearch(image);
+/*	ML::Matrix test1(100, 1);
+	test1.function([](double x) -> double {return ML::Random::getInt(0, 255); });
+	ML::Matrix test2(36, 100);
+	test2.function([](double x) -> double {return ML::Random::getNormal(10000); });
+	ML::Matrix test3(26, 36);
+	test3.function([](double x) -> double {return ML::Random::getNormal(10000); });
+	(test3 * (test2 * test1).apply(ML::sigmoid)).apply(ML::sigmoid).print();
+	getchar();*/
+	ML::NeuralNetwork net({ 100, 36, 26 });
+	net.populate();
+	net.train();
 	while (true) {
 		if (gui.handleGUIEvents() == gui_msg_quit) break;
 		while (!mainProgram.noMessages()) {
