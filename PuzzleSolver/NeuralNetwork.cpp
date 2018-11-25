@@ -24,6 +24,14 @@ ML::Matrix & ML::Matrix::operator=(const Matrix & other)
 	return *this;
 }
 
+ML::Matrix & ML::Matrix::operator=(const std::initializer_list<double>& list)
+{
+	assert(list.size() == size_ && "Sizes must be equal");
+	for (int i = 0; i < size_; ++i)
+		data[i] = *(list.begin() + i);
+	return *this;
+}
+
 void ML::Matrix::set(int row, int column, double x) throw(std::out_of_range)
 {
 	if (row < 0 || row >= rows || column < 0 || column >= columns) throw std::out_of_range("Matrix element does not exist");
@@ -70,6 +78,14 @@ ML::Matrix ML::Matrix::operator*(const Matrix & other) const throw(ML::MathUndef
 		}
 	}
 	return output;
+}
+
+ML::Matrix ML::operator*(const double c, const ML::Matrix & m)
+{
+	ML::Matrix mat = m;
+	for (int i = 0; i < mat.size(); ++i)
+		mat.set(i, m.get(i) * c);
+	return mat;
 }
 
 ML::Matrix ML::Matrix::operator-(const Matrix & other) const throw(ML::MathUndefinedException)
@@ -120,6 +136,14 @@ ML::Matrix ML::Matrix::transpose() const
 	return output;
 }
 
+ML::Matrix & ML::Matrix::operator-=(const Matrix & other) throw(ML::MathUndefinedException)
+{
+	if (rows != other.rows || columns != other.columns) throw ML::MathUndefinedException();
+	for (int i = 0; i < size(); ++i)
+		data[i] -= other.data[i];
+	return *this;
+}
+
 ML::Matrix ML::Matrix::elementMultiply(const Matrix other) const throw(ML::MathUndefinedException)
 {
 	if (rows != other.rows || columns != other.columns) throw ML::MathUndefinedException();
@@ -165,38 +189,37 @@ void ML::Matrix::print(FILE * out) const
 {
 	for (int i = 0; i < rows; ++i) {
 		for (int j = 0; j < columns; ++j) {
-			fprintf(out, "%f ", get(i));
+			fprintf(out, "%f ", get(i, j));
 		}
 		fprintf(out, "\n");
 	}
 }
 
+void ML::Matrix::randomize()
+{
+	for (int i = 0; i < size(); ++i)
+		data[i] = Random::getNormal(10000);
+}
+
 ML::NeuralNetwork::NeuralNetwork(std::initializer_list<size_t> list)
 {
-	testMat.setDimensions(26, 100);
-	testMat.function([](double x) -> double {
-		return Random::getInt();
-	});
-	biases.resize(list.size());
+	biases.resize(list.size() - 1);
 	weights.resize(list.size() - 1);
 
-	for (int i = 0; i < list.size(); ++i) {
-		biases[i].setDimensions(*(list.begin() + i), 1); //column vector
-		if (i > 0) {
-			//W * n(i - 1)
-			weights[i - 1].setDimensions(*(list.begin() + i), *(list.begin() + (i - 1)));
-		}
+	for (int i = 1; i < list.size(); ++i) {
+		biases[i - 1].setDimensions(*(list.begin() + i), 1); //column vector
+		weights[i - 1].setDimensions(*(list.begin() + i), *(list.begin() + (i - 1)));
 	}
-	results.resize(weights.size());
+	results.resize(list.size());
 }
 
 ML::Matrix ML::NeuralNetwork::calculate(const Matrix & input)
 {
-	this->input = input;
 	Matrix resultant = input;
+	results.add(resultant);
 	for (int i = 0; i < weights.size(); ++i) {
-		resultant = (weights[i] * resultant) + biases[i + 1];
-		resultant.function([](double x) -> double {return x / (1 + exp(-x)); });
+		resultant = (weights[i] * resultant) + biases[i];
+		resultant.function(sigmoid);
 		results.add(resultant);
 	}
 	return resultant;
@@ -238,21 +261,32 @@ void ML::NeuralNetwork::populate()
 
 void ML::NeuralNetwork::learn(const Matrix & calc, const Matrix & real)
 {
-	//First weight = weights[0]
-	//First bias   =  biases[1]
-	//First result = results[0]
+	//results[0] = input matrix
+/*
+	const ML::Matrix dCdB2 = ML::summation(2 * (calc - real)) * (ML::sigDerivative(weights[1] * results[1] + biases[1]));
+	const ML::Matrix dCdW2 = dCdB2 * results[1].transpose();
+
+	const ML::Matrix dCda0 = weights[1].transpose() * dCdB2;
+	const ML::Matrix dCdB1 = ML::summation(dCda0) * (ML::sigDerivative(weights[0] * input + biases[0]));
+	const ML::Matrix dCdW1 = dCdB1 * input.transpose();
+
+	weights[0] -= dCdW1;
+	weights[1] -= dCdW2;
+	biases[0] -= dCdB1;
+	biases[1] -= dCdB2;
+*/
 	
-	std::function<double(double)> learningRate = [](double x) -> double {return x * 0.7; };
 
-	Matrix dJdB2 = (calc - real).elementMultiply(calc.apply(sigmoidDerivitive));
-	Matrix dJdB1 = (weights[1].transpose() * dJdB2).elementMultiply(results[0].apply(sigmoidDerivitive));
-	Matrix dJdW2 = dJdB2 * results[0].transpose();
-	Matrix dJdW1 = dJdB1 * input.transpose();
+	ML::Matrix cost = 2 * (calc - real);
+	for (int i = weights.size() - 1; i >= 0; --i) {
+		ML::Matrix dCdB = cost.elementMultiply(ML::sigDerivative(weights[i] * results[i] + biases[i]));
+		ML::Matrix dCdW = dCdB * results[i].transpose();
+		cost = weights[i].transpose() * dCdB;
 
-	weights[0] = weights[0] - (dJdW1.apply(learningRate));
-	weights[1] = weights[1] - (dJdW2.apply(learningRate));
-	biases[1] = biases[1] - (dJdB1.apply(learningRate));
-	biases[2] = biases[2] - (dJdB2.apply(learningRate));
+		weights[i] -= dCdW;
+		biases[i] -= dCdB;
+	}
+	
 }
 
 void ML::NeuralNetwork::train()
@@ -284,27 +318,28 @@ void ML::NeuralNetwork::train()
 		if (FindNextFile(hand, &fData) == FALSE) break;
 	}
 	int count = 0;
-	while (count++ < 30) {
+	while (count++ < 100) {
 		int right = 0;
 		for (int i = 0; i < inputs.size(); ++i) {
-			char c = 'A' - 1;
+			char c = -1;
 			double max_ = DBL_MIN;
 			for (int j = 0; j < results[i].size(); ++j) {
  				if (results[i].get(j) > max_) {
-					c = j + 'A';
+					c = j;
 					max_ = results[i].get(j);
 				}
 			}
-			Matrix out = calculate(inputs[i]);
+			const Matrix out = calculate(inputs[i]);
 
-			char c2 = 'A' - 1;
+			max_ = DBL_MIN;
+			char c2 = -1;
 			for (int j = 0; j < out.size(); ++j) {
 				if (out.get(j) > max_) {
-					c2 = j + 'A';
+					c2 = j;
 					max_ = out.get(j);
 				}
 			}
-			if (c == c2) ++right;
+			if (c == c2 && c != -1) ++right;
 			learn(out, results[i]);
 		}
 		printf("#%d:  %d / %d \n", count, right, inputs.size());
@@ -314,7 +349,7 @@ void ML::NeuralNetwork::train()
 double ML::Random::getNormal()
 {
 	srand((clock() + count++) * count);
-	double r = rand();
+	const double r = rand();
 	return r / static_cast<double>(RAND_MAX);
 
 }
@@ -335,4 +370,25 @@ int ML::Random::getInt()
 {
 	srand((clock() + count++) * count);
 	return rand();
+}
+ML::Matrix operator*(const ML::Matrix & m, const double c)
+{
+	ML::Matrix out = m;
+	for (int i = 0; i < out.size(); ++i)
+		out.set(i, m.get(i) * c);
+	return out;
+}
+
+ML::Matrix ML::sigDerivative(const Matrix & m)
+{
+	Matrix out = m;
+	return out.apply(ML::sigmoid);
+}
+
+double ML::summation(const ML::Matrix & m)
+{
+	double sum = 0;
+	for (int i = 0; i < m.size(); ++i)
+		sum += m.get(i);
+	return sum;
 }

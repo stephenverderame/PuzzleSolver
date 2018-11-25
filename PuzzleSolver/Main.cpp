@@ -14,6 +14,7 @@
 #include "Maze.h"
 #include "Undo.h"
 #include "NeuralNetwork.h"
+#include <iterator>
 #undef min
 using namespace Program;
 using namespace Notification;
@@ -55,6 +56,8 @@ int main() {
 	}mazeData{ {0, 0}, {0, 0} };
 	point rotationOrigin;
 	SearchGrid wordSearch(image);
+
+#pragma region test
 /*	ML::Matrix test1(100, 1);
 	test1.function([](double x) -> double {return ML::Random::getInt(0, 255); });
 	ML::Matrix test2(36, 100);
@@ -63,9 +66,148 @@ int main() {
 	test3.function([](double x) -> double {return ML::Random::getNormal(10000); });
 	(test3 * (test2 * test1).apply(ML::sigmoid)).apply(ML::sigmoid).print();
 	getchar();*/
-	ML::NeuralNetwork net({ 100, 36, 26 });
+	int count = 0, correct = 0;
+	double w1 = ML::Random::getNormal(10000), w2 = ML::Random::getNormal(10000), b1 = ML::Random::getNormal(10000), b2 = ML::Random::getNormal(10000);
+	while (count++ < 10000) {
+		/*
+		 Z = a0 * w + b
+		 A1 = sigmoid(Z)
+		 C = (y - A1)^2
+
+		 dC/dw = (dZ/dw)(dA/dZ)(dC/dA)
+		 dC/db = (dZ/db)(dA/dZ)(dC/dA)
+
+		 derivative of C with respect to w = derivative Z with respect to w * derivitive of A with respect to Z * derivative * derivative of C with respect to A
+		 treat the variable you are taking the derivative of with respect to as x, and all others as constants or coefficients
+
+		 dC/dA = 2(y - A1)
+		 dA/dZ = sigmoid'(Z)
+		 dZ/dw = a0
+
+		 dZ/db = 1
+
+		 Multiple Layers
+
+		 dC/da0 = (dZ/da0)(dA/dZ)(dC/dA)
+		 da0/dw0 = (dZ0/dw0)(dA0/dZ0)(da0/dA0)
+		 da0/db0 = (dZ0/db0)(dA0/dZ0)(da0/dA0)
+		 */
+		double x = ML::Random::getNormal(10000);
+		double a = ML::sigmoid(x * w1 + b1);
+		double y = ML::sigmoid(a * w2 + b2);
+		double real = ML::sigmoid(ML::sigmoid(x * 0.55 + 0.2) * 0.01 + 0.6);
+		printf("%f --> %f ", y, real);
+		if (abs(y - real) < 0.04) {
+			printf("Correct!\n");
+			++correct;
+		}
+		else printf("Wrong!\n");
+
+//		double cost = (y - real) * (y - real);
+		double dCdW2 = 2 * (y - real) * ML::sigmoidDerivitive(a * w2 + b2) * a;
+		double dCdB2 = 2 * (y - real) * ML::sigmoidDerivitive(a * w2 + b2);
+
+		double dCda0 = 2 * (y - real) * ML::sigmoidDerivitive(a * w2 + b2) * w2;
+		double dCdW1 = dCda0 * ML::sigmoidDerivitive(x * w1 + b1) * x;
+		double dCdB1 = dCda0 * ML::sigmoidDerivitive(x * w1 + b1);
+
+		w1 -= dCdW1;
+		b1 -= dCdB1;
+		w2 -= dCdW2;
+		b2 -= dCdB2;
+	}
+	printf("%d / %d\n", correct, count - 1);
+	printf("Weight 1: %f Bias 1: %f  Weight 2: %f Bias 2: %f \n", w1, b1, w2, b2);
+	getchar();
+	ML::Matrix W1(2, 3), W2(1, 2), B1(2, 1), B2(1, 1);
+	W1.randomize();
+	W2.randomize();
+	B1.randomize();
+	B2.randomize();
+
+	ML::Matrix wr1(2, 3), wr2(1, 2), br1(2, 1), br2(1, 1);
+	wr1 = {0.4, 0.11, 0.99,
+		   0.01, 0.78, 0.88};
+	wr2 = { 0.067, 0.4 };
+	br1 = { 0.978,
+		   0.21 };
+	br2 = { 0.23 };
+	int cor = 0, trials = 100;
+	for (int i = 0; i < trials; ++i) {
+		ML::Matrix input(3, 1);
+		input.randomize();
+		ML::Matrix a = (W1 * input + B1).apply(ML::sigmoid);
+		ML::Matrix y = (W2 * a + B2).apply(ML::sigmoid);
+		ML::Matrix real(1, 1);
+		real = (wr2 * (wr1 * input + br1).apply(ML::sigmoid) + br2).apply(ML::sigmoid);
+		printf("#%d: %f --> %f ", i + 1, y.get(0), real.get(0));
+		if (abs((y - real).get(0)) < 0.05) {
+			++cor;
+			printf("Correct!\n");
+		}
+		else {
+			printf("Wrong!\n");
+//			char buffer[10];
+//			fgets(buffer, 10, stdin);
+		}
+
+		//Cost: Summation of all Elements((y - real) ^2)
+		ML::Matrix dCdB2 = ML::summation(2 * (y - real)) * (ML::sigDerivative(W2 * a + B2));
+		ML::Matrix dCdW2 = dCdB2 * a.transpose();
+
+		ML::Matrix dCda0 = W2.transpose() * dCdB2;
+		ML::Matrix dCdB1 = ML::summation(dCda0) * ML::sigDerivative(W1 * input + B1);
+		ML::Matrix dCdW1 = dCdB1 * input.transpose();
+
+		W1 -= dCdW1;
+		W2 -= dCdW2;
+		B1 -= dCdB1;
+		B2 -= dCdB2;
+	}
+	printf("%d / %d \n", cor, trials);
+	printf("W1\n");
+	W1.print();
+	printf("\nW2\n");
+	W2.print();
+	printf("\nB1\n");
+	B1.print();
+	printf("\nB2\n");
+	B2.print();
+
+	char buffer[10];
+	fgets(buffer, 10, stdin);
+	ML::NeuralNetwork seedNetwork({ 3, 5, 1 });
+	seedNetwork.populate();
+	count = 0;
+	while (count++ < 30) {
+		int iterations = 0, correctIterations = 0;
+		std::ifstream in("seedTestData.txt");
+		std::string inLine;
+		while (std::getline(in, inLine)) {
+			std::istringstream iss(inLine);
+			std::vector<std::string> data(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
+			ML::Matrix input(3, 1);
+			input.set(0, std::stod(data[1]));
+			input.set(1, std::stod(data[3]));
+			input.set(2, std::stod(data[4]));
+			ML::Matrix output(1, 1);
+			output.set(0, std::stod(data[2]));
+			ML::Matrix calc = seedNetwork.calculate(input);
+			if (abs((calc - output).get(0)) / output.get(0) < 0.02) {
+				++correctIterations;
+			}
+			++iterations;
+			seedNetwork.learn(calc, output);
+
+		}
+		printf("#%d: %d / %d\n", count, correctIterations, iterations);
+	}
+	getchar();
+	ML::NeuralNetwork net({ 100, 16, 26 });
 	net.populate();
 	net.train();
+
+#pragma endregion test
 	while (true) {
 		if (gui.handleGUIEvents() == gui_msg_quit) break;
 		while (!mainProgram.noMessages()) {

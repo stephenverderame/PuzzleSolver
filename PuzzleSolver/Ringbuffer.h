@@ -13,6 +13,17 @@ public:
 		assert(maxsize > 0 && "Size must be > 0");
 		buffer.resize(maxsize);
 	}
+	Ring(std::vector<T> & vec) : Ring(vec.size()) {
+		buffer = vec;
+	}
+	Ring(std::initializer_list<T> & list) : Ring(list.size()) {
+		buffer.insert(buffer.end(), list.begin(), list.end());
+	}
+	Ring& operator=(std::vector<T> & vec) {
+		assert(vec.size() == maxsize && "Ringbuffer assignment size mismatch");
+		buffer = vec;
+		return *this;
+	}
 	void resize(int maxsize) {
 		assert(maxsize > 0 && "Size must be > 0");
 		this->maxsize = maxsize;
