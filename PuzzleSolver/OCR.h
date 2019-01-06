@@ -129,6 +129,7 @@ namespace CV {
 	bool isCloseTo(Line & a, Line & b, int buffer = 13);
 
 	void letterXSort(std::vector<Square> & row);
+
 }
 namespace CV {
 	template <typename T = int, int buffer = 20>

@@ -46,4 +46,15 @@ public:
 			return std::make_pair(overflows, maxsize);
 		return std::make_pair(0, i);
 	}
+
+	/**
+	 * Adds up corresponding elements of an equal sized Ringbuffer
+	*/
+	Ring<T>& operator+=(const Ring<T> & other) {
+		assert(maxsize == other.maxsize && "Ringbuffer size must be equal!");
+		for (int i = 0; i < maxsize; ++i)
+			buffer[i] += other.buffer[i];
+		return *this;
+	}
+	std::vector<T> vector() { return buffer; }
 };

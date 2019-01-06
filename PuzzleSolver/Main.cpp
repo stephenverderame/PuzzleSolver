@@ -56,16 +56,8 @@ int main() {
 	}mazeData{ {0, 0}, {0, 0} };
 	point rotationOrigin;
 	SearchGrid wordSearch(image);
-
+#ifdef _TESTING_
 #pragma region test
-/*	ML::Matrix test1(100, 1);
-	test1.function([](double x) -> double {return ML::Random::getInt(0, 255); });
-	ML::Matrix test2(36, 100);
-	test2.function([](double x) -> double {return ML::Random::getNormal(10000); });
-	ML::Matrix test3(26, 36);
-	test3.function([](double x) -> double {return ML::Random::getNormal(10000); });
-	(test3 * (test2 * test1).apply(ML::sigmoid)).apply(ML::sigmoid).print();
-	getchar();*/
 	int count = 0, correct = 0;
 	double w1 = ML::Random::getNormal(10000), w2 = ML::Random::getNormal(10000), b1 = ML::Random::getNormal(10000), b2 = ML::Random::getNormal(10000);
 	while (count++ < 10000) {
@@ -85,7 +77,7 @@ int main() {
 		 dZ/dw = a0
 
 		 dZ/db = 1
-
+		  
 		 Multiple Layers
 
 		 dC/da0 = (dZ/da0)(dA/dZ)(dC/dA)
@@ -176,10 +168,11 @@ int main() {
 
 	char buffer[10];
 	fgets(buffer, 10, stdin);
-	ML::NeuralNetwork seedNetwork({ 3, 5, 1 });
+	ML::NeuralNetwork seedNetwork({ 3, 3, 1 });
+	seedNetwork.setLearningRate(1.7);
 	seedNetwork.populate();
 	count = 0;
-	while (count++ < 30) {
+	while (count++ < 50) {
 		int iterations = 0, correctIterations = 0;
 		std::ifstream in("seedTestData.txt");
 		std::string inLine;
@@ -190,26 +183,31 @@ int main() {
 			input.set(0, std::stod(data[1]));
 			input.set(1, std::stod(data[3]));
 			input.set(2, std::stod(data[4]));
-			ML::Matrix output(1, 1);
-			output.set(0, std::stod(data[2]));
+			ML::Matrix output = {{std::stod(data[2])}};
 			ML::Matrix calc = seedNetwork.calculate(input);
 			if (abs((calc - output).get(0)) / output.get(0) < 0.02) {
 				++correctIterations;
 			}
 			++iterations;
-			seedNetwork.learn(calc, output);
+			seedNetwork.learnBatch(calc, output);
 
 		}
+		in.close();
 		printf("#%d: %d / %d\n", count, correctIterations, iterations);
+		seedNetwork.update();
 	}
 	getchar();
-	ML::NeuralNetwork net({ 100, 16, 26 });
+/*	ML::NeuralNetwork net({ 100, 50, 26 });
+	net.setLearningRate(1.7);
 	net.populate();
-	net.train();
+	net.train();*/
 
 #pragma endregion test
-	while (true) {
-		if (gui.handleGUIEvents() == gui_msg_quit) break;
+#endif
+	ML::NeuralNetwork nn({ 100, 63, 26 });
+	nn.populate();
+	ML::trainNetwork(nn);
+	while (gui.handleGUIEvents() != gui_msg_quit) {
 		while (!mainProgram.noMessages()) {
 			notification note = mainProgram.ppopMsg();
 			if (note.msg == messages::msg_click) {

@@ -5,6 +5,7 @@
 #include <functional>
 #include <time.h>
 #include "Ringbuffer.h"
+#include "img.h"
 namespace ML {
 	class MathUndefinedException : public std::exception {
 	public:
@@ -20,6 +21,7 @@ namespace ML {
 		Matrix() : rows(0), columns(0), size_(0) {};
 		Matrix(int r, int c);
 		Matrix(const Matrix & other);
+		Matrix(const std::initializer_list<std::initializer_list<double>> & m);
 		Matrix& operator=(const Matrix & other);
 		Matrix& operator=(const std::initializer_list<double> & list);
 		void set(int row, int column, double x) throw(std::out_of_range);
@@ -35,12 +37,14 @@ namespace ML {
 			size_ = r * c;
 		}
 		int size() const noexcept { return size_; }
+		double summate() const;
 
 		Matrix operator*(const Matrix & other) const throw(ML::MathUndefinedException);
 		Matrix operator-(const Matrix & other) const throw(ML::MathUndefinedException);
 		Matrix operator+(const Matrix & other) const throw(ML::MathUndefinedException);
 		Matrix transpose() const;
 		Matrix& operator-=(const Matrix & other) throw(ML::MathUndefinedException);
+		Matrix& operator+=(const Matrix & other) throw(ML::MathUndefinedException);
 
 		//* Element-wise multiplication. Corresponding elements are multiplied to return the output. (Hadamard Product)
 		Matrix elementMultiply(const Matrix other) const throw(ML::MathUndefinedException);
@@ -62,6 +66,9 @@ namespace ML {
 		 * @see Random::getNormal(int)
 		*/
 		void randomize();
+
+		//* Zeros out the matrix
+		void zero();
 	};
 	Matrix operator*(const double c, const Matrix & m);
 	Matrix operator*(const Matrix & m, const double c);
@@ -88,7 +95,14 @@ namespace ML {
 	private:
 		std::vector<Matrix> biases;
 		std::vector<Matrix> weights;
-		Ring<Matrix> results;
+		mutable Ring<Matrix> results;
+		mutable std::vector<Matrix> sumBiases, sumWeights;
+		unsigned int layers;
+		double learningRate;
+		struct {
+			bool e;
+			std::vector<double> rates;
+		} differentialLearning;
 	public:
 		/**
 		 * Initializes neural network. Each element in list is the amount of nodes in that stage
@@ -113,14 +127,67 @@ namespace ML {
 		*/
 		void populate();
 
-		//* Backpropogation
+		//* Backpropagation online version
 		void learn(const Matrix & calc, const Matrix & real);
+
+		/**
+		 * Backpropagation batched version
+		 * Updates sumWeights and sumBiases
+		 * After completion of a minibatch or epoch, update() should be called
+		*/
+		void learnBatch(const Matrix & calc, const Matrix & real) const;
+
+		/**
+		 * Backpropagation batched version
+		 * Updates weights + biases by sum of weights + biases of entire batch or epoch
+		 * @see learnBatch(Matrix, Matrix)
+		*/
+		void update(int batchSize);
+
+		Ring<Matrix> resultBuffer() { return results; }
+
 
 		//* Trains network with test letters in Letters folder
 		void train();
+
+		unsigned int getLayers() { return layers; }
+
+		void setLearningRate(double x) noexcept { learningRate = x; differentialLearning.e = false; }
+		double getLearningRate() const noexcept { return learningRate; }
+
+		/**
+		 * @param x, vector of size weights.size()
+		 * Nth element represents learning rate of nth layer
+		 * Enables differential learning if disabled
+		*/
+		void setDifferentialLearningRates(std::vector<double> x);
+
+		/**
+		 * If differential learning is enabled, returns the learning rate vector, otherwise throws a string
+		 */
+		std::vector<double> getDifferentialLearningRates() const throw(std::string);
+
+		//* Saves nn data to disk
+		void save(const char * filename) const;
+
+		//* Loads nn from disk
+		void load(const char * filename);
 
 	};
 
 	const static auto sigmoid = [](double x) -> double {return 1 / (exp(-x) + 1); };
 	const static auto sigmoidDerivitive = [](double x) -> double { return exp(-x) / pow(1 + exp(-x), 2); };
+
+	/**
+	 * Crops out white background of image
+	 * Returns cropped image
+	 */
+	IMG::Img pickOutLetter(const IMG::Img & letter);
+
+	/**
+	 * Trains or tests network
+	 * @param train, when true 'teaches' the network. If false, weights and biases are not updated
+	*/
+	void trainNetwork(NeuralNetwork & nn, bool train = true);
+
 }

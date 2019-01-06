@@ -169,6 +169,11 @@ void IMG::Img::scaleByFactor(double scaler)
 	img = std::make_shared<Image>(*img->scale(scaler * img->getWidth(), scaler * img->getHeight()));
 }
 
+void IMG::Img::scaleTo(int width, int height)
+{
+	img->scaleTo(width, height);
+}
+
 int IMG::color::avg()
 {
 	return ((int)red + blue + green) / 3;

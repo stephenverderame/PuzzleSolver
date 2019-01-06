@@ -489,7 +489,7 @@ void CV::SearchGrid::identifyLetters()
  }
 void CV::SearchGrid::identifyLettersML()
 {
-	NeuralNetwork network({ SAMPLE_WIDTH * SAMPLE_HEIGHT, 16, 16, 26 });
+	NeuralNetwork network({ SAMPLE_WIDTH * SAMPLE_HEIGHT, 63, 26 });
 	network.populate();
 	for (int y = 0; y < rows; ++y) {
 		for (int x = 0; x < columns; ++x) {

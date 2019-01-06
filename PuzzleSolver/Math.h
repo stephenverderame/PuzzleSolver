@@ -1,4 +1,5 @@
 #pragma once
+#define _USE_MATH_DEFINES
 #include <initializer_list>
 #include <math.h>
 #include <memory>

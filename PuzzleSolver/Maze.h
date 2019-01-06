@@ -12,7 +12,7 @@ namespace CV {
 		IMG::Img & img;
 		std::vector<int> buffer;
 		/**
-		 * Use of pimpl idiom to avoid need to include threading stuff in files including this
+		 * Use of pimpl idiom to avoid need to include threading stuff in files including this header
 		*/
 		std::unique_ptr<impl> pimpl;
 	public:

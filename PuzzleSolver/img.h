@@ -129,5 +129,11 @@ namespace IMG {
 		 * @param scaler resampling factor. 
 		*/
 		void scaleByFactor(double scaler);
+
+		void scaleTo(int width, int height);
+	};
+
+	class LightweightImage {
+
 	};
 }
