@@ -90,4 +90,8 @@ Futher inter-view communication is done via the observer or mediator pattern (pr
 
 ![UML Diagram](https://drive.google.com/uc?export=download&id=1TjOwW6t88axcIfcUIpj6FxsOXT7GINqI)
 
+## Demo
+
+[![Watch Video](https://drive.google.com/uc?export=download&id=1Ki8-IbTxb8GcWfvCk4x1wG2n7QsM7_7k)](https://www.youtube.com/watch?v=ouUGd9aWtbk)
+
 
