@@ -29,7 +29,7 @@ The word search portition is where the complexity kicks in
 #### Matrices
 A custom linear algebra library was created in order to perform the various vector and matrix operations required by the program
 Many operations use Duff's Device to perform loop unrolling. Some operations include:
-* Matrix multiplication (obviously, using cache blocking and loop unrolling)
+* Matrix multiplication (using cache blocking and loop unrolling)
 * Hadamard Product
 * Matrix-Vector Product
 * Rotation Matrices
